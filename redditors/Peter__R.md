@@ -1,0 +1,4725 @@
+Awesome work!  This was a great idea!
+
+Now we need someone to make a website where people can submit children transactions with high miner fees, and the website can track the growing pot available to the miner (or miners) who includes them.  It would be good publicity for the big-block cause.
+
+
+Congratulations Gavin and Mike on completing the patch to support larger block sizes.  Although we all have ideological disagreements from time to time, two fundamental values of the Bitcoin community are freedom of choice and transparency of communication.  Your work represents a big step in returning the power over Bitcoin's future back to the community where it belongs. 
+Yes, this is a known weakness in segwit that was never fixed.  It doesn't mean that segwit coins are _necessarily_ insecure, but it absolutely does mean that the security model for segwit coins is strictly weaker than for bitcoins.  
+I too have reached out to Blockstream personnel--on several occasions--for collaborative purposes but have been consistently ignored.  What /u/adam3us says in public sounds reasonable, but his actions don't align with his words.  
+
+I have more than one colleague who could share similar experiences.
+/u/gavinandresen: You are hugely respected in this community, your vision for Bitcoin's future aligns with the original goals of the project, and I am very much looking forward to your return to leading development (if that is what you choose).  
+
+Please remember that you have LOTS of supporters.  We will rally around the cause; we just need a direction!  
+I think many Lightning Network (LN) proponents would be less enthusiastic about LN if they understood the technology behind it better.  
+
+To address your question, a LN wallet must regularly monitor the network to ensure that one's counter party doesn't publish an earlier (fraudulent) channel state for settlement on the Blockchain (e.g., a channel state where _you_ held fewer coins).  If your wallet cannot do this (perhaps you're offline for too long) then you must contract with a third-party to do it for you.  With the above in mind, attacks that make it difficult for you (or your hired third-party) to detect fraud and respond to it become feasible.
+
+Personally, I think LN and payment channels will be useful for micro- and nano-type payments.  But I think Bitcoin Core's plan to bet the farm on LN for nearly all transactions is a very bad idea.  
+
+
+This was a strange moment for me when it happened.  Prior to this, Andreas had been an inspiration to me. I loved his talks and his vision for bitcoin. He would often say how bitcoin was permissionless and that if you wanted to start making a difference, that you should just start building stuff and putting it into action.
+
+I thought he would appreciate what we were doing with BU.  We weren't just arguing for bigger blocks on Reddit, we created an implementation to make it a reality.  This implementation included Xtreme Thin Blocks -- tech that reduced block propagation times by a factor of 5x and block propagation BW by a factor of 25x.  
+
+Indeed, Xthin had a vulnerability that was exploited.  
+
+Andreas could have applauded BU for doing this work and taking these risks, and just politely pointed out that it would take time for BU's QA process to mature.  He could have _encouraged_ the permissionless innovation and scaling work we were doing.  That would have been consistent with the message I remembered from his talks.  But instead, I felt like he wanted us to just stop working on bitcoin and go away.  I remember him even making a comment about us being "little yapping dogs that needed to be kicked."  This all seemed very strange to me coming from Andreas.  In my mind, we were working to allow bitcoin to continue to grow, yet it felt like he was against us.
+TLDR: Graphene is a technology used to transmit new blocks with fewer bytes than "just sending the block in full."
+
+##Details & Historical Context
+
+Historically, when a new block was found, a Core node would transmit _all_ of the transactions in that block verbatim, even though nodes would have seen most of those transactions already.  Transactions were essentially sent twice: once when the transaction was originally broadcast, and a second time when that transaction was included in a block. 
+
+It was obvious to many people that improvements should be made; however, Core was not interested in making them.  BS/Core leader Greg Maxwell at the time suggested that miners should use the Relay Network and non-mining nodes should use "blocks-only" mode to save bandwidth.  
+
+####Xtreme Thin Blocks
+
+Peter Tschipper (/u/bitsenbytes) was one of those people who wanted to improve block propagation, and so he designed and implemented "Xtreme Thin Blocks" (Xthin) in Bitcoin Unlimited. A Xthin node sends a [Bloom filter](https://en.wikipedia.org/wiki/Bloom_filter) of its mempool when it requests a block from a peer, allowing the peer to determine which transactions the node does and doesn't have.  The peer then sends the transactions in the block by a "short hash" for the transactions the node already has, and in full for the transactions the node is missing.  Xthin was a huge success, [reducing the number of bytes required to transmit a block by a factor of 24 and the time required to send a block by a factor of 6](https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-5145c9648426).  
+
+Core's feet were being held to the fire with the positive reception of Xthin, and so they were motivated to create their own version of the same idea, known as "Compact Blocks."  Today, Bitcoin ABC uses compact blocks, BU uses Xthin, and XT can do both.  
+
+####Graphene
+
+Brian Levine, George Bissias and colleagues [invented a different scheme](https://youtu.be/BPNs9EVxWrA) to send blocks using even fewer bytes, based around the "crazy math" of invertible-Bloom look-up tables (IBLTs).  Graphene may be able to send blocks using an order of magnitude fewer bytes than even Xthin or Compact Blocks! 
+
+In Graphene, when a node requests a block from a peer, the node sends the size of its mempool (rather than a Bloom filter of its mempool as was the case with Xthin).  The peer than sends the node a custom Bloom filter of the block's contents, and an IBLT of the transaction hashes in the block.  The receiving node next filters its mempool with the Bloom filter to find the transactions that are _likely_ to be in the block, and then use the IBLT to find _exactly_ which transactions are in the block.  I said "crazy math" in the previous paragraph because the receiving node is able to determine all of the transaction IDs in the block _even if he does not already have all of the transactions_.   It's almost like the IBLT contains "stem cells" that can transform into missing TXID X for Node A, but transform into a _different_ missing TXID for Node B.   
+
+####Real World Testing Required
+
+Graphene is still very new and it's possible that some hiccups might be encountered in practice.  How well it _actually_ performs with respect to Xthin or Compact Blocks will require real-world testing.  Another challenge is that Graphene allows the receiving node to determine the TXIDs in the block, but _not the order_ (unlike Xthin/Compact Blocks).  For Graphene to really shine, nodes using Graphene block transmission must agree on a canonical ordering of transactions in a block.
+Yes, in hindsight asking whether CSW’s continued involvement would be positive was not appropriate. I’m frustrated by the lies he’s spreading about me. 
+
+Poll deleted.
+While it is true that most the bytes encoded the ordering, it is not necessarily true that ABC’s mandatory lexical ordering is the best way forward. For example, Gavin proposed a consensus-compatible canonical ordering that could be used today without a forking change:
+
+https://gist.github.com/gavinandresen/e20c3b5a1d4b97f79ac2
+
+Wow, isn’t this one of the most serious consensus bugs ever? It affects all BTC Core nodes and the only thing preventing unbound inflation is the fact that the nodes crash, taking down the entire BTC Core network instead.
+
+Maybe multiple implementations isn’t such a bad idea after all, /u/nullc? I think only ABC is affected for BCH.
+Good detective work, /u/Contrarian__.  
+
+My belief is that CSW has no mathematical abilities at all—as in he doesn’t grasp even first-year statistics or calculus—and I base this on several online discussions and one in-person “whiteboard” session I’ve had with him. I’m curious if there is _any_ significant mathematical work that he has authored that he has _not_ plagiarized.
+I vote for Option 3 (which, incidentally, is in the processing of happening):
+
+Each day, more nodes increase their block size limits and signal their willingness to accept larger blocks, more miners signal their _intent_ to begin creating larger blocks, and then--some day soon--a miner will look around, say "hmm it's pretty obvious now that the network is going to accept my 1.5 MB block" and broadcast it.  That block will be accepted by the network of nodes, built upon by the other miners, and become a permanent part of Bitcoin's blockchain. 
+
+The block size limit will then be raised and we'll look back and wonder what all the fuss was about.  There will be no drama, no loss of funds, and no blockchain fork.  
+
+Edit: and we will be en route to the moon.  
+I am the author of that post.  I wanted to say that although I'm excited by that result, it should be taken with a grain of salt.  It was derived from a simplified model that doesn't take into account all the messy details of the real world.  
+My view is that the original design of bitcoin -- with users running SPV wallets and specialists running nodes -- solved the scaling problem.  35 GB blocks sounds like a lot, but that is only 500 Mbit/sec.  The upper end of residential internet speeds today is 1 Gbit/sec (for hobbyist nodes), with speeds well over 10 Gbit/sec commonly available in data centers (for business nodes).  I have spent a lot of time looking into the scaling challenges for bitcoin, and I am confident that Satoshi's design can scale to global adoption levels without any further breakthroughs in science or technology -- what it will take is continued state-of-the-art hardware and software engineering.
+
+An important point many LN proponents fail to mention is that LN scales transactions but it doesn't really scale users.  If you imagine a future with 4 billion LN users each with 5 open channels, then Bitcoin's unspent transaction output (UTXO) set will be at least 4 x 10^9 x 5 x 50 bytes = 1 TB in size.  Unlike the blockchain which can be pruned, nodes require the full UTXO set in order to validate incoming transactions and blocks.  And nodes need to perform fast lookups against the UTXO set, so the UTXO set cannot be written to an optical drive and forgotten about.  Instead, the UTXO set must be maintained in "warm memory," which in practice will mean a combination of RAM and flash.  I would argue that maintaining a 1 TB UTXO set is "on the same order of technological difficulty" as downloading 35 GB blocks every ten minutes.  The story that somehow LN will allow bitcoin to scale to global adoption levels on a network of low-cost raspberry-pis is untrue.
+
+No matter how I look at it, if bitcoin grows to global adoption levels and if most users run non-custodial wallets, then the hardware resources to run a node will exceed the capabilities of mobile devices and low-cost single-board computers like raspberry-pis.  The difference is that in the original design of bitcoin, the users can still be their own banks, verify their own transactions, and send payments to any other user without the assistance of an intermediary.  And this is possible with hardware no more sophisticated than a cheap feature phone on a SMS plan in a third world country.  In the LN future, on the other hand, bitcoin (if you can even call it bitcoin at that point) becomes Banking 2.0. 
+The BS/Core cartel is powerful.  They blocked me from the bitcoin-dev mailing list, they somehow overturned the program committee's decision to accept me as a speaker for Scaling Bitcoin Hong Kong, and they even tried to have my [talk from Scaling Bitcoin Montreal](https://www.youtube.com/watch?v=ad0Pjj_ms2k) removed from YouTube -- and actually succeeded for about 12 hours -- but I guess they gave up on that one when they realized how scandalous it would look.  
+
+It's pretty interesting to dig up how badly the BS/Core trolls were attacking McCormack on Twitter just for inviting me to provide balance against his other guest (who would be uniformly positive about a LN future for bitcoin).  They know that I will do my research and present a compelling and factually-accurate case for why LN isn't the solution it's purported to be.  They are not scared of people spreading FUD; they are scared of people spreading the truth and are allergic to free and open inquiry.  
+Fantastic work, awemany!  Your spot in Bitcoin's history books is confirmed.
+
+/u/tippr gild
+The logic behind my statement is easy to understand.  Imagine that fees averaged $100 per transactions.  You've been using a channel for a while and now your remaining channel balance is near $100.  When I say "your remaining channel balance," I mean the amount you actually have available in that channel, already net of the $100 fee to close the channel to the blockchain.  
+
+Now let's imagine that the LN hub you're connected to begins to misbehave.  Perhaps he demands KYC information from you to continue transmitting your payments, or perhaps he refuses to transmit your money unless you provide him with the complete routing information to gain his approval.  
+
+The normal response to such concerns by LN proponents is that you would just close the uncooperative channel on-chain and then open a new channel with a more friendly LN hub to continue.  The problem though is that switching hubs costs you all of the money you have in the channel!  It will cost you ~$100 to set up the new channel.  This means that as a practical matter, you have no power at all over your money.  You need to play by the rules imposed by the misbehaving hub because you no longer have any real recourse.  
+
+This makes the hub a "custodian" for your money.  It is still true that the hub can't steal your money, he can prevent you from moving it, which I would argue is a huge amount of power. He can make you jump through all of these hoops in order to spend _your_ money because your only recourse (closing the channel) is a mirage: doing so would cost you all of your money anyways!
+
+$100 fees are a _low_ estimate in a future where most transactions are done on LN.  But $100 is _a lot_ of money to most people in the world.  This means that for _most_ people, LN will _not_ bring them financial freedom and the ability to be their own bank and send payments to anyone they choose.  For most people, LN will look like banking looks today.
+The user experience in Bitcoin (Cash) could be significantly improved with faster verifications by miners.  
+
+One way to do this is to decrease the inter-block time.  This has the advantage of simplicity, but the disadvantage of increased orphan rates, a longer header-chain for SPV wallets to download, and that fact that some people think 10-min blocks is a defining attribute of "bitcoin."  
+
+Another way to do this is with [subchains/weak blocks](http://ledgerjournal.org/ojs/index.php/ledger/article/view/40/55).  This has the advantage of reducing orphan rates, but the disadvantage that the weak block confirmations are not as "secure" as real block confirmations.
+
+We are beginning experiments with subchains on the Gigablock Testnet shortly.
+Agreed. These were fantastic talks. I'm quite excited about both ideas. Great job Brian!
+I was worried for you going into this Roger, because I know the mode of operation of the two hosts.  The interview started nice enough, but then the hosts became quite aggressive.  You kept your cool, got in all the important talking points, and in fact left them rambling incoherently as their fallacious arguments unraveled.
+
+You really did great!
+/u/gavinandresen: You are hugely respected in this community, your vision for Bitcoin's future aligns with the original goals of the project, and I am very much looking forward to your return to leading development (if that is what you choose).  
+
+Please remember that you have LOTS of supporters.  We will rally around the cause; we just need a direction!  
+The important take away is that block size is not the most pertinent scaling metric.  What we care about is sustained throughput. This chart shows that despite the 38MB and 64MB blocks, the average throughput at the time was less 10 MB per ten minutes.  The blocks were bigger, but they were spaced further apart and surrounded by smaller blocks.  
+
+When we did the [gigablock testing](https://www.youtube.com/watch?v=5SJm2ep3X_M) last year, we were able to produce and propagate a 1.3 GB block, but that was not a realistic measurement of sustained throughput.  Instead, we could achieve approximately 22 MB sustained (with stock BU) and approximately 100 MB sustained with Andrew Stone's optimized/parallelized version (parts of which have now been ported to production BU).
+
+  
+This is a thing of beauty--so simple but exactly what we need.  
+
+We have several brick-and-mortar stores in Vancouver accepting bitcoin.   These stores normally use an iPad or Android tablet and BitPay or The Bitcoin Coop's Coinos payment system.  The problem is that it is still awkward to grab the iPad from behind the counter, open the payment app, and have the customer scan the QR code.  We need a *single purpose* device like this that can just sit there on the counter always ready.
+
+When do you expect to have these units available for sale?  Are you looking for beta testers?
+For those who don't know: BU is funded mostly by donations (typically from wealthy bitcoiners and miners who think bitcoin should be a p2p e-cash system and not just digital gold). We have approximately $10 million in BTC/BCH reserves + other funding arrangements to cover developer salaries.  BU is in a strong financial position.
+I’d like to share a research paper I’ve recently completed titled “A Transaction Fee Market Exists Without a Block Size Limit.”   In addition to presenting some useful charts such as the cost to produce large spam blocks, I think the paper convincingly demonstrates that due to the orphaning cost, a block size limit is not necessary to ensure a functioning fee market.  
+
+The paper does not argue that a block size limit is unnecessary in general, and in fact brings up questions related to mining cartels and the size of the UTXO set.   
+
+It can be downloaded in PDF format here:
+
+https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+
+Or viewed with a web-browser here:
+
+https://www.scribd.com/doc/273443462/A-Transaction-Fee-Market-Exists-Without-a-Block-Size-Limit
+
+**Abstract.**  This paper shows how a rational Bitcoin miner should select transactions from his node’s mempool, when creating a new block, in order to maximize his profit in the absence of a block size limit. To show this, the paper introduces the *block space supply curve* and the *mempool demand curve*.  The former describes the cost for a miner to supply block space by accounting for orphaning risk.  The latter represents the fees offered by the transactions in mempool, and is expressed versus the minimum block size required to claim a given portion of the fees.  The paper explains how the supply and demand curves from classical economics are related to the derivatives of these two curves, and proves that producing the quantity of block space indicated by their intersection point maximizes the miner’s profit.  The paper then shows that an unhealthy fee market—where miners are incentivized to produce arbitrarily large blocks—cannot exist since it requires communicating information at an arbitrarily fast rate.  The paper concludes by considering the conditions under which a rational miner would produce big, small or empty blocks, and by estimating the cost of a spam attack.  
+
+
+[$10 BOUNTIES] Find an error in the PDF manuscript (excluding end notes), report it by responding to this comment along with your bitcoin address and receive $10!!  Your comment must be UNEDITED so that I can reasonably trust the time stamps.  Errors include spelling and grammar mistakes, typesetting issues, mis-numbered equations, typos, etc.  Suggestions are appreciated but do not qualify for a bounty.  I reserve final say regarding what does and does not qualify for a bounty.   (And yes I know my pi variable is sometimes in italics due to a bug in Word.)
+
+UPDATE: I will be without Internet for several hours and will award further bounties when I return.  Thanks everyone for their feedback!! Moving forward now, I'm mostly interested in clear errors like missing or repeated words, clear spelling mistakes, wrong verb tense, etc, than I am with grammar nuance.
+∞
+I remember after I published this paper on [Bitcoin's transaction fee market with unbounded block size](https://www.bitcoinunlimited.info/resources/feemarket.pdf), he made several comments about me using "sophisticated mathematics in order to confuse people," or people being "dazzled by the complex formulae" and such.  But this paper uses nothing more than high-school level calculus; it is really quite simple.
+
+This, as well as other similar interactions, and of course /u/awemany's observation that Greg is still looking for the zero on a log chart :) , has convinced me that Greg doesn't really have a grasp of several very common topics in mathematics.
+As I typed that last night while visiting Core Slack, I pondered the inevitability of that quote ending up on Reddit and being used to discredit Bitcoin Unlimited: "ZOMG if people can change the block size limit then the inflation schedule will certainly be next!!!1"  I typed it anyways because that sort of FUD no longer works.  People understand that [Bitcoin is a creature controlled by the market of people holding Bitcoin](https://medium.com/@Mengerian/the-market-for-consensus-203de92ed844#.iuzbhcx4y).  And the market of people holding Bitcoin want what's best for Bitcoin.
+
+A bit of background: 
+
+I came to Bitcoin from the "hard money / gold" side of the Internet--you could say I was a "gold bug."  I believed that the government's ability to create new money out of thin air negatively distorted the economy, served as a stealth tax, and facilitated world war and unbound governmental growth (I still believe that today). 
+
+As a new bitcoiner, I was obviously very concerned when I learned that the "21 million coin limit" was not really a limit at all: it could be changed just by making changes to the code!  It seemed inevitable that inflation in Bitcoin would one day spiral out of control: if extra coins _could_ be created by only changing the software then certainly they _would_ be created that way, or so I thought.
+
+Eventually I came to understand why it doesn't matter that Bitcoin's inflation rate could possibly be changed: Bitcoin is and will always be what the market of people holding Bitcoin wants it to be.  And why would the market of people holding Bitcoin ever want inflation to spiral out of control?
+ 
+Right now as I type this Bitcoin has 16,120,850 coins.  My node will permit miners to award themselves up to 12.5 new BTC each block they find for another 180,332 blocks, followed by another 6.25 BTC for the next 210,000 blocks, etc.  If we do the math on this pattern, it works out that my node (unless my grandkids make changes :) ) will permit just shy of 21 million coins sometime next century.  Your node is likely enforcing the same rules today.  And so is nearly everyone else's node.  This is what makes Bitcoin's inflation rate secure: the only way the inflation rate will spiral out of control is if we (node operators, miners, exchanges, etc.) all decide to change the rules in our nodes to permit too many coins to be mined.  _But why the heck would we do that?_
+
+So back to the topic of Bitcoin's central properties.  What are they?  In my opinion, they are the properties that make Bitcoin money: Alice shouldn’t be able to create bitcoins out of thin air, Bob shouldn’t be able to spend the same bitcoin twice, and Carol shouldn’t be able to freely spend bitcoins that belong to Alice or Bob.  Or, as Satoshi Nakamoto put it:
+
+> The steps to run the network are:
+1) New transactions are broadcast to all nodes.
+2) Each node collects new transactions into a block.
+3) Each node works on finding a difficult proof-of-work for its block.
+4) When a node finds a proof-of-work, it broadcasts the block to all nodes.
+5) Nodes accept the block only if all transactions in it are valid and not already spent.
+6) Nodes express their acceptance of the block by working on creating the next block in the chain, using the hash of the accepted block as the previous hash
+
+I'll end this post by saying that Bitcoin Unlimited will not be adding an option to allow its users to adjust their node's inflation rate.  But not because doing so would be _dangerous_.  We're not adding this option because there is no demand from users to have such a feature.  If you understand Bitcoin you'll understand that the inflation rate would not be threatened even if we did.
+
+Bitcoin is not controlled by the developers.  
+
+**Bitcoin is controlled by YOU.**
+
+Further reading: https://medium.com/@Mengerian/the-market-for-consensus-203de92ed844
+Congratulations Gavin and Mike on completing the patch to support larger block sizes. Although we all have ideological disagreements from time to time, two fundamental values of the Bitcoin community are freedom of choice and transparency of communication. Your work represents a big step in returning the power over Bitcoin's future back to the community where it belongs. 
+The Bitcoin protocol can scale massively.  But the current implementations of that protocol start running into problems at a sustained load of around 100 transactions per second.  For more info, watch this talk where we stress tested up to 1 GB blocks:
+
+https://www.youtube.com/watch?time_continue=1&v=5SJm2ep3X_M
+
+
+Over half of his paper is copied from Liu & Wang.  This is scientific fraud even if he _did_ cite Liu & Wang (which he doesn't).  He then made minor changes to the prose that he copied, in many cases introducing errors and nonsense, making it read like technobabble.  
+
+The sections of the paper that he wrote himself are just plain wrong:
+
+https://bitco.in/forum/threads/wright-or-wrong-lets-read-craig-wrights-selfish-miner-fallacy-paper-together-and-find-out.2426/
+Thank you for taking initiative on this, Brian!  Support like this is very much needed!
+Right now /u/awemany is working on a [prototype](https://github.com/BitcoinUnlimited/BitcoinUnlimited/pull/856) implementation of the [subchains](https://www.bitcoinunlimited.info/resources/subchains.pdf) protocol.  The next thing I am going to work on is testing this implementation on the Gigablock Testnet.  Specifically, I want to look into how subchains affect block propagation times and prove that we can break our previous record of 500 tx/sec sustained throughput into the blockchain.  I also want to see how fast we can make the weak block times (5 sec confirms?) before things fall apart.  Hopefully, we'll have something to present at the upcoming conference March 23 - 25th in Tokyo.  
+
+Beyond that, we still want to do the "UTXO stress test" where we measure what happens when the UTXO set size grows into the hundreds of GB.
+Yes, I noticed this about Peter McCormack too. My impression was that Peter was quite open to my criticisms about Lightning, and was even sympathetic to the need for bigger blocks.  But what he seemed to view as black and white was the narrative that "BTC is bitcoin and BCH is thus illegitimate."  For example, he sees Bitcoin.com and Roger Ver's promotion of BCH as "an attack on bitcoin" whereas I see it as a defence of bitcoin as peer-to-peer electronic cash. I didn't realize we'd talk so much about the fork, and wish I had prepared better for this topic because with the benefit of hindsight, I could have made stronger points here. Nevertheless, I think the discussion is interesting, as it reveals how differently two people might view the question "what is bitcoin?" To me, it is a p2p ecash system, to Peter I think it is whatever BTC happens to look like.
+#All we needed was bigger blocks
+
+The only hard-forking change we really needed was bigger blocks, and so I agree with Haipo.  
+
+#Important advancements can be made permissionlessly _without_ a fork
+
+Exciting work is being done for bitcoin cash right now.  All the items below can be done without a hard-fork, and in most cases without a soft-fork too:
+
+- double-spend proofs (neither a hard- nor a soft-fork)
+
+- faster transaction relay (neither a hard- nor a soft-fork)
+
+- graphene (neither a hard- nor a soft-fork)
+
+- subchains (neither a hard- nor a soft-fork)
+
+- UTXO commitments (not a hard-fork, but needs a soft-fork to be trusted under the PoW conjecture)
+
+I'm not saying that I'm against hard- or soft-forks, but I think if they happen at all, they should happen very slowly and only after _lots and lots_ of community discussion.
+
+#"You cannot articulate why this forking-change is bad" is not a convincing argument in favour of forking
+
+It is the responsibility of the faction who wishes to make a hard- or soft-forking change to convince the community that it is useful, doesn't hurt existing use cases, and that the risks are well understood.  A good example is the hard-fork to enforce canonical/lexicographic ordering of transactions in blocks, scheduled for ABC's November upgrade.  I don't like it.  I think this change will come back to bite us.  But I have yet to articulate a _really convincing_ reason of why it is bad (I can articulate several somewhat convincing reasons however).  But then, the group who wants to make this hard-forking change cannot articulate a really convincing reason why it is good.  **I think in a case like this, we should have a strong bias towards the status quo.**  
+
+#Unknown Unknowns
+
+Hard- and soft-forks have unknown unknowns.  Nassim Nicolas Taleb, the author of Antifragile, might say "why open yourself up to a huge (but unpredictable) downside, for a small (but predictable) upside?"  Yet, developers seem to have an inherent need to sniff out and remove all inefficiencies in a system (I know I am guilty of this myself).  What we miss is that oftentimes those "inefficiencies" were actually adding robustness to the system.
+
+#If developers played God
+
+If our human physiology were designed by developers instead of by Nature's trial-and-error process, we'd certainly see some improvements: the devs would fix the L5/S1 weakness in the human back, and get rid of the appendix.  But then I bet they'd eventually want to redesign the human eye to move the optic nerves to the back side of the retina (like the Octopus) to eliminate our [blind spot](https://en.wikipedia.org/wiki/Blind_spot_(vision)).  
+
+Such a redesign of the human eye has a small but known benefit: our vision (especially with only one eye open) would objectively be improved.  But we'd be opening ourselves up to an unknown downside: did they really get the redesign right?  Maybe there were some small details of the original human eye that we didn't understand (details that millions of years of evolution fine tuned in subtle ways) and then missed when they made the redesign to remove the blind spot (a good example of this is the small consensus bug ABC created when they [refactored a section of code for cosmetic reasons](https://medium.com/@coryfields/http-coryfields-com-cash-48a99b85aad4)).
+
+#Bitcoin development should be more like growing a garden
+
+The point I'm trying to make is that Nature would never redesign the human eye to remove the "inefficient" blind spot.  Our eyes work well enough.  
+
+Gavin Andresen said once that Bitcoin development is like growing a garden: "you plant all these different seeds, try to help them grow, weed out the bad stuff, and let nature do the rest."  Gardens grow slowly and no matter how much we try, the plants will never adhere precisely to the design we had in mind when we planted the seeds.  
+
+
+NChain is planning to build a product off of BU; BU is open source and whether we (BU) like nChain or not we cannot prevent them from doing this.  But I think the fact that they chose BU is more evidence of BU's maturity as a project and proof of its viability as an alternative to Core.
+
+I really don't know anything about nChain.  I won't speak for the rest of BU, but whether I "work with them" really depends on what they bring to the table.  That's the same rule I have for anyone else. So far they have made lots of big claims (and some obviously false ones too^1 ) but we've seen very little delivered. If they don't contribute to BUs goals of on-chain scaling and multiple implementations then they don't contribute. Simple. But if they make efficiency improvements, enhance security, or identify bugs, I don't see why BU wouldn't incorporate those improvements.
+
+^1 For example, Craig Wright's claim that Gun Sirer's SM math is wrong which would be easy to prove if it were true, but we still have no proof. It's quite clear to me that Sirer and Eyal's paper is correct.
+> and that you're willing to do so or too ignorant to even realize what you're doing.
+
+This is the type of comment that makes me not want to post in this community.  This morning, based on Cypherdoc's use of the term "defensive blocks," I realized that, due to these empty blocks becoming more prevalent at larger blocksizes, that I could show with a simple analytical model that the network capacity would be bounded.  I spent the morning preparing that post and was excited to share it and get feedback from others.
+
+Noosterdam must have thought it deserved more widespread coverage and posted it here to r/bitcoin.  
+
+I then **immediately** came here and posted a warning, which, because the readers of Reddit are very sensible, was upvoted to the top comment.  I completely agree this is a simplified model.  I believe it is useful in its simplicity.
+
+You know, I've been on your side in private conversations where people are questioning your motives.  But with a spiteful reply like this, I'm beginning to think u/raisethelimit was right:
+http://imgur.com/DF17gFE
+Wow, this site is **awesome** and you put it together so quickly!  Well done!!
+I like the idea of a futures market, but I think the terms of these particular tokens are confusing. The only way the BCU tokens do NOT expire worthless is if what's in the Core repo is incompatible with the most work chain. If we get bigger blocks and Core adapts to track consensus, the BCU tokens would be worthless (which might surprise people who bought BCU thinking they were betting on bigger blocks only).
+Thank you to Smooth, Adrian-X, Solex and Cypherdoc for their suggestions.  
+
+This graphic is released under the Creative Commons Attribution 4.0 License.
+
+EDIT: If the image is blurry on your system, try this link:
+
+http://imgur.com/QoTEOO2
+> 128 MB November 2018
+
+Not gonna happen.
+
+I can confirm that Greg banned the IP address of my iPhone so I can't presently respond at #bitcoin-wizards.  I think he's a bit "touchy" after his dealings with Luke and the meeting with the miners.
+> /u/bdarmstrong should be flying out Classic folks to talk to miners every week (like being on the campaign trail). 
+
+I will happily volunteer to go on the campaign trail :)  I just need a plane ticket, a meeting set up in advance, and some time to prepare my slides/talking points.
+
+
+Awesome work guys!
+
+I think we're just about ready to fire up the Gigablock Testnet again and see if we can break 1000 transactions per second sustained.  I bet we're close now.
+Welcome to the club /u/NilacTheGrim and /u/jonald_fyookball. 
+
+Anyone who doesn't see that CSW/nChain is using the same censorship tactics as Blockstream to create an echo-chamber full of CSW cult followers simply doesn't _want_ to see it. 
+Wow, nice work, /u/vbuterin!  This is definitely my favourite "complicated soft-fork solution to avoiding a simple hard fork!"  
+I commend Wences and Xapo for showing leadership with respect to scaling!
+
+However, I would like to propose that it be more impactful for Xapo to run Bitcoin Unlimited and be willing to accept larger blocks TODAY.   
+
+Imagine if Xapo, Coinbase and BitPay all said "our nodes will accept blocks up to 4 MB today--this ensures that we track consensus regardless of the method miners use to coordinate a block size limit increase."
+
+Time to get campaigning!
+
+cc: /u/gavinandresen, /u/chriswilmer
+Make that $13,000 worth of BCH now.
+
+[Bitcoin Unlimited would like to contribute 15 BCH](https://twitter.com/BitcoinUnlimit/status/1115728720269070336) to the amazing work on CashShuffle by /u/zquestz, /u/nilacthegrim, /u/jonald_fyookball and everyone else involved. CashShuffle is a huge plus for BCH.
+
+https://explorer.bitcoin.com/bch/tx/1938436b68bf2d49dd85553f2d7a105cdbb614a1c2fafc63d656c08acf8dbb35
+Thanks for clearing that up, Tom.  Great post!
+
+Let me add that because (like you said) UTXO growth is a result of more people using Bitcoin (as opposed to simply more transactions), it cannot be "fixed" by off-chain networks like LN anyways; in other words, if small-block proponents are worried about UTXO growth in an on-chain-scaling future, they should be equally worried about it in a LN future.  When you get to the bottom of it, the small-block position is simply a desire to prevent Bitcoin from freely growing in order "to keep mah raspberry-pi node on a dial-up connection in the Florida swamps running."
+Decent reporting of the conversation with Amit Bhardwaj, /u/kyletorpey, but these comments reported as fact show that you've drunk too much of the Blockstream/Core Koolaid:
+
+> Bitcoin Unlimited is software that creates an alternative protocol and network based on Bitcoin
+
+I suppose one could argue that it's an alternative protocol (IMO it's an alternative client that allows user to adjust protocol parameters), but how does it "create an alternative network"?  The only way we'll get larger blocks in the Blockchain is if the majority of the current network accepts such blocks too.  
+
+> Whether Bitcoin Unlimited would initiate a Bitcoin hard fork or effectively constitute the creation of an altcoin depends on what people decide...
+
+What about the possibility that it simply leads to bigger blocks being included in the Blockchain (i.e., no fork event whatsoever)?  This IMO is the most likely outcome.
+
+> [Bitcoin Unlimited] requires a hard fork...and thus all users moving over to a new network...which can be difficult to coordinate
+
+Another strange use of the words "new network."  If the Blockchain begins to include blocks larger than 1 MB, most users (i.e., those using SPV and other lite wallets) would come along by default.  How can you get that all users must move to a new network out of this?  
+
+Sure, full node operators (perhaps ~1% of the user base) would need to increase their block size limits, but this can and is being done ahead of time (e.g., by running BU or a modified version of Core).  
+
+Getting more transactions per second by having people start using an entirely different transaction format (segwit) seems much more difficult to me.  
+> We also expect that as the Bitcoin ecosystem grows, the number of alternative Bitcoin protocol implementations may increase, and it is inevitable that other software projects may **release radically different software proposals** for the ecosystem to consider. At the end of the day, the Bitcoin Core development team does not decide the Bitcoin consensus rules. Instead, **users participate in Bitcoin by making their own choice of which Bitcoin software to run**. 
+
+Thank you to the Core team for addressing this important point!  Indeed, the [evolution of the network is decided by the code people freely choose to run](http://www.bitcoinunlimited.info/articles.html). 
+
+Paging /u/theymos, /u/mineforeman, /u/frankenmint: does this mean we're now permitted to discuss the benefits of alternative implementations such as [BitcoinUnlimited](http://www.bitcoinunlimited.info/index.html)?
+I've got a baby on the way and we're building a new home, so I've been spending less time here.  
+
+I've also been feeling down about bitcoin since the hash war.  Like /u/capt_roger_murdock said to me recently, between 2015 - 2017 bitcoin was a tree growing in a container too small for it to thrive.  For over two years, we tried to move it to a larger pot without success.  So we ended up taking a small cutting from the bitcoin tree and planting it in a much bigger pot.  The little cutting admittedly looked kind of stupid in such a big pot, but with some watering and fertilizer we told ourselves that it would grow to fill that large container and more.  But then just when the cutting was starting to establish some roots and to bud with new leaves, we decided to cut it in half, move each half to even bigger pots, and then trample and pee on both.  
+
+To answer the technical questions, I don't have a problem with Schnorr provided it uses the the secp256k1 curve and is done as an additional feature, and not with a plan to phase out existing functionality (I believe both provisos hold).    
+
+Regarding Avalanche, I feel similar to Andrew Stone.  I like the _promise_ of Avalanche but I'd prefer such major changes to be studied more carefully -- over several years -- before we decide to incorporate them. 
+
+Last fall, /u/s1ckpig and I organized the [Instant Transactions Workshop](https://www.satoshisvisionconference.com) in Gargnano, Italy.  It was a great deal of work to bring the seventeen or so BCH devs together in Italy for 3 days, but I thought it was worthwhile.  The "consensus" that came out of that meeting was to implement double-spend proof relaying, as this solved both the fast-respend and reverse-respend attacks, and required minimal development.  
+
+The trouble now is that Avalanche partly competes with this proposal and thus no one is working on double-spend proofs any longer.  BU would surely fund the roll out of double-spend proofs (I would personally drive this initiative forward) if it was likely that it would be adopted by the majority of nodes and miners.  But I'm confident that if we did this work that it would not be adopted (at least in the current climate).  We put off making a low-risk, non-controversial, and easy improvement that would immediately improve the user experience, because it competes with a high-risk, controversial, and difficult improvement that does almost the same thing.  The difference between Avalanche and double-spend proofs is that Avalanche can potentially solve the miner-bribe attacks too, and so it is better in theory, all else being equal.
+
+I think the reality is that BU as a power center was paralyzed by the split, as our views sat somewhere between ABC and SV (ABC is science-based like BU but wants to make more significant changes and do so at a faster pace than BU, while SV wants a slower pace of change like BU but is largely faith-based according to the gospel of Craig Wright). After the split, BCH is more "ABC" than prior to the split (e.g., bitcoin.com used to run BU for mining but can't any longer [1]), and BSV is purely "SV."  BU as a governance body is less relevant now.
+
+
+[1] because of the largely-undocumented consensus changes ABC made to implement re-org protection [the changes were made for a good reason, don't get me wrong, but these rapid consensus level changes basically forced all miners and economically-significant node operators to centralized around the ABC implementation to ensure consensus if further rapid changes were required].   
+
+
+
+
+
+
+
+ 
+I need to interject to mention that my quote was taken somewhat out of context.  Greg is obviously a very talented programmer and cryptographer and I have a lot of respect for his work, for example on Coinjoin and Confidential Transactions.  
+
+Here is the full context:
+
+*********
+It's because most of them are not Bitcoin experts--and I hope the community is finally starting to recognize that. I would say that they are skilled technicians when it comes to the low-level implementation details of the Bitcoin Core codebase, and some are skilled at cryptography and computer science too. But that represents perhaps only a third of what it takes (IMO) to be a Bitcoin expert.
+
+I've always been annoyed with the attitude that some engineers and scientists have of being "bored" with lower-level implementation details, viewing technicians as second-class problem solvers. In my opinion, you don't really fully understand a problem or design until you get into the messy real-world details. When I joined the community in 2013, I was surprised that we had a sort of "reverse prejudism" instead, holding people that actually do the coding in higher regard intellectually (you don't even GitHub??).
+
+We design a lot of circuit boards in my non-bitcoin life, and a good PCB layout guy is amazing. For example, they know all this stuff about keeping noise down and telling you how the ground currents will likely flow--and they explain it to me and I'm like "wow, that totally makes sense from what I know about physics but I would have never thought about that!" But that deep expertise really only holds for this narrow sub-topic. When the conversation deviates outside of it, it becomes crystal clear that their understanding of physics or engineering is actually fairly superficial. Well yeah! Because they specialized in one particular topic and have tons of hands-on experience with it, whereas the generalist might have studied engineering or science in a formal setting for a decade or longer. To work effectively, both specialist and generalist need to understand the limitations of their knowledge.
+
+Someone like Greg is a classic example of a talented technician with a chip on his shoulder. I'll preface this by saying that talented technicians are awesome and can make more money and be more useful than many of the hands-off "generalist" types. I used to think Greg's understanding of Bitcoin was infallible--because so much of what he says amazes me and turns out to be correct once I dig into the implementation details. But during the last year--as I've got up to speed myself--it's become increasingly clear that he actually has a fairly superficial understanding of large swaths of computer science, information theory, physics and mathematics. But he presents himself in such a way as though he's an expert at all of them. And I won't even get into his superficial understanding of economics. ;)
+
+In my opinion, someone like Gavin Andresen is a genuine Bitcoin expert.
+**********
+Sure: transfers between bitcoin exchanges -- a free alternative to Blockstream's Liquid product.
+
+Imagine all of the bigger bitcoin exchanges connected in a "circle" via Lightning channels. Any exchange could make a near-instant payment to any other exchange, rather than waiting for confirmations.  Indeed, this can be done with payment channels, but it requires N*(N-1)/2 channels that way, rather only N channels for LN.  So LN is more capital efficient (less locked liquidity) than direct payment channels for this use case.
+Sorry to offend.  That wasn't my intention.  And I'm not calling you brainwashed. That was /u/abtcff, not me. For the most part, I think you are the opposite of the typical Core-leaning bitcoiner: you are thoughtful and open-minded to the other side's argument.
+
+I was speaking to my experience from the interview.  Although you seemed to view the fundamental flaws of Lightning objectively and with an open mind, you didn't seem to do the same on the topic of "what is bitcoin?"   Someone with an open-mind on _this particular_ topic would at least acknowledge that /u/MemoryDealers work promoting BCH through bitcoin.com was only an "attack" from one perspective. From the perspective that "Bitcoin is a peer-to-peer electronic cash system," Roger's work is the opposite of an attack -- he's fighting hard to bring better money (bitcoin) to the world!  
+
+That's the only topic from the interview I thought you viewed non-objectively.  Again, sorry if I offended you.  That wasn't my intention.  
+
+I do NOT think you are brainwashed.
+It's not nearly as motivating to do the work if I don't have access to the appropriate audience.   My work will be seen by the people who are already sold on the original design of bitcoin, and censored from the places filed by people who aren't.  This was an opportunity to talk about some of the problems of LN that would never be allowed to be discussed on r/bitcoin or other controlled safe spaces and heard by an audience that mostly subscribes to the BS/Core doctrine.
+I already reviewed the first few pages (that Wright supposedly wrote himself) here:
+
+https://bitco.in/forum/threads/wright-or-wrong-lets-read-craig-wrights-selfish-miner-fallacy-paper-together-and-find-out.2426/
+
+He makes a fundamental error by implicitly assuming that mining has memory.  
+
+Sections 3 (minus 3.1), 4, 5, 6 are copied from Liu & Wang.  Wright made minor changes to the prose in many cases making it read nonsensically.  This is scientific fraud.  
+
+https://twitter.com/PeterRizun/status/983752297363660800
+
+
+I think CSW can't pay the bet because then people will be able to point to it as an example of him being wrong (he's wrong all the time like all of us [but he's right a lot too!] but what he does when this happens is he makes up some interpretation where he is actually right and just misunderstood).  He's created this "expert persona"  and attracted a certain cult of followers that blindly accept everything he says; making good on his bet with me would weaken that persona.
+
+But I do find it very odd the length people have gone, to somehow argue that his answer of t = 5 min is correct.  The recent "quantum mechanical" arguments were so crazy that I'm still not sure if the poster was trolling or not! 
+
+It's funny.  When I first got into Bitcoin it seemed that the entire community was "different" than the rest of the world in that they valued independent critical thought.  Then the block size wars broke out and it became clear to me that many small-blockers just blindly accepted the BS/Core doctrine.  Again, I thought the "big blockers" were someone different and better at critical thought.  But now the CSW thing has taught me that that's not the case either.  It seems in any group, there is a sub group that will look to find an "expert" they resonate with and then blindly agree with whatever they say.  
+Yes, definitely.  All Bitcoin Cash developer groups would like to find a more automated solution to keep the block size limit well above demand but still serving its original purpose to prevent ridiculously large "spam blocks" from being included in the Blockchain.
+> Thin blocks only really work if nodes quit pruning their mempool, or if they all have the same mempool pruning policies, right?
+
+Not for Peter Tschipper's "Xthin" blocks (that should be deployed in the next release of Bitcoin Unlimited).  The receiving node images its mempool onto a Bloom filter that its sends with its get-block request.  The transmitting node sends the block contents by hash for all the TXs imaged onto the Bloom filter and in full otherwise.  The more synchronous the mempools are the faster the blocks propagate, but the technique works regardless.  
+
+I am very excited by this technology because it allows for significant improvements in block propagation times *without* requiring mempool homogeneity.  Nodes can prune their mempools however they like.  That being said, synchronized mempools result in faster times on average so there is a natural incentive (but not a requirement) towards consistent mempool policy.  
+I am one of the people behind Bitcoin Unlimited.  My name is Peter Rizun and I am a physicist and entrepreneur from Vancouver, Canada.   
+
+My main research interest is developing analytical theory that explains properties and emergent phenomenon of the Bitcoin Network. 
+
+I am co-founder and co-managing editor of [*Ledger*](http://ledgerjournal.org)—the first peer-reviewed academic journal for cryptocurrency research.   
+
+I’ve written two papers related to Bitcoin that received significant interest:
+
+[“A Transaction Fee Market Exists Without A Block Size Limit”](http://www.bitcoinunlimited.info/downloads/feemarket.pdf)
+
+[“Reduce Orphaning Risk and Improve Zero Confirmation Security With Subchains”](http://www.bitcoinunlimited.info/downloads/subchains.pdf)
+
+and CoinDesk just published a [Top-10 list](http://www.coindesk.com/10-must-read-cryptocurrency-research-papers-from-2015/) of research papers for 2015 that I authored.  
+
+I gave [a talk](https://www.youtube.com/watch?v=ad0Pjj_ms2k) at Scaling Bitcoin Montreal on block space as an economic commodity.  
+
+I also designed, coded, and prototyped [Sigsafe](http://www.sigsafe.ca/sigsafe.pdf): the first passive NFC device to sign a Bitcoin transaction over an air gap and broadcast it to the network in real time [[video](https://vimeo.com/105458967)] 
+
+I have been banned from /r/bitcoin twice, I am blacklisted from the developer mailing list, Greg Maxwell is my arch nemesis, and [I eat small-blockers for breakfast](https://bitcointalk.org/index.php?action=profile;u=89047).
+
+[Here](http://ledgerjournal.org/ojs/index.php/ledger/about/editorialTeamBio/5) is my head shot and a brief bio. 
+Very interesting idea.  This deserves some thought...
+With Xthin, it takes 20 - 50 MB to propagate a 1 GB block.
+
+https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-3512f3382276
+This is another one of those times when Greg's lack of physics expertise is revealed.  He's like my crazy aunt who keeps proposing new ways to get free energy to me: "hey Peter, let's pump water up a hill and then run it through a hydroelectric generator to power our cities!" 
+
+Greg still does not understand that there is no way to get around that fact that it takes bandwidth to communicate information.  And unless you're 100% certain on the contents of the blockchain -- information must be communicated to remove the remaining uncertainty.  (Of course if you're already 100% certain on the contents of the blockchain before the blocks are mined then you've found a mining-less solution to the double-spend problem :) )
+
+He keeps twisting and turning trying to find that perpetual motion machine.  Greg: I suggest you start with Physics 100.   
+I disagree with this policy.  Deleting comments and banning users should be reserved for doxxing and threats.
+
+Although I am consistently surprised by some of the terrible things said by people on both sides of the debate, I don't think these comments should be deleted and nor do I think the people who made them should be banned.  We should just downvote them. 
+
+What is the boundary for how rude a comment needs to be before it's deleted?  And can we really ensure we won't be biased and interpret borderline-comments against those we agree with as "vulgar and disgusting" while interpreting similar comments made against someone we disagree with as "a bit much but justified in order to make the point."  I worry we'd follow in the steps of /r/bitcoin where attacks become permissible against one side of the debate but not against the other.   
+
+I'll also mention that I think Reddit is useful as a "gauge of sentiment."  And for this gauge to be accurate it is helpful to watch the "toxicity meter" move up and down.  
+
+Come join us at bitco.in for consistently polite and respectful discussion.  
+Have you seen this?
+
+http://i.imgur.com/OmDKcWf.jpg
+Your #iusedtousebitcoin series is really good, John Blocke, and illustrates the real-word issues that Blockstream/Core seems to be completely oblivious to. 
+My favourite whale is back!
+
+Time to make some waves, my friend.
+Awesome work dpinna!  I was planning to look into the same thing when I board my train in a few hours...I'll let you know if I get the same results as you.
+
+Two notes for posterity (not directed at you, just of general interest to readers):
+
+1.  It was David Hudson who originally pointed out this objection (and did so politely and constructively).
+
+2.  The original construction for Eq. (5) can still interpreted as valid (although perhaps less useful than with your modifications)--like you suggested, you'd associate a small propagation impedance between your own hash power and a larger impedance to the rest of the network.  I had actually tried to make this more formal in an unpublished Appendix B, but decided that topic was better suited for a follow-up paper.  However, I'm now thinking that perhaps David Hudson's adjustment to my formulation and your modification here is more useful.  (It's a lot simpler than what I was trying to do which was work with a huge matrix that referenced the propagation impedance between the i_th and the j_th segment of network hash power).  
+I didn't realize until your talk that the re-request rate (second round trip) with Compact Blocks was so high (~60% compared to ~1% for Xthin).  Of course, the explanation is that Core's technique doesn't send a Bloom filter with its get_data() request like Xthin does, and so the transmitting node can't figure out which transactions the receiving node is missing (without a second round of communication).  
+
+One reason [Xthin blocks were able to pass through the Great Firewall of China so efficiently](https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-792a752c14c2#.enk4c5vb5) was thanks to its very low re-request rate.  I'm scratching my head to understand why Core doesn't use Xthin's Bloom filter.  Is there some disadvantage to the Bloom filter that I'm not seeing?
+Found it:
+
+https://www.reddit.com/r/btc/comments/6cjt73/andreas_antonopoulos_has_gone_full_retard/
+
+I remembered it a bit wrong though: it was reaching for a rock to threaten to throw at the dog, rather than the dog needing to be kicked.
+This is a well-written article. Very clear. Thanks for taking the time to prepare this.
+
+I learned something too: I thought toomim had found a way to parallelize the TTOR check, but what he did was showed that TTOR could indeed be checked with the two-loop OTI algorithm. 
+
+That said, I’m not sure you’re correct that the worst case for TTOR is a single active thread if the block is one long chain of dependent transactions. For example, I could split the block into four contiguous chunks, and then validate all but the first transaction of each chunk in four parallel processes. Now I know that each chunk is topological and that all transactions are valid if the first is valid. Then I just validate the first transaction of each chunk in causal order. If that works, the block is valid and TTOR is satisfied.  This method only works for your example of a block that is one long chain, but I don’t see why more sophisticated algos couldn’t be found that work well for all blocks.
+I explain it in detail in my talk at TFOB.  It's only about 20 min long, if you're interested:
+
+https://www.youtube.com/watch?v=hO176mdSTG0
+
+
+The replies are sorted by "controversial" rather than by best, so a lot of the downvoted stuff floats to the top.  If they weren't hiding the scores, it would be clear that this plan has very little support across the community.  
+From the mod logs, it looks like he tried to forbid people from saying the Core was controlled by Blockstream.
+
+"Never believe anything in politics until it has been officially denied." -- [Otto von Bismarck](http://thinkexist.com/quotation/never_believe_anything_in_politics_until_it_has/217637.html)
+The tale is a mixture of fact and speculation.
+
+We know that MtGox was hacked in June 2011, but we don't know that any bitcoins were taken.  
+
+We know that Mark controlled at least 424,242 BTC after the hack, but we don't know how many he should of controlled.  
+
+We know the price dropped to $2 in 2011, but we don't know that this was due to the hackers re-selling the stolen coins.  
+
+We know that Willy was real, but we don't know for a fact that it belonged to Mark (although we do know that it was buying when the web and API interface were down last fall).
+
+We don't know that he used customer funds, but we do know that MtGox is now short on fiat in addition to being short on bitcoin.  
+
+We do know that Mt Gox's code did not properly deal with transaction malleability, but we don't know that this was done intentionally for the purposes of obfuscation.
+
+If this article is popular, perhaps I can add references to more clearly distinguish between fact and speculation.  I spent several hours writing and editing this today and I wanted to put it out there  :)  
+It is just like today's blocks, so you could potentially have re-orgs of the weak blocks that make up the subchain.  
+
+At a certain point -- maybe around 5 seconds or so -- miners will definitely start stepping on each others toes.  One thing we want to test is how quickly the weak blocks can be made before the protocol breaks down (i.e., miners can no longer converge upon a common subchain).
+Awesome!!!  It's been incredible to watch Bitcoin Unlimited grow organically from an idea here on Reddit (and on /u/cypherdoc2's thread), to a serious competing implementation of the Bitcoin protocol.  Thank you to all involved, and especially to /u/theZerg1 for driving this project forward! 
+
+With /u/BitsenBytes recent efforts on Xthin and Xpress, BU has now delivered working technology to facilitate IMO the most significant improvement to-date for the fast propagation of blocks across the p2p network, arguably the [current bottleneck](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) effecting on-chain scaling. 
+
+Try to keep up, Blockstream/Core ;)
+It is different. 
+
+Imagine you open a LN channel where you have a $50 balance.  Maybe you make some payments to your channel partner and now you have $25 and he has $25.  But then fees rise from ~0 to ~$10, and so you move $10 from your $25 into the "fee bucket."  You now have only $15.   And then later fees rise to $20.  So again you take another $10 from your balance and move it into the fee bucket.  You now have a $5 balance.
+
+But fees keep rising.  And your channel partner is concerned that soon you won't have enough balance to cover the fee, and he'll be unable to claim his $25.  And so he force closes the channel at about the time when you run out of money.  The result is that all of your balance went into the fee bucket, then the channel closed, returning the $25 to your channel partner but nothing to you.  Your channel partner now waits hoping that fees drop.  
+
+A week later fees drop to ~$0. You are out $25, your channel partner is out $0.  You've just lost money through no fault of your own.
+Keep looking Greg. You'll find that zero on the log chart some day.
+The vision is to move to a multi-implementation future, for a number of reasons:
+
+- Each implementation will have its own culture and ideology, making them friendlier places for new devs compared to the BS/Core environment.
+
+- The implementations will be written in different languages (e.g., C++, Go, Javascript), as this opens up the pool of people who can contribute.
+
+- Changes to Bitcoin can evolve in a more market-driven manner, because node operators have more choice in the software they run.
+
+- Consensus critical bugs become less likely with the "defensive-consensus strategy" of Jason Dreyzehner from BitPay.  Miners run _all major implementations_ and build upon only blocks that are valid according to all of them.  This means that node operators and businesses can run _any_ client they choose.  If one client becomes "stubborn" and won't, for example, allow miners to raise their block size limit, miners can announce that they will no longer run that implementation -- they're no longer a prisoner to the wrath of Core's development monoculture.  
+
+Congrats on the alpha release for LN, roasbeef!  
+Peter T (/u/bitsenbytes) was the inventor of Xthin, not me. I just helped with the testing and wrote up our results.
+Both of the two emails I sent today were censored too. I even modified my first email based on the reason the moderator gave for its removal, but still no luck.
+
+Bitcoin-dev has censored every single email I've written since my debate with Greg Maxwell in November that resulted in him "unsubscribing" from the mailing list and the next day having the decision to include my talk for Hong Kong reversed.
+But couldn't a group of attacker nodes keep forward the bad block to new nodes, crashing any node that receives it?  
+“Do nothing” is a possible outcome of /u/thezerg1’s proposal.
+Watch the talk: these are high-end machines with fast internet connections, but still easily-accessible to a hobbiest.
+
+But really that’s beside the point: the testing showed that the bottlenecks had more to do with the bitcoin software than the hardware it was run on. In other words, the current code cannot even take advantage of consumer-grade hardware. One example of this is the lack of parellization: once a single CPU core was maxed out, problems began, even though 7 other cores may be idle.
+Me too.  One thing that a lot of people commented on at the "Satoshi's Vision" event on Sunday was just how effective censorship really is.  Most of us admitted that we believed that once theymos/blockstream/core went full "North Korea," that their support would quickly crumble.  In reality the opposite happened: the thoughtful people were chased away leaving behind a population of sycophants committed to defending the party line.  Now when outsiders look in, it seems that Blockstream/Core has popular support!
+
+Any ideas on what can be done to improve the situation?
+I'm very happy to see you researching Bitcoin Unlimited, u/ydtm!  
+
+I agree that this is the correct way to decide the maximum block size.  Waiting for the miners to decide on and activate a block size limit increase for the non-mining nodes is putting the cart before the horse. We are trying to get the miners to lead (be the horse), whereas in reality they should follow (they are the cart). 
+
+What we need is for many of us users *and* businesses (such as Coinbase, Xapo, Bitpay, Blockchain.info, etc.) to take matters into our own hands and say "our nodes accept blocks up to 8MB (or whatever) *today*!"  As you illustrated in the OP, one way to do this is by running Bitcoin Unlimited.  This would go along way towards making miners feel comfortable producing bigger blocks.  
+
+With Bitcoin Unlimited, there is no need to even come to consensus on what each node's block size limit should be--an "effective limit" emerges organically from the product of our individual choices.  
+
+Here are some more thoughts on the matter:
+
+https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-564#post-20378
+>Please dont go full retard. A basic math would bring you back to reality.
+
+Let's do the math:
+
+The hash rate of the 21.co chip is [50 GH/s](https://support.21.co/21-bitcoin-chip/what-s-the-hash-rate-of-the-21-bitcoin-chip).
+
+The total network hash rate is approximately [1 billion GH/s](https://blockchain.info/charts/hash-rate).  
+
+Thus it would require 10^9 / 50 = 20 million 21.co chips to equal the current hash power of the Bitcoin network. 
+
+In 2015, [240 million](http://www.statisticbrain.com/computer-sales-statistics/) computers were sold.  
+
+If 21.co were to make a deal with Intel or AMD and if 10% of computers at some point in time began shipping with 21.co ASICs, that would represent more deployed hash power than the entire Bitcoin network at present.  
+
+So I would tend to agree with /u/SirEDCaLot that 21.co "might be seriously addressing mining centralization."
+
+
+Thanks for explaining this, Gavin!
+
+Another thing that's interesting is that the segwit data would be "cheaper" for mostly artificial reasons.  Assuming the new "effective" block size limit were above market demand, I don't see why the actual cost of producing "segwit block space" would be significantly different than the cost of producing "normal block space."  Assuming that miners are rational short-term profit-maximizing agents, they shouldn't discount segwit transactions at all!  
+
+If blocks aren't full, expecting miners to enforce fee policies that discount the segwit data is the same as expecting them subsidize segwit users at the miner's own expense.  For example, a rational miner should choose to include a 1kB normal TX paying $0.10 over a 2kB segwit TX paying $0.10 because the segwit TX increases his marginal orphaning risk more than the normal TX.   However, according to the default fee policy (AFAIK) he would choose to include the less-profitable segwit TX.  From a game-theory perspective, this means that all miners would have a "profitable deviation" by reducing the segwit subsidy.   
+
+I'm not suggesting the segwit subsidy is bound to fail.  The fees are small anyways and miners might not be bothered to change their default settings.  Furthermore, miners might think the subsidy is worthwhile if they believe it will help the network over the long term (in other words, *real miners* aren't "rational, short-term profit maximizing agents" like we often assume when making models).  
+
+But it is food for thought.
+
+(The situation is different if blocks are persistently full, in which case segwit block space is actually less expensive to produce, but only assuming nodes can enforce (and want to enforce) the segwit subsidy against [significant transactional pressure](https://bitco.in/forum/threads/the-forbidden-gif-unblocking-of-the-stream-via-emergent-consensus.767/).)
+
+Thanks for the compliment!
+
+> Any theories to why they diverged the past two years?
+
+Personally, I'm fascinated by why the two curves were historically so correlated in the first place.  I can't really explain any of it (the correlation or the divergence).  
+
+Here's hoping the market price curve catches up! :D 
+Thanks!
+
+I find it so strange that the most central issue regarding the block size debate is the one thing we're not allowed to talk about: on which side of the free-market equilibrium block size should the limit be placed?
+
+This topic is censored from the Dev-list and it is censored from Scaling Bitcoin.   If you share my view, then it doesn't matter whether the limit tomorrow is 2 MB or 20 MB--just as long as the limit is above the demand.  If you share the small-block view, then (AFAIK) you want blocks to be consisitently full, so that the limit drives up fees.  
+
+The reason we can't agree on a compromise is because the choice is binary: the limit is either used as an anti-spam measure, or as a policy tool to control fees.   
+>  you probably are a troll
+
+Ad hominem.  Reported.
+
+
+Interesting. 
+
+- What about the fact that many of us were banned from /r/bitcoin for talking about increasing the block size limit or refuting counterfactual claims made by small-block proponents?
+
+- What about the fact that *all* my submissions to /r/bitcoin are now censored and I can no longer even contribute over there?
+
+- What about the fact that the thread I used to post in at BitcoinTalk was locked by BadBear and Theymos because it was "too broad in scope" shortly after the XT controversy broke out (this was a pro-XT thread)?
+
+- What about the fact the Blockstream hasn't made a public statements urging for an immediate halt to the censoring at /r/bitcoin and at bitcointalk?  
+
+- What about the fact that LukeJr, PeterTodd, and IIRC Maaku actually argued in favour of the censoring by suggesting that XT was an alt-coin and thus off-topic?
+
+The fact that you're coming here to ask us to stop down voting comments made by those who support smaller blocks is evidence of how censoring people with different opinions or ideologies inevitably fails.  You made your bed--now you get to lie in it.   
+You've thwarted my evil plan to bring small blocks to this kingdom! I shaved my neckbeard for naught!!
+Well said, Andrew!
+> The strange way groups come around to ideas they are against but must adopt.
+
+Yeah, they even changed the name: Xtreme Thin Blocks -> Compact Blocks.
+
+> This is how big blocks will be adopted, too.
+
+But they'll call them "full figured" and they'll be _way better_ than everyone else's big blocks!
+
+> It helps not to rub it in.
+
+Couldn't resist.  
+Bitcoin Unlimited *prevents* chain forks with its excessive-block logic.  
+
+Also remember that BU doesn't restrict the development of new communication channels for agreeing on "recommended" block size limits.  For example, miners could indicate their limits in their coinbase transactions, and perhaps we could add a new p2p-command so that nodes could be polled for their block size limit settings.  The idea is just to let this happen in a more decentralized fashion, without having to project 20-years forward or to come up with complex fully-coded agreement schemes.  Instead let the node operators decide but include fail-safe logic to resolve a fork in the highly-unlikely event that one occurs.  
+Congratulations to /u/bdarmstrong for voicing this opinion and providing some much-needed leadership in scaling bitcoin!  
+
+Incidentally, I was also very impressed to learn that you're not only a talented businessman but had the technical ability to create the first version of the Bitcoin node Coinbase now uses to serve 2.7 million people.  
+
+...and miners help to fund Bitcoin Unlimited, and so we develop tech that is useful to them.  
+
+I agree with most of what you wrote above, but I think "fast block propagation algorithms do not make the network better" is false.  Fast block propagation reduces the marginal orphaning risk of including an additional transaction in a block.  With fast block propagation a miner can profitably include a lower-fee transaction is his block candidate than he could with slow block propagation.  So faster block propagation should be inversely correlated to transaction fees denominated in BTC (of course that only applies when blocks are _not_ full).  If we want lower fees, we want faster block propagation.
+
+https://www.bitcoinunlimited.info/resources/feemarket.pdf  
+It is great to see some academic analysis around Bitcoin's consensus rules. I hope the authors consider submitting this manuscript to [_Ledger_](https://www.ledgerjournal.org/ojs/index.php/ledger) as this is the type of research the journal is keen to publish.
+
+I’m glad to see that the authors came to the same conclusion that we (BU) did that in the absence of an “officially prescribed" block size limit that the miners would be incentivized to converge upon the same _de facto_ block size limit. An individual miner enforcing a lower limit would be at a (high) risk of forking himself off the network, while an individual miner enforcing a higher limit would be at a (low) risk of wasting hash power on a destined-to-be-orphaned block.
+
+However, I think the authors missed something very important.  The authors argued that Bitcoin security relies on “prescribed" block validity rules but then didn’t touch on the obvious follow-up question of “well...who is it then that does this prescribing?”  
+
+BU’s answer to this question is that it is the miners and users who define the block validity rules through a decentralized process and, because of this, those rules are always in a sort of state of flux — that is, there are no “officially prescribed rules,” only “de facto applied rules."  The Bitcoin protocol is a living organism that evolves based on the will of miners, users and the market.   
+
+If “officially prescribed rules” are required in order for Bitcoin to be secure, then I think that implies Bitcoin is then fundamentally insecure (although I don’t agree with that conclusion).  But that conclusion has very little to do with BU for the simple reason that BU doesn't really _do_ anything — it just makes it easier for miners to do what they can already do by modifying the Bitcoin Core source code and recompiling.
+
+As the authors of the paper point out, most miners today run with a block size limit (EB) of 1 MB. The only reason a miner would change this value to something different than 1 MB was if he _wanted to_ (e.g., as part of some scheme with the other miners to raise the de facto block size limit and reduce network congestion). But if that miner _wanted to_ change his node's block size limit, he could do that with Core too. It just requires a bit more work; there’s a bit more "friction."
+
+I think the real question then is whether the security of Bitcoin depends on this type of "friction." If all the miners knew the source code inside and out and were very comfortable and efficient at making changes, would the properties of Bitcoin change? Is this type of friction a good thing or a bad thing?
+
+My suspicion is that by reducing this type of friction, Bitcoin would more quickly evolve to meet the demands of the market (e.g., we would have had larger blocks over a year ago). The complex system of miners and users that is Bitcoin want Bitcoin to grow strong and more valuable, and by reducing friction the system can more readily do so. This view justifies multiple implementations, open and free discussion, as well as keeping the source code as simple as possible and minimizing protocol complexity like segwit (more people able to understand and make changes to the code is a good thing.)
+
+However, one could take the opposite view that if it were easier to make changes, then miners and users would tend to make changes to the detriment of Bitcoin. This view would justify a single "official repo" for Bitcoin lead by a "team of wise developers." It would justify censorship to keep users/miners from communicating (because if left to their own devices they will make bad choices). It would also justify adding complexity to the code (e.g., segwit) such that making changes become even more challenging so that only a smaller and smaller set of people are capable of doing so.
+
+Only by watching the grand experiment that is Bitcoin play out will we learn the answer to these questions.
+No, this is FUD.  
+
+Bitcoin Unlimited will follow the longest chain.  If for some reason a 2 MB block is mined and the majority of the hash power ignores it, BU will revert back to the 1MB chain when it becomes longest.  The orphaning of the 2MB block will be no different than the everyday occurrence of a regular block being orphaned.
+
+Another way to see that BU is perfectly safe is to imagine we were *soft forking* from 2 MB to 1 MB.  We've learned from experience that it's OK for nodes to begin enforcing the new restricted rules *after* the soft-forking event. In other words, it would be OK for nodes to enforce the 2MB block size limit even after the miners soft fork to 1 MB.  Now imagine the reverse process of a hard fork from 1MB to 2MB: it's similarly OK for nodes to loosen their acceptance rules and accept 2MB *before* the hard-forking event.  
+
+For a soft-forking change, nodes can upgrade asynchronously *after* the miners start enforcing a new rule. For a hard-forking change, nodes can upgrade asynchronously *before* the miners stop enforcing an old rule.
+> when the mods delete post they disagree with or when the mods delete posts in order to advance the mods agenda
+
+True.  
+
+It's also rather funny that the mods have broken many of their own rules in their comments in this very thread (which incidentally are mostly down-voted until hidden).  I've seen examples of:
+
+1. Stone walling
+2. Ad hominem
+3. Side tracking
+
+Paging /u/110101002; you're needed to give an example of lewd behaviour.  
+I agree that block propagation latency matters.  I wrote a paper in 2015 on the relationship between block propagation and equilibrium fees.  If the network is inefficient at propagating blocks between the hash power, then miners need to charge a higher fee rate in satoshis per byte to compensate for the increased orphan risk.  Even without a block size limit, the network responds to "too much demand for block space" for economic reasons by driving up the fees.
+
+https://www.bitcoinunlimited.info/resources/feemarket.pdf
+
+The orphan risk cost is about 12.5 BTC * t / 600 sec for small t, where t is the propagation time in seconds.  So 1 millisecond of extra delay costs about 12.5 x 0.001 / 600 = 2000 sat, which is about $0.10 in BTC.
+
+The reason why the BCH network can't propagate GB blocks in a few seconds is mostly because there is no need to do so yet.  There is no underlying physical law that prevents world-wide dissemination of GB blocks within seconds, nor is there any real technological obstacles to doing so (at least for specialist nodes).  It is just a matter of doing the engineering and procuring the right hardware and internet connections.  
+I think he’s taking the view that the limit is removed from BCH but that each node implementation still gives its users the freedom to set a block size above which to ignore.  I think that perspective makes sense.
+
+It would be foolish to go one step further and also make it _impossible_ for users to set a limit, because then their nodes could crash if fed too big a block, costing them money.
+There are still signatures in the Blockchain, but a “digital coin” is no longer “a chain of digital signatures” as described by Satoshi in Fig. 1 of the white paper. This means the security properties for segwit coins are different than for bitcoins. So far, that difference hasn’t really mattered.  See my talk here for an explanation of the subtle differences:
+
+https://m.youtube.com/watch?v=VoFb3mcxluY
+Because Coingeek/nChain are against it _and_ ABC is against it, while only BU is for it.  The items in my list are supported by at least 2 of these 3 main groups (*actually, I'm not sure about BIP101, but all groups support the spirit behind a permanent solution to raising the cap).  
+
+I like OP_GROUP and want to see it added too.
+We’re going to scale BCH to multi GB blocks. And that’s going to take continued hard work and time.
+/u/awemany recently [coded up a prototype](https://www.reddit.com/r/btc/comments/7itn2o/fast_bch_fast_bch/).  We will begin testing shortly on the Gigablock Testnet.
+The Bloom filter _reduces_ the average number of round trips (at the cost of a bit more bandwidth).  Without the Bloom filter, the transmitting node doesn't know which transactions the receiving node already has in its mempool. 
+
+Regarding the purported 'attack,' I left the beast busted and bruised [here](https://bitco.in/forum/threads/xthin-is-robust-to-hash-collisions.1218/) but it was Thomas Zander (/u/thomaszander) who pushed the sword through its Maxwellian heart with his Optimistic Mining argument (i.e., a more severe (non) 'attack' is already possible if miners mine off the block headers. Or conversely, Optimistic Mining breaks all such attacks.)  
+> Is there an address for unlimited dev donations?
+
+Yes.  Scroll to near the bottom of the article and you'll see an address ([3AtbpAikJ6C11ZCHiYbEKcSjyoVjzfxYwU](https://insight.bitpay.com/address/3AtbpAikJ6C11ZCHiYbEKcSjyoVjzfxYwU)) and a QR code.  Donations will go towards keeping our VPS nodes running, including our nodes in Shenzhen and Shanghai.
+
+EDIT: Holy smokes!  We've received over 1.3 BTC in donations!  Thank you so much everyone!!
+
+The idea is to *decentralize* development away from just Blockstream Core.  We need *multiple* implementations.  
+Yes, a fork to raise the limit.  Gavin is working on it.  
+Thanks for working through the math and presenting your findings like this.  It was very clear. Indeed, the "small solo miner" of today is a multi-million dollar operation; the cost of a "Visa-scale" node is a rounding error. 
+
+(BTW -- we're propagating 1 GB blocks on the gigablock testnet with only mid-range $1k - $2k desktop machines)
+These results were from real nodes running on the real network.  Xthin is implemented in Bitcoin Unlimited.  You can download it and run it today:
+
+http://www.bitcoinunlimited.info/download
+> Excellent work Peter. Great stuff.
+
+Thanks!  This was a team effort, though, and I only played a small part. 
+Well said!!
+There is now a thread to discuss questions like this in the new Bitcoin forum:
+
+http://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/
+Transparency of communication.  
+Nice video, Rick. I thought the part about how LN's "source routing" was quite different from normal routing was good, as this isn't discussed enough IMO.  
+
+I hadn't heard the proposal to use WatchTowers^TM to allow users to receive money when they are offline.  I don't see how this can work in a non-custodial manner. If my node is offline, then my private keys are offline and can't update the channel state to accept a payment.  Is there some cryptomagic with shared keys or something that solves this in a way that the watchtower can sign to receive on your behalf but cannot also sign to spend?  Or is this just a custodial solution in disguise?
+
+> In Bitcoin we used to have a solution for that, the bitcoin-dev mailinglist. This has been a failed experiment with many examples of lost opportunities and even a group like Bitcoin Unlimited just refusing to use it because it is not neutral. The secondary effect is that this same group has refused to make BIPs (Bitcoin Improvement Proposal) because of the place where they are proposed and discussed is that same list they won't join.
+
+The bitcoin-dev mailing list is not useful for Bitcoin Unlimited because our emails are regularly censored.  I can deal with peoples' biases--the reality is that different groups want different things for bitcoin--what I can't deal with is not being permitted to discuss certain topics (particular, topics related to Bitcoin Unlimited).  If discussion is censored, what other choice do we have but to move the discussion to some place that is not censored?
+> 1) will these reports be translated into Chinese and posted on 8btc, etc?
+
+I would love to see them translated into Chinese, as would most the other authors I believe.  However, none of us speak Chinese (that I'm aware of) so we would need a volunteer to do the translations.
+
+I would happily remake the figures with Chinese labels (assuming this is feasible).  
+
+> 2) I run BU with EB16... Will you ever try to repeat these measurements for 16 MB test blocks? It would be interesting to compare 16 MB XThin with current 1MB standard
+
+I would love to see this data as well.  I suspect the improvements with respect to _propagation time_ will be more significant for larger blocks.  I don't believe anyone is planning to do this test at the moment, but we'd love it if someone would!
+
+> 3) how can I help / donate to 1 or 2?!
+
+If you want to help, just get involved!  We normal talk at bitco.in and on our bitcoinunlimited slack channel.  To get an invite for our slack, ask Trevin:
+
+https://bitco.in/forum/threads/slack-channel-for-bitcoin-unlimited-discussion.693/
+
+If you would like to donate, I think we'll probably provide a donation address at the end of Part 5 along with an explanation of what we want to use the funding for.  
+
+That sounds great, but there is still also the unexplained banning of /u/jstolfi.  Is there any update on the circumstances surrounding that decision?
+We didn’t have a single laptop.
+
+But it wouldn’t have mattered: the bottleneck is the software due to a lack of parallelization.
+It can lead to a persistent split with a poison block attack.  I think such an attack is low probability, and it wouldn't be _that_ bad if it occurred.  That said, from my communication with miners they'd rather not take the risk.  
+
+To understand why the attack exists, imagine that all the miners removed their block size limits and promised to try to accept any block they received, no matter how big it was.  
+
+1. It's pretty obvious that right now, all the BCH miners can accept 8 MB blocks.
+
+2. All miners can probably accept 32 MB blocks too, although that hasn't been proven yet.
+
+3. BU miners should be able to accept a 128 MB block, but I'm not sure if an ABC node would.
+
+4. I doubt any miners on the network could accept a 10 GB block today.  
+
+It should be clear that as the size of a block increases, the % of the miners who can accept such a block falls from 100% to 0% over some range of block sizes.  There must exist a size that no miner can accept!
+
+The danger zone for the poison-block attack is the size where both a lot of miner can accept the block, and a lot of miner can't (around 50%, but even 30% or 70% would be bad).  If an attacker produced a poison block and if only 50% of the miners could accept it, then this could lead to a persistent blockchain split where the other 50% end up orphaning that block and follow a different branch, or just choke on the block and crash, costing the miner lots of lost revenue.  
+
+Like I said above, such an attack is unlikely IMO (it costs $10k or so and a lot of hash power to attempt), and it's not the end of the world if it happens.  But so far, the miners have expressed little interest in removing the limit.  They'd rather agree to orphan blocks over a certain size, than to worry about this risk. 
+If you don't like BU or Classic but support larger blocks, you could recompile Core with MAX_BLOCK_SIZE = 8000000 (or whatever you prefer) and then set your user-agent string to show "...(EB8)."  Your node would be ready for larger blocks and you'd be signalling that fact to the network.  
+Peter Tschipper (/u/bitsenbytes) developed Xthin, not me (and certainly not Greg Maxwell).  
+I don't think they're shilling at all.  That's actually the way things appear from the outside looking in.  It shows how effective the theymos/blockstream/core censorship program has been.  [More thoughts](https://www.reddit.com/r/btc/comments/558ef0/call_for_proposals_bitcoin_unlimited_is_making/d88iibg).
+I second the motion to un-ban /u/jstolfi.  
+
+(BTW: I didn't think we even did bans over here...sounds very /r/bitcoin'ish)
+This chart shows Bitcoin's market cap plotted alongside the square of the number of transactions per day (not including popular address as defined by blockchain.info).
+
+It is interesting, because we see that the correlation does not only exist over long time scales, but exists over shorter time scales too. For example, the bubble and bust of 2011 resulted in a similar looking curve for both the price and the square of the number of transactions.
+
+Indeed, the relationship appears to have broken over the past year. I believe the market is presently worried that Bitcoin will be unable to further scale and that the relationship will resume when BIP101 (or similar) is activated.  
+
+UPDATE: It appears the x-post to /r/bitcoin has now been censored; the animated GIF I posted earlier there is still up, however.  /u/110101002, can you explain the rationale for removing this post?
+What a nice surprise to see my chart posted.  Thanks for linking back to the original source!
+Yes we want to change bitcoin by parallelizing the code!
+
+Most of the Satoshi clients are limited to throughputs below 20 MB / 10 minutes, sustained.  For example, the 4-hour average throughput of BSV never exceeded [10 MB / 10 minutes](https://twitter.com/PeterRizun/status/1064745922502905861) during the last stress test, despite the 64 MB block.  The bottleneck is the lack of parallelization in mempool acceptance, as we demonstrated last year:
+
+https://www.youtube.com/watch?v=5SJm2ep3X_M
+
+Bitcoin Unlimited has understood these bottlenecks and worked around them already, and the latest release of BU running on high-end hardware can now admit thousands of transactions per second into mempool. 
+
+This is possible _because_ we made changes to the code.  And we will continue to make changes to the code because these are necessary to scale bitcoin to a global p2p ecash system.  If you think that you can grow bitcoin without continued changes to the codebase, then you are clueless about how tech development works.
+Now that's what I like to read! Well done James!
+You obviously didn't read the article.
+Wow, I wake up and see the video I posted to bitcointalk.org late last night has already been viewed 434 times.  I love r/bitcoin!
+
+The pitch is that this device would act as a "second signer" for a multisig address that's part of your wallet.  Your phone (or computer) would create (and display) the transaction, sign it with its private key, and then request that you "tap" your sigSafe tag to produce the second signature (which is signed internally within the sigSafe tag and then relayed over NFC back to the phone).  This solution provides low-cost/simple *hardware* security by allowing the tag to piggyback off of the phone's screen.  The user would keep a paper back-up of the sigSafe's "seed" in case the device is lost.
+
+White paper: www.sigsafe.ca/sigsafe.pdf
+
+Project development thread: https://bitcointalk.org/index.php?topic=610453.0
+
+Credit to:
+
+- Bitcointalk member "Bonam" who generated the gerber files to produce the PCBs (and I paid him "internationally" using bitcoin).  
+
+- My colleague Noah for producing the flashy diagrams (who also become a bitcoin user through this process :)
+
+- Tom from Klinch for the name "sigsafe."
+
+- And Gerald (DeathAndTaxes) for reviewing the white paper and offering several helpful suggestions to improve the device security and useability.  
+Lightning does have limitations, and those limitations are fundamental in nature -- they cannot be abstracted away from the UX. The bottom line is that Lightning does not and CANNOT work as originally expected if L1 fees are high and volatile. The entire reason for LN to exist is invalid.
+
+BTW if you listened to the entire interview, you'd know that I did mention positive things about LN.  For example, the enthusiasm in the community and that LN would be useful for fast settlement between exchanges, essentially becoming a free version of Blockstream's "Liquid" product.
+The [full post](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-1392#post-90346) is definitely worth a read.
+
+BCH split from BTC after two+ years of fighting to increase the block size limit, to stop $50 fees and allow bitcoin to continue to grow.  Everyone could understand the reason and need for the split.  
+
+Further splitting over smaller and smaller issues that most people can't even understand is counterproductive.
+I'm glad to hear that you'd still like to see double-spend proofs implemented.  
+
+/u/solex1 and I spoke with /u/deadalnix and Jason in Hong Kong in December about this, and our feeling after the conversation was that BU pushing forward with double-spend proofs would be a wasted effort.  
+
+/u/deadalnix: will you implement double-spend proof relay in ABC if we do the work?
+It's an interesting discussion.  How powerful do we want the scripting language to be?  The more useful it is, the more it will be used for good things.  And the more it will be used for bad things too.  So yeah it's something we should think about and discuss.
+
+The trouble is that we're not really discussing it in a consistent way.  The same people arguing against OP_CDS (DSV) are arguing in favour of super-long scripts and reactivating op-codes so that DSV can be emulated in script anyways.  So the "debate" seems more like political posturing for control and power, than real concern about the future of Bitcoin.  If we're worried about what we can do with OP_CDS as a single op-code, should we not also be worried about what we can do with OP_CDS implemented as a big long script?  Does not your thought-experiment of https://fund-an-assassination.onion apply in both cases?
+I disagree.  We're setting a _bad_ precedent if we make this change.  
+
+We should require at least one good reason before we make a forking change to the protocol.  If no good reason can be given, the bias should be for the status quo.  
+
+To flip this and say we _should_ make forking changes unless a good reason _against_ the change can be made is too radical for my taste.
+
+I still do not understand the reason for this change.
+In before CSW proposes farming instead of mining...
+Volunteers are great (BU is mostly powered by volunteers) but we're at the point where relying on volunteer web-dev work is just too slow and unreliable.  We want a full-time permanent web developer now.  
+
+The two immediate tasks are not trivial.  For example, the Gigablock Testnet site must poll all of the testnet nodes to get the requisite data, calculate various statistics, and update the webpage in real-time.  
+Yes, it is being considered.  E.g., see item #2 here:
+
+https://www.bitcoinunlimited.info/cash-development-plan
+
+My feeling is that such a change does not have enough community support to make it happen:
+
+https://twitter.com/PeterRizun/status/941798726317760512
+The hash of each PDF file is also embedded in the Bitcoin blockchain, serving as proof that each article existed on today's date.  You can verify for yourself using proofofexistence.com.  For example, here is the hash of my [subchains article](http://www.ledgerjournal.org/ojs/index.php/ledger/article/view/40/55): 
+
+https://proofofexistence.com/detail/ac41b714b0fe9baafbdbaa18f5efd0a799738c9a726265fc2af72037a1d572d1 
+
+Incidentally, it looks like proofofexistence.com is using low fees and so all the proofs are still unconfirmed.  Accurate document time stamping is another casualty of full blocks!
+Greg, I think you need a nap:
+
+- The graph plots the square of Blockchain.info's "number of transactions per day excluding popular addresses" versus Blockchain.info's "Bitcoin's market cap in USD."  
+
+- There are no offset, slope or polynomial adjustments.  
+
+- The date range corresponds to the complete data set available from blockchain.info at the time of making that plot.  
+
+- A log scale is appropriate because (a) we're looking at 5 orders of magnitude of market price data, and (b) a given vertical displacement corresponds to the same % change both in 2010 or 2016.
+The issue was that we needed to put this together very quickly, and doing open submissions wouldn't have worked given our timeline.  
+
+That said, the list of speakers/panelists has not been finalized.  Were you, or someone you know, interested in speaking or being on a panel?  
+
+And it is here that TTOR has an advantage over ABC's proposal: most of the Merkle tree can be calculated ahead of time from weak-block data.  When the strong block comes in, only part of the tree needs to be updated. With lexical ordering, the entire tree needs to be rebuilt.  
+Craig said today that he only simulated 340 GB blocks.
+
+https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-1177#post-62427
+Here’s Craig’s most recent lie about me:
+
+https://mobile.twitter.com/PeterRizun/status/980070153474879489
+
+He said I signed and broke a NDA in regards to my critique of his selfish mining fallacy paper. This is a complete fabrication. I have never signed a NDA with CSW or his related businesses (besides the paper was posted publicly on SSRN so there are really two lies here).
+
+When someone makes lies like this up about you and posts them publicly, it is frustrating because some people believe those lies. And then when you call the lying individual out to settle the record, other people accuse you of creating drama. 
+
+And I’m not the only one who has been at the other end of CSW’s lies. He’s hurt several others too. I personally think CSW is a huge black eye for the otherwise great BCH community.
+The Dragon's Den has forked: half are saying that my arguments are bad; and half are saying that I plagiarized Peter Todd's (good) arguments.  I wonder which branch has more hash power?
+> "SPV wallets are not secure" is a boolean statement.
+
+Similar to BS/Core's other common boolean statement that "unconfirmed transactions are not secure."  Like you said, security is a sliding scale and it only needs to be good enough for the use-case in question.  With respect to SPV wallets, I'm wondering if there's even a _single example_ of someone being defrauded due to "SPV-level" security.  99.9% of users do not run full-validating nodes and there have been over 200 million transactions, so there's been ample opportunity.  0 in 200,000,000 would be pretty impressive if it is true.
+
+
+Jake Smith and I presented to Coinbase at its San Francisco facility to probably 50 people, with more people tuning in online.  He and I presented at Bitpay in Atlanta to the entire company, with Bitpay's remote offices watching on Google Hangouts. 
+Thanks!  Glad you liked it!
+Here is a static image of the last frame, if you prefer:
+
+(redacted)
+
+EDIT: Improved "r\bitcoin-safe" still version with help from u/forkiusmaximus:
+
+http://imgur.com/pLzmtj6
+Bitcoin Unlimited has all the same defaults as Core (See [BUIP001](https://bitco.in/forum/threads/buip001-unlimited-inspired-extensions-to-the-bitcoin-client.222/) for details).  It just makes it easier for users to change them, and it intelligently resolves fork conflicts automatically should one emerge.
+
+It sounds then like what they are saying is that users should not be given free choice regarding the evolution of the network.
+I like how Gavin takes the time to explain technical topics like this in such an accessible way.  His blog posts from a few months ago where he methodically went through each objection to raising the block size limit were similarly well communicated.  
+
+I am a believer in the idea popularized by the physicist Richard Feynman, that if you really understand something--regardless of how complex it is--that you will be able to explain it at the freshman level.
+
+Gavin really understands Bitcoin and is also a great educator.  
+But isn't that the case?  An automobile today is still the same thing as a Ford Model-T, only faster, safer, more efficient, etc.  The definition is really implicity in the name: an auto- (not a horse or your feet) matic way of being -mobile.  
+
+What happened with bitcoin and BTC would be like if automobiles of today were neither auto- nor -mobile and everybody used the subway instead.
+Great to see you commenting more, Jonathan!  I love reading posts like this (and the OP) where people have actually done the math.  Seems to be a BCH-thing for the most part.  
+
+I look at the UTXO set size a bit differently. I see its size scaling with the number of _users_ rather than the size of blocks.  In equilibrium, the average user will be creating new outputs at the same rate they are spending them (plus some small amount for lost coins, but I think this will be negligible with improved wallets).  
+
+If we imagine a global adoption scenario (which is more like 20 GB blocks than 1 GB blocks), where we have 4 billion users each with 5 UTXOs on average, then we're taking 20 billion outputs.  At a size of 50 bytes per output, that's about 1 TB of unspent outputs to manage.  
+
+Interestingly, the size of the UTXO set I would predict for a BCH future is about the same as the size of the UTXO set I'd predict for a BTC+LN future.  In a LN future, I'd imagine each user with 3 open channels (to hubs) and perhaps 2 outputs on the blockchain as savings. 
+
+I agree with your point about updating the UTXO set at scale being a challenge.  But I'd say that that 7.68 TB PCIe SSD you linked to above would work far beyond 1 GB blocks and all the way to global adoption (4 billion users making 1 or 2 transactions per day).  Further, just like I could imagine PCIe accelerator cards for verifying signatures, I could also imagine SSDs custom designed specifically for maintaining the UTXO database.  Using only parts the exist today, I think I could build a hardware UTXO database that could profitably be sold for under $1000 that could handle throughputs approaching 1,000,000 tx/sec.
+
+The more I think about it, the less worried I am about scaling the UTXO set.  
+
+I think the biggest cost of running a full node in a BCH future will be internet bandwidth, by a factor of about 10X over all the other costs.
+
+
+I'm all for "moving fast and breaking shit" for changes and new features that don't affect the consensus-layer or have ripple effects of making work for dependency projects.  BU "broke shit" with Xthin by moving fast-- that was totally worthwhile IMO because it established BU as a leader in efficient block propagation and it motivated BS/Core to play catch-up.
+It is on the table.  The bear market makes it harder to pay for and to even estimate how many people will come.  In the bull market, it is easy to sell out an event.  Now it is different.  I would hate to plan for 300 people and have only 75 attend.
+If SV had more hash power and mined blocks that were acceptable to both ABC and SV, they would have re-orged the ABC chain whether they were hidden or not.  To me, the distinction between attacker and defender is not always clear. 
+
+That said, I do agree that the act of hiding a chain is an act of aggression/dishonesty.  
+I think ABC's lexical ordering proposal (I don't like calling it CTOR because it's confusing) will probably be activated in November, because Bitmain + ABC really want it and combined they have a lot of influence.  (My preference for November would be to do nothing [no fork], however.)
+
+My opinion remains that there is no good reason for this change. From where I stand, the "benefits" have all been shown to be marginally-helpful at best, and negative at worst.  
+
+That said, I don't think this is going to make or break bitcoin either way.
+With a pre-consensus method like [subchains](https://www.bitcoinunlimited.info/resources/subchains.pdf), every block that is valid today would still be valid tomorrow.  The difference, though, is that the probability a block is orphaned would increase by how far from the "pre-consensus" the block is.  But even a block that was _totally_ out of whack with the pre-consensus would still be accepted, e.g., 9 times out of 10.
+
+This is a nice property to have because it:
+
+(a) speeds up block propagation and critical-path block validation
+
+(b) imposes a cost on miners who facilitate RBF double-spends
+
+(c) is neither a soft- nor a hard-forking change to the protocol
+
+A pre-consensus idea like the one allegedly implemented by Coingeek to improve 0-conf is [a more radical change](https://www.yours.org/content/gaming-coingeek-s-mining-pledge-for-fun-and-profit-aa9b0dc586e1).  In fact, it is really a consensus-level change, because it's adding the new rule that a miner is to orphan an otherwise-valid block if it contains a transaction that conflicts with an unconfirmed transaction in the miner's mempool.  In addition to being a consensus-level change, it seems fundamentally broken too (see link above).
+
+
+> Leader worship is unfortunately a very strong instinct in our species.
+
+I thought we had evolved passed this but Bitcoin has taught me that we have not.  
+
+> But I'm not so sure all the worship CSW gets is truly "organic". The fact that he's a liar is way more obvious than the fact Core is wrong. But even still he has this many "supporters"? It's fishy. 
+
+CSW has told bald-faced lies in public, and his "technical ability" is an order-of-magnitude below what he portrays.  What I struggle with though is whether his involvement is a net benefit or a net hindrance to BCH.  He is helping to spread the word about BCH and make people aware of the problems with BTC.  And he also helps clarify technical misunderstandings such as the fact that non-mining nodes are mostly impotent and that users do not need to run them.  But then he seems to be on a crazy patent-binge which concerns me, and he pushes many false statements as fact too.  
+With PV, a block that takes 10 minutes to verify means that the network has 10 minutes to find a smaller block to orphan the attack block.  The chances of the network finding a faster block within 10 minutes is 63%.  So by conducting such an attack, the attacker would keep his block reward 37% of the time, and lose it 63% of the time.  So the attack costs the attacker about 0.67 x 12.5 BTC * $1250 = $10,500, while the damage the attacker does to the the network is minimal (he causes a bunch of CPUs to work overtime for 10 minutes).
+
+Although producing a slow-to-validate block is still possible, PV makes it expensive to do so _and_ reduces the damage it can do to the network.  PV turns the quadratic-hashing attack into an act of self-harm that only a masochistic miner would enjoy ;)
+I think what is important is the fraction of the network ready and willing to accept larger blocks.  So real node operators upgrading from Bitcoin Core to Bitcoin Unlimited definitely help.  This is _especially_ true if those node operators are operating economically important nodes like Blockchain.info, BitPay, Coinbase, BitStamp, etc.  
+
+So I think node count is important as it is _indicative_ of underlying economic support for larger blocks.  But just spinning up 10,000 nodes to artificially boost this count would not help (and may hurt). I guess what I'm saying is it's not the raw node count that matters but what the node count _actually_ means in terms of underlying network support from the nodes' human operators.  
+
+If a reader is running a node today and wants to help get larger blocks, then upgrading to Bitcoin Unlimited will help us get there.
+Peter Tschipper (/u/bitsenbytes) has been working on datastream compression and "batched" INV's to improve transaction propagation (and perhaps more that I'm not aware of).  That man eats bottlenecks for breakfast :)
+They know that the end of Blockstream Core draws near.  
+
+It appears they also deleted all your comments to /u/eragmus.  
+
+What I find so funny about North Korea is that their strict rules prohibit ad hominem and yet they freely engage in it. For example, eragmus is free to call me a "troll" (which IMO *is* ad hominem); however, if I say something like "/u/adam3us is wrong" (which IMO is *not* ad hominem) then sometimes the comment is deleted and always I am accused of ad hominem.  
+Trezor is an important step forward in secure bitcoin storage.  It is a completely custom device (circuit board, firmware, plastic enclosure) that represents a great deal of engineering development.  $119 is a very good price for this level of technology and innovation, given the lower volume levels that our small market supports.  And you're not just paying for the hardware, you're also paying for the trust and goodwill that Satoshi Labs has earned.  Would you really want to secure your bitcoins using some cheap knock-off?
+
+As adoption grows and manufacturing can be scaled-up to higher volumes, then expect this tech to become cheaper and more sophisticated.  Instead of complaining, let's work together to make that happen.  
+Awemany's claim is part of it: with 100 GB blocks and lots of chained transactions, I think there will be better optimizations if transactions are sorted topological.  But that's just a hunch.
+
+Besides that, there's also the time needed to sort the transactions lexically, the time needed to check that the transactions are indeed sorted lexically, the extra effort of rebuilding most of the Merkle tree when additional transactions are added to a block candidate, and the fact that it would make subchains slower because the subchain needs to be resorted for every new weak block.
+
+Further, this just seems too rushed to me.  I don't see why we're doing this right now.
+There’s also the unknown unknowns associated with a hard-forking change like this. The bias when evaluating hard fork proposals should be towards the status quo unless the change is really awesome or important (e.g. like bigger blocks was).
+
+CC: /u/tomtomtom7 
+Just compare Sections 3 (minus 3.1), 4, 5 and 6 in Wright's paper side by side with Liu & Wang's.  It is copied nearly verbatim, with only minor changes here and there (changes that often turn the sentences to gibberish, incidentally).  
+
+If you can't see that these sections are copied, then you don't want to see it.
+Firstly, you accounted for only one way in which the SM could lose.  There are many other ways too.  In fact, there are an infinite number of them.  The correct solution--as derived by Eyal & Sirer--includes an infinite sum.  
+
+Secondly, even given your screwed up model that only considered one possibility, you made an error in deriving this equation:
+
+F(HM) = (1-α)(1-α^2)
+
+You said just before this equation that the SM only needs to find one additional block to keep going while the HM needs to find two.  It should be (again according to your erroneous model):
+
+F(HM) = (1-α)^2
+
+Now if you plug in some numbers, you'll see that the odds are stacked against the HM (even more so than E&S derived because you didn't account for all the ways the SM could lose).  
+
+***
+
+This is getting pretty pathetic.  Why don't you actually review the math in Eyal & Sirer's paper if you want to see how to perform the calculation correctly.  They lay it out very clearly.  Anyone who could follow the math you just presented should be able to follow the more clear presentation of the correct solution in the Selfish Mining paper.  
+This idea that the average LN user would be opening and closing channels and controlling their own private keys I think is not realistic (and so ironically the way HTLC.me works _is_ realistic).  IMO, it will be the major hubs opening and closing channels and the users will simply have custodial accounts with these hubs.  With this design, the users don't need to worry about on-chain fees OR worry about always being on-line to monitor for fraudulent stale channel-states being settled on the blockchain.
+
+This design also lets the hubs engage in fractional-reserve banking.  
+
+In other words, LN would likely become a modernized version of today's bank system.  
+FYI that is our baseline results with BU essentially "as is."  A few days ago we achieved 300 tx/sec sustained thanks to /u/thezerg1's work streamlining mempool admission.  I think we'll hit ~1,000 tx/sec sustained on the next ramp we attempt.  Mempool admission is no longer the bottleneck, as we've demonstrated mempool admisson rates over 10,000 tx/sec already.
+If the block size limit were above demand, than we'd have more transactions per day and lower fees per transactions.  I think it is fair to say that bitcoin would be used more if the block size limit were higher, and that that would make bitcoin more useable.  
+
+What other bias do you think there is?
+
+Wow, I think this is a new record for your fastest time-to-troll one of my posts.  It must be right on target!  
+
+According to Greg, the size of the UTXO set is the dominant cost of operating a node.  And the size of the UTXO set clearly scales with the number of users _with or without LN_.  One could argue that LN might reduce the UTXOs per user somewhat, or argue--as /u/awemany does--that it will actually result in more UTXOs per user.  But either way it is clear: the idea that LN would allow bitcoin to massively scale its user base while simultaneously ensuring that users can run full nodes on low-cost hardware with poor Internet connections is shattering.
+Your cognitive dissonance must be getting tough to deal with.  You keep having to make up new and more complex stories for why straightforward visualizations of data are "graph fraud."  
+
+For readers, here are some other facts that Greg denies:
+
+[The square of the number of transactions per day is correlated to Bitcoin's market cap.](https://np.reddit.com/r/Bitcoin/comments/3x8ba9/bitcoins_metcalfes_law_relationship_between/)   
+
+[Bigger blocks are empirically more likely to be orphaned than smaller blocks.](https://np.reddit.com/r/btc/comments/4t6guk/the_marginal_cost_of_adding_another_transaction/)  
+Yes, it seems that the _Scaling Bitcoin_ series has evolved into a general-purpose cryptocurrency conference.  
+
+Despite this, and despite its "small-block" bias, I still think it's a well-run event that brings together a lot of people across the Bitcoin community.  Looking forward to seeing what comes out of Milan this weekend.
+[CoinDesk just picked up the news of the BU grant program](http://www.coindesk.com/bitcoin-unlimited-research-grant-program-scaling/)
+This will be one of the points we address in Part 5.
+A node operator can use BU to set his block size limit to whatever he wants; a miner can use BU to mine blocks any size that he wants.  I'm not sure I understand your question.  What do you mean by "it doesn't raise the block size"?
+Agreed, it is not BIP101; however, it will not fork with respect to BIP101.  For this reason, it sets the BIP101 version bits in any block a BU node mines so that BU nodes can help to activate BIP101 (if that ends up even being necessary).  
+I'd like to share a research paper I've recently completed titled "Reduce Orphaning Risk and Improve Zero-Confirmation Security With Subchains."  The paper explains—using diagrams and charts—a novel application of weak blocks, and examines some of its properties related to fees, equilibrium hash rates, orphaning risk and scaling, and the security of zero-confirmation transactions.
+
+I believe I've shown that security of zero-confirm transactions can be significantly enhanced (possibly neutering RBF in the process) and that fees will directly contribute to the PoW cost, refuting Maxwell's [belief](https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-May/007880.html) that "the fact that verifying and transmitting transactions has a cost isn’t enough, because all the funds go to pay that cost and none to the POW 'artificial' cost." This last result is also important concerning the block size limit debate, because it was an argument used by small-block proponents in favor of a tight limit to drive up fees for security purposes.
+
+The "subchain" technique is just one possible application of weak blocks—but it’s possibly the easiest to analyze mathematically, and it has the very nice property of adding measurable security to zero-confirmation transactions.  
+
+The paper can be downloaded in PDF format here:
+
+http://www.bitcoinunlimited.info/downloads/subchains.pdf
+
+Or viewed with a web-browser here:
+
+https://www.scribd.com/doc/293708577/Reduce-Orphaning-Risk-and-Improve-Zero-Confirmation-Security-With-Subchains
+
+Hat tips to /u/gavinandresen and /u/awemany for reviewing, and to "rocks" from bitco.in for the idea.  
+
+************
+
+**Abstract.** Orphaning risk for large blocks limits Bitcoin's transactional capacity while the lack of secure instant transactions restricts its usability. Progress on either front would help spur adoption. This paper considers a technique for using fractional-difficulty blocks (weak blocks) to build subchains bridging adjacent pairs of full-difficulty blocks (strong blocks). Subchains both reduce orphaning risk by propagating block contents over the entire block interval, and add security to zero-confirmation transactions due to the weak blocks built above them. Miners are incentivized to cooperate building subchains in order to process more transactions per second (thereby claiming more fee revenue) without incurring additional orphaning risk. The use of subchains also diverts fee revenue towards network hash power rather than dripping it out of the system to pay for orphaned blocks. By nesting subchains, weak block confirmation times approaching the theoretical limits imposed by speed-of-light constraints would become possible with future technology improvements. As subchains are built on top of the existing Bitcoin protocol, their implementation does not require any changes to Bitcoin’s consensus rules.
+
+************
+Nicely done, /u/aminok!
+
+Adam's long-winded explanation that "Bitcoin will need protocol improvements to scale" is completely beside the point.  Everybody already agrees that it will need improvements.  
+
+That has nothing to do with whether we need a restrictive block size limit.  The original design of Bitcoin had a block size limit much greater than the free-market equilibrium block size.  Let's agree to keep it like that so that Bitcoin is free to grow (whether that be BIP101 or something else).  
+
+If Bitcoin is free to grow, then people will innovate to make the protocol improvements necessary to allow it to grow.  For example, right now rational miners wouldn't dare produce 20 MB blocks because those blocks would likely be orphaned.  Miners might fund research to figure out how to improve block propagation so that 20 MB blocks would eventually be possible.  
+
+If Bitcoin is **not** free to grow, then people might instead "lobby Adam Back and the Blockstream crew" to tell us it's "safe" to allow it to grow.  The crazy thing is that the Blockstream crew really only has expertise in coding and crypto---understanding Bitcoin requires much broader knowledge than that.   
+100 milliwatts!  Look out!!  :D
+The important thing is that these are people from deep within the Blockstream/Core Dragon's Den calling you out for sock puppetry.  Your reputation is already shot at that point -- no further proof is necessary.
+
+Hey /u/increaseblocks: how do I know this is a legit screen shot from the UASF channel on Core Slack?
+We have no problems with funding.  The bottleneck is people taking the lead on initiatives and attracting good people to help.  
+BU is a mixture of paid full-time people and volunteers, but no one is currently paid from BU funds.  We are located all over the world and so we work remotely, normally coordinating things on Slack and sometimes on Google Hangouts.   
+Let's see how well the army of raspberry-pi's do on August 1st.
+You've almost got it.  Indeed, there is a risk to mine a larger slower-to-verify block.  To include an additional transaction in his block (thereby making it marginally larger and slower-to-verify), a rational miner will demand a fee sufficient to offset this increase risk.  An equilibrium emerges where producing a bigger block would result in _less profit_ due to too high an orphaning risk while producing a smaller block would _also_ result in less profit due to leaving too many fees on the table.  
+
+Voila!  A transaction fee market exists without a block size limit.  
+> In my understanding, so far only Lightning Network is aiming to >10000 tps to get to the much quoted "VISA transaction levels".
+
+It is more accurate to think of Lightning Network (assuming it can be made to work) as a way to scale the number of transactions _per user_.  It doesn't really help in regards to scaling the user base.  The idea that LN would allow Bitcoin to massively scales its user base while keeping the cost to run a node very low is not true.  Here is a graphic that helps explain:
+
+http://i.imgur.com/pLzmtj6.gif
+
+It seems to me that a big fear of the small-block side is if the cost to run a node increases, in such a way that eventually most users don't actually run their own nodes (but businesses, universities, governments, and power user still do).  
+
+Firstly, this fear seems misguided because _already most users don't run their own node_: today there are approximately 6,000 accessible nodes and probably about 5 million users/holders, for a user-to-node ratio of about 800 : 1.
+
+Secondly, promoting LN as a way to keep the cost of running a node low doesn't even really make sense!  Node costs would still increase significantly if we onboard another 100 million users _even in an LN future_.
+
+(BTW: Try making a new submission in r\bitcoin with this image and see what happens)
+> To be fair, as I mentioned in the talk, they have not yet implemented a good prefill-guessing algorithm yet. 
+
+OK that makes more sense.  When I spoke with some of the people working on CB earlier, I came away with the sense that the prefill algorithm was already working. 
+Nevertheless, even with a good guessing algorithm, I don't see how they'll ever match Xthin's re-request performance (and all it costs us is a 5kB Bloom filter).
+
+Oh...and great job on the talk and the slides!  I really liked your slide format with the main points in big on the left!
+Thanks!
+
+Regarding the /r/bitoin post, it was actually already censored but then un-censored a bit later.  Unfortunately, this prevented it from spending as much time as usual at the top of "New" to attract upvotes.  However, it appears to be holding its own over there at the moment (19 up, 8 down by my calc).  
+> SegWit and LN are both, clearly, great technical improvements to bitcoin. Nearly every single technical person in the community agrees with this...
+
+SegWit changes some of bitcoin's properties, but whether or not those changes result in improvements is debatable.  Off the top of my head, SegWit:
+
+1. eliminates most forms of malleability,
+
+2. makes future changes to the scripting language easier,
+
+3. partitions the market for block space into two categories, and gives an arbitrary 75% discount to one category,
+
+4. permits more transactions per second under certain conditions without requiring a hard-forking change,
+
+5. couples the coinbase transaction with the block header (the root hash for the segwit data is stored in an OP_RETURN output in the coinbase transaction rather than in the block header where it logically belongs). 
+
+Of these 5 changes, I like #1, I'm mixed on #2, I'm strongly opposed to #3, I don't think #4 will pan out, and I think #5 might cause problems in the future that we can't foresee.  It is not at all clear to me that SegWit (at least as currently proposed) is a "great technical improvement." 
+
+
+Bitcoin Unlimited is compatible with BIP101 and in fact sets the BIP101 version bits in blocks it mines.  
+Congrats /u/thezerg1! 
+#My Thoughts On Opt-In Replace-by-Fee
+
+When I read about Todd's "opt-in" replace-by-fee, my initial thought was that it was harmless because it was optional.  This morning, I think it will do damage to Bitcoin's reputation as a payment system.  Here's how...
+
+Firstly, it's important to understand what the "opt-in" means.  The "opt-in" isn't on a node-by-node basis; it's on a transaction-by-transaction basis.  What this means is that if an attacker "opts-in" on a payment to a vendor, and later tries to double spend that payment, that *all the nodes and miners running Blockstream's implementation of the protocol will work to facilitate the double spend attack.*
+
+So why will this cause problems?  There are several ways:
+
+##1.  Local Bitcoins
+
+Core has just made it very easy for scammers to operate on Local Bitcoins: the scammer will simply trade bitcoins for cash and then double spend it a bit later.  The newbie buying the coins won't understand that "since this TX was flagged for double-spending, he should have waited for a confirmation."  Instead of double-spending being a low-probabiliy attack that required a knowledgable person to even attempt, Core is making it easy and reliable for your average run-of-the-mill scammer.
+
+The idea that Bitcoin now has a payment type to make double-spending easier will not make sense to newbies.  In fact, it makes no sense to me!  We can unstick stuck transactions with child-pays-for-parent, after all.
+
+##2. Merchants Running Custom Payment Systems
+
+The same problem will happen at merchants running their own payment systems: many won't get around to upgrading to detect these transactions (they might not even realize they need to).  After they get scammed a few times, they will be more reluctant to accept Bitcoin at all.  Explaining to them that "well you should have noted that the transaction was double-spendable" would just seem ridiculous: "you're telling me that Bitcoin now facilitates double spending!?"
+
+##3. Extra Work for Payment Processors
+
+Payment processors like Bitpay will get around to making sure they can detect the double-spendable transactions.  However, this means they'll need to put engineers on the job and take them off of other projects.  In other words, Core has effectively forced these payment processors to spend more money to support a "feature" that there was no demand for anyways.
+
+##The Good News
+
+There is a silver lining to this!  Once industry wraps their heads around how silly this "opt-in RBF" is, then I think we'll see more backlash.  Perhaps this will be the proverbial straw that broke Core's back, pushing people into XT, btcd, Unlimited and other clients that don't support any form of RBF.
+
+##Why Did Core Add "Opt-in" Replace By Fee?
+
+My hunch is that Blockstream already realized that this would cause damage to Bitcoin's reputation as a payment system, and that by selling it as "optional" they could allow the damage to occur without taking the blame ("it was the free market at work!").  When the problems I described above start to happen, it will give them more ammunition to say "We told you we need Lightning Network because Bitcoin isn't reliable as a payment network!"
+Wow, you're doing excellent and important work!  Thank you for the regular updates!!
+
+Bigger blocks are so close I can almost taste them :D
+Awesome work, TradeBlock!
+The money is only gone forever if your channel partner closes the channel on you (e.g., because you are now "broke" and he wants to close it to ensure he gets his money out before fees rise even further).
+
+If the channel remains open, on the other hand, and then later fees fall back down, you and your channel partner can move fees out of the "fee bucket" and back to your side of the channel.  
+
+The rule is that it takes both you and your channel partner in cooperation to move funds to or from the fee bucket.  Once funds are in the fee bucket, your channel partner can close the channel and you lose those fees and there's nothing you can do about it.  But if the channel remains open, there is always the chance of funds coming out of the fee bucket, if fees fall.
+The channel state transaction literally moves coins from an output that is spendable by you, into the miner's fee.  Indeed, if fees drop, you and your channel partner could move funds back from the miner's fee into your output, but until that happens, the funds are NOT yours.
+Apply and find out. Focus on making bitcoin succeed as p2p ecash, and not BCH vs BSV tribal stuff.
+Nice article, Chris!  
+
+That's actually the first time I've walked through the math for signing and verifying digital signatures using Schnorr. It's a lot easier to understand than ECDSA.
+
+I'd love to see a follow-up article in a similar style to explain signature aggregation :)
+
+I'll echo what Andrew said above: calling the Avalanche proposals being discussed "pre-consensus" is a misnomer IMO.  Calling it pre-consensus sounds like what's being discussed is _less of a change_ than changing bitcoin's consensus ruleset.  But what were discussing is _more of a change_ than changing bitcoin's consensus ruleset.  We're not just talking about adding or removing some static rule (such as "blocks cannot be larger than 1 MB") -- we're talking about giving a new group the power to _subjectively_ define any transaction as invalid.  
+
+Presently, we have a static ruleset: any transaction can be objectively marked "valid" or "invalid" with only knowledge of bitcoin's ruleset.  No communication with the network is required to determine transaction validity (other than checking in every few months or so to see whether any soft- or hard-forks are planned).  With Avalanche, this changes.  There is no longer any way for a miner to _objectively_ know that a transaction he wants to include in the block is _valid_.  This is because transaction validity is now dependent upon the subjective outcome of the Avalanche process.  The goal is noble: to improve instant transaction reliability.  However, this is a significant departure from bitcoin's classical consensus mechanism.  Maybe Avalanche represents progress and will be really awesome!  I don't know.  But I think it needs  _lots_ more theoretical development before we should consider implementing it on mainnet. 
+Thanks for the information.  This is exactly the type of calculations I would have liked to see ABC present.  I know that I haven't done the math yet on all this, which is why I'm concerned.  
+
+> I wonder... Was CSW one of the first to object to it, or did he jump on after others started to question it? Who was the first person you noticed to be in opposition to the idea?
+
+/u/ThomasZander and I have always objected to this change.  I went quiet over the summer, and then started making more noise after /u/awemany brought up some good points.  
+
+I don't think Craig Wright even understands what we're talking about.  He just saw it as a wedge he could use to split the reasonable BCH developers (which is another reason why I think it was a bad idea to push this for November). 
+The miners already have the ability (at least in BU) to set a 128 MB block size limit tomorrow.  But the miners I have spoken with are happy sticking with 32 MB as a limit for now. 
+Great write up! 
+
+And fast too: You must have been working all day and night!
+Every time I speak with /u/dgenr8, I'm convinced that XT style double-spend relay is the best.  Every time I speak with /u/ThomasZander, I'm convinced instead that using a double-spend proof is the best approach. It would be nice to collect all the facts and arguments in one spot, especially leading up the Workshop on Instant Transactions in October (assuming the workshop is approved by BU membership). 
+
+What's great though is that everyone who understands the difference between [0-conf RBF double spends and 0-conf synced double-spends](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-1214#post-77162), is in favour of improving the reliability of the latter.  I believe we can work together to close up the existing vulnerabilities associated with 0-conf synced double spends.  This is low-hanging fruit we can pick _today_ to make BCH more useable as peer-to-peer electronic cash.
+
+
+Can confirm.  We will accept BCH and only BCH.  
+Yes I think it is a wart and not a cancer, meaning that I don't think it will kill the network.  However, segwit coins have an objectively weaker security model than bitcoins.  
+
+My preference is to revert segwit completely.  
+> That would result in a 500% difficulty increase. 
+
+The difficulty cannot increase by more than ~~400%~~ 300% (4x) per retarget period.
+ 
+Agreed.  I changed it to "serving its original intent as a simple mechanism to prevent a malicious miner from producing huge spam blocks."  I wanted to keep the word spam because it's what I used in my [fee market paper](https://www.bitcoinunlimited.info/resources/feemarket.pdf) (Section 8) to describe this attack.
+There are 225 million transactions on the blockchain, and 99.9% of users do NOT run full nodes.  Is it true that not even a single person running an SPV wallet was defrauded even a single time, as a result of "SPV-level" security?
+:)
+> Do you trust 0-conf?
+
+I trust it less than 1-conf.  And I trust 1-conf less than 2-conf.  The point is that unconfirmed transactions are not "trivially double-spendable"--how easy they are to double-spend depends on the fraction of the hash power that engages in petty-compliant behaviour (which right now is very small).   
+
+This fact is easy to prove: use a library like pybitcointool to generate sets of double-spent transactions, with one paying more in fees than the other.  Submit the low-fee version first using the blockchain.info API, and then 5 seconds later submit the high-fee version using the blockr.io API (or the API of your choosing).  Report back to us how often your double-spend is successful.
+
+
+The problem is that BIP109 is both a hard fork and a soft fork at the same time; that is, it allows for larger blocks but it adds tighter limitations on number of bytes hashed and number of signature operations.  Bitcoin Unlimited supports larger blocks but (at this point in time) does not believe the additional rules should be added.  
+
+On test net, BIP109 activated and then a block was mined that was valid according to Bitcoin Core and Bitcoin Unlimited, but was invalid according to Classic due to these additional rules, and the Classic nodes were forked off the network.  This created some FUD (that in my opinion was misplaced) and now many people think it's better to turn off BIP109 signalling.  
+> In high bandwdith mode. When CB has no rerequest the transfer takes 0.5 protocol round trips. 
+
+BU's high-bandwidth mode is called Xpedited and also takes 0.5 round trips.  Let's compare apples to apples here.
+
+> Because it adds a mandatory additional round trip to the protocol, making the best case considerably slower.
+
+It has LESS round trips than CB LB on average. 99% of the time it has the same number of round trips as standard block propagation, and 1% of the time it takes an extra round trip. CB takes an extra round trip 60% of the time. (If you claim it's actually 25% then that's still 25x more extra round trips than Xthin, but really you'd have to do a real write up of your testing similar to what we did for Xthin for this claim to have any weight behind it).
+
+Once again, why not send a bloom filter with CB's get-data() request? Astute readers will notice that you didn't actually give an answer.
+> There is also no "censorship issue" - that's a bogus accusation against /u/theymos (who is not a dev) because altcoiners want to trick people into thinking their altcoin is Bitcoin in Bitcoin communities, and altcoins aren't even allowed here as a rule.
+
+[Bitcoin Unlimited](http://www.bitcoinunlimited.info/) allows users to set their own block size limits, but has defaults such that it won't fork with respect to consensus.  
+
+Is Bitcoin Unlimited an altcoin?
+I don't disagree.  What is important is *total fees*--not the fee per transaction.  The bigger we can grow the Bitcoin economy during these early years while the block reward > total fees, the more real value in fees we'll have available to secure the network when the block reward subsides.
+"Because consensus is too important to be left to the people" /s
+Thanks.  I didn't think watchtowers receiving transactions on a customer's behalf made sense.  
+
+>  it's just Rick demonstrating his lack of knowledge
+
+So Rick got one thing wrong (he thought the LN situation was _better_ than it actually is) and a bunch of other things right.  So what.  LN is complicated and it seems that no one understands it fully.  
+
+With the design of LN today, the cost to create a new channel is the miners' fee required to get the channel-opening transaction confirmed in the blockchain. We saw this fee rise to $50 in November 2017 when demand for block space was elevated.  Many of those who support the high-fee future for bitcoin expect to see fees consistently north of $100 or even $1000. 
+The contention is mostly around making the lexical ordering _mandatory_, as this could reduce scalability in the future. 
+Didn't we already get rid of the developer-determined block size limit when we split with Core?  
+
+For example, in BU, miners can already set any limit they want.  Miners have chosen to set a limit of 32 MB for now.  
+
+
+ABC intends to hard fork in November to make lexicographic ordering a new consensus rule, and thus the debate.
+Agreed on all points.
+> Finds the holes in anything, very good at it.
+
+He's identified 100 of the last 10 holes :D
+
+(I do agree he's good at identifying potential attack vectors)
+
+
+Awesome!  
+> there is no one single entity which controls bitcoin development.
+
+Blockstream does.  
+
+> it is an empirical fact that the consensus code which defines bitcoin must be exactly the same across all full nodes, especially mining nodes
+
+If you exclude rules like the block size limit or the number of bytes hashed, then I would agree.  We've been running experiments maintaining consensus as defined by the longest proof-of-work chain composed of valid transactions using Bitcoin Unlimited's "meta cognition" idea.  *Empirically* it will track consensus with both Core and XT, although its block size rules are different than both.  
+
+> What are you referring to with respect to decentralizing development?
+
+Right now approximately 90% of nodes run Core.  I'd like to see that figure shrink to <30% while other implementations gain node share.  
+But Google is a search engine so it links to multiple definitions.  
+
+For the record, you've already broken the following rules:
+
+* Stonewalling (refusing to clarify the definitions)
+* Sidetracking (repeating the same non-answer over again)
+
+
+Thanks but Bitcoin Unlimited deserves the credit, I’m just happy to deliver the message!
+When LN first launched, Rusty Russell said that, at least for the time being, all of the LN nodes would constantly communicate all of the channel states, so that LN nodes more-or-less had a complete view of the state of the network.  This was obviously non-scalable, but simplified the problem of routing payments between nodes. 
+
+What is the LN network currently doing in this respect?  Is there any concise documentation someone can point me to?
+
+More generally, I'm interested in articles that analyze how the resources required to run a non-custodial LN wallet are expected to scale as LN grows to 100,000 TPS and billions of users.  
+Not yet.  We'll piece an agenda together once we have a better idea of what people are planning to present on.  Here's what I'm thinking though:
+
+Tentative Schedule:
+
+Day 1: Defining the problem
+
+How can double-spends of instant transactions be carried out today?
+
+Statistics on 0-conf double-spends
+
+Day 2: Exploring solutions
+
+Double-spend relay vs. double-spend proofs
+
+Super-stand transactions
+
+Pre-consensus
+
+Day 3: Forging a path forward
+
+Coordinating between node implementation (ABC, BU, XT, Flowee the Hub), SPV wallets, businesses, and miners
+
+Best practices when accepting instant transactions and understanding risk level
+Wow, I'm very impressed.  Great website and a very clear, thorough and professionally-written technical specification.  I'm not normally that interested in tokens, but reading your website and your spec got me excited to see what you guys can build with this!
+As much as a dislike /u/nullc for his attacks against me, and as much as I think his vision for Bitcoin is completely wrong, he has spent years thinking about this sort of thing.  
+
+I _would_ like to hear his thoughts on enforced lexical ordering.  Doesn't mean I'm going to take his recommendation, but he might bring up a point that I haven't yet considered.  
+
+Right now, about 30% of the technical folks I respect are in favour of lexical ordering, 20% are against, and 50% don't know.
+I'd love to see a Big O analysis for this problem.  I don't believe we have enough data yet to justify this hard-forking change to lexicographic ordering, and a Big O analysis would be a helpful piece.  If you have the skills, please contribute!  
+
+That said, /u/awemany's simulator here is unquestionably useful.
+
+
+To see the problem with this idea, consider Satoshi's original vending machine example.  At time t = 0 sec, a fraudster pays $2 in BCH for a bottle of juice.  The vending machine waits till t = 2 seconds to scan for conflicting double-spend transactions.  No conflicts were detected, so the vending machine releases the juice.  The fraudster then broadcasts the double-spend at t = 3 seconds.  The miners see the double-spend and mine _neither_ transaction.  The fraudster ends up with the juice AND keeps his money.  
+Actually, I agreed that Eyal & Sirer could have further stressed the point that difficulty needs to adjust in order for the strategy to work.  To some people this fact was "obvious" and probably why the authors only discuss it briefly.  But to others, it was not obvious at all;  these people would have benefited from a whole section dedicated to how the difficulty adjustment plays out.  
+Given all that's gone on recently, I'm not really sure, but I'm leaning towards "this is an April Fools' Day" joke.  
+
+> Quantum entanglement of the blockchain
+
+:D
+In the current proposal, miners do not get any fees for finding weak blocks; the miner who finds the strong block gets all the fees and block rewards.  
+
+But miners are still incentivized to share their weak blocks because it reduces their orphaning risk should they find a strong block.  
+
+One could argue that some fee-sharing mechanism would be preferable.  Maybe it would be.  But that would require a soft- or hard-forking change.   First I want to test subchains on the Gigablock Testnet and see what we learn...  
+Either the efficacy of block transmission on the Bitcoin Network is a function of Greg's state of mind, or he's making stuff up as he goes.
+Yes, thanks for catching that.  It's fixed now.
+Is this really an attack?  I think it's only an attack if the minority chain has value, but if the minority chain dies quickly (or never exists in the first place) then what value was really there?  
+
+My new thinking on this matter is that it's part of a safe upgrade procedure to minimize the chance of a blockchain split (which seems to be a primary concern of small blockers and big blockers).  
+That is correct.  [The study](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) considered block propagation to nodes _prior to_ the use of Xthin or compact blocks.  If the study were repeated with a population of Bitcoin Unlimited nodes with Xthin support, [we estimated last June](https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-5145c9648426#.yjmzg96cn) that--using the authors' metric for "effective throughput"--that that number would have been more like 20 MB.  
+
+Another thing to note about the study, is that 4 MB was the block size where the authors estimated that *10%* of the current network nodes would be unable to keep up.  The authors explain that if one is ok with losing the weakest *50%* of the network nodes, that 38 MB blocks would be doable (remember again that this is _without_ Xthin).  
+
+Lastly, if we actually had 38 MB blocks, it means our user base has likely grown by a factor of ~38 as well, and so although we might lose 50% of the current nodes, we might get thousands of percent more _new_ nodes.  (And what's wrong with losing weak nodes anyways?)
+A lot of people thought that LN (assuming it could actually be made to work) would allow bitcoin to massively scale its user base while simultaneously ensuring that users could run full nodes on low-cost hardware.  This does not appear to be true. 
+
+It is more accurate to think of Lightning Network and payment channels as a way to scale the number of transactions a user can make or a way to reduce the cost of microtransactions (rather than a way to scale the number of users). 
+And yet they all contribute valuably to Bitcoin. How does that work? 
+Bitcoin Unlimited permits node operators to increase their node's block size limit without having to recompile the source code.  It simply reduces the friction of doing something that is already possible.  
+
+(BTW--it does not result in an unlimited block size).
+The linked article doesn't mention SPV wallets or server-trusting clients.  His point is that bigger blocks -> more users -> more nodes.  Specifically, he assumes that with 8 MB blocks we would have roughly 8X the number of users.  He assumes that the percentage of users running nodes would drop by no more than 50% (due to the small increase in CONOP), and concludes that we'd end up with at least 4X the number of full nodes.  
+No, it's an alpha release with a very simply routing protocol that won't scale (but the developers know this and have plans to deal with it).  It represents a tremendous effort by all those involved, and they should be commended for that. 
+
+I don't know what role LN will play in the future (personally, I think "on-chain" transactions will be suitable for everything that credit cards are today _as well as_ payments an order of magnitude smaller; payment channels and LN technology might be the answer for smaller micropayments still). Regardless, I think what /u/roasbeef and colleagues are doing is important and worthwhile work that will certainly bear some sort of tasty fruit.
+Great work, Andrew.  It's nice to see _actual measurements_ rather than hand waving.  
+
+I am actually quite blown away by your article.  To be clear, Core presently has a limit of MAX BLOCK SIGOPS = 20,000, in order to prevent blocks that would take a really long time to validate from making it into the Blockchain.  But you're saying that what they're measuring to determine if a block takes too long to validate is actually not really related to how long a block _actually_ takes to validate?
+
+One question: when you say you propose a “cost” of 150,000,000,000 per MB, you don't really mean anyone would be paying anything, right?  You mean that if the variable you've defined as "cost" is larger than 150,000,000,000 that the block is excessive (and dealt with the way BU deals with blocks that are excessive for other reasons), correct?
+No this is not part 5.  Part 5 is still coming.  There was demand from the community to explain how Xthin deals with collisions, which--as you can see--took about 1300 words.  In our opinion, this attack is silly and we didn't want the weight of addressing it in our article series to hinder the up-beat message we hope to deliver in Part 5.  
+Looks awesome and I can't wait to see the real site in action!
+
+If development does indeed decentralize across competing implementations, then I can see nodecounter.com playing an important role in the future.  
+Thanks for commenting, Mike.  There is some confusion that Bitcoin Unlimited (at least the version that everyone is talking about right now) doesn't have a block size limit.  The default block size limit is actually 16 MB for block acceptance (and 1 MB for block creation).  However, node operators can adjust these limit as they see fit.  The "unlimited" is in reference to unlimited choice.  
+
+Big attack blocks would be orphaned.  The reason we added the "excessive block logic" was to automatically deal with a (very unlikely IMO) network split attack.    
+
+BU is not unlike [this proposal](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-204#post-7407) from 2013 by Gavin.  
+
+P.S.  It also sets the version bits for BIP101 in the blocks it mines :)
+> trying to stir up drama
+
+I felt what /u/doctorwhony was doing was trying to get clarification on what topics and posts will be censored and what type of comments people would be banned for.  By calling that "stirring up drama" in my opinion you are using *ad hominem* to make him appear unreasonable and the moderation here as reasonable, while in fact the opposite is true.  
+
+
+In my opinion, it is important that we work towards multiple (forkwise-compatible) implementations of the protocol. The 90% node share that Core presently has is a danger to Bitcoin's future development.
+The incident was not caused by SPV mining *for the few moments it takes to validate the latest block.*  It was caused by F2Pool (and AntPool) never getting around to actually validating the blocks.  
+
+Attempting to mine empty SPV blocks during the time it takes to verify the previous block increases the miners revenue, as shown here: https://bitcointalk.org/index.php?topic=68655.msg11791292#msg11791292
+Credit to Solex for the 1MBCON Advisory System Status:
+
+https://bitcointalk.org/index.php?topic=1010569.0
+
+and DeathAndTaxes for digging up the GitHub commits that introduced the blocksize limits:
+
+https://bitcointalk.org/index.php?topic=919629.msg10279486#msg10279486
+
+Interesting theory!  
+
+A miner leaving BTC for BCH will reduce his profitability in the short term (otherwise he would have left already) but it will drive up BTC fees because he's reduced block space supply.  The _other_ miners who remain on BTC benefit right away, but it still might be worth it for our miner if he benefits more when he rejoins than he loses by temporarily leaving.  It would be fun to work out the math for this.  
+
+My hunch is, given the small relative hash rate of BCH, that he'd lose more profit in his switch to BCH than he would gain by driving up fees.  What's interesting though is that your "fee gaming" idea should become easier as the prices of BCH and BTC get closer together.
+Consider the amount of 3rd-party services a typical person will need to use LN in a non-custodial manner:
+
+- A nearly always-on internet connection to receive payments. Unlike BCH, you can't receive if your wallet is off-line.
+
+- A watchtower service to protect you against channel-state fraud (unless you are willing and able to monitor the blockchain for channel-state fraud and respond to protect your funds in a timely manner). Unlike BCH, _you_ are responsible for monitoring the blockchain for double-spends, not just the miners.
+
+- A routing service to let you know how to construct the source-routed path from one of your channels to its destination (unless you want to download the LN channel graph on a regular basis, which currently has a 50 MB block size limit, and figure out the routing yourself).  Unlike BCH, you can't just pass the transaction to the payee, or connect to a random node and broadcast it.
+
+- A reliable service to back-up your LN channel states, so that you can recover your funds if your device dies.  Unlike BCH, you won't necessarily be able to recover all of your funds from the 12-word seed you wrote down on paper.
+
+And now we have:
+ 
+- Lightning Loop: a service to help you keep your channels balanced so that you can send and receive your money.  Unlike BCH, you need to maintain your LN channels in a suitable condition by constantly rebalancing them and moving funds on- and off-chain, in order to send and even to receive payments.
+
+
+To use BCH in a non-custodial way, the only thing a user needs is a SPV wallet, that could even run on a $5 feature phone, and a connection that can receive a few hundred kilobytes per day.  The only service required is one that allows them to fetch the Merkle path (a few kbytes in size max) for each payment they receive.
+Yes, I think it does go away.  
+
+Which is why I've been saying the _real_ reason for ABC's LTOR proposal is to pave the way for Merklix.  I think you can make a good argument for LTOR + Merklix.
+See our experiment design here:
+
+https://www.scribd.com/document/359889814/ScalingBitcoin-Stanford-GigablockNet-Proposal
+
+
+
+
+
+Yes, for the average user it really _doesn't_ matter; they are trusting someone either way -- it is you who doesn't understand this simple fact.  
+
+Of course where this is going is that the average user should simply be running a SPV wallet.  In practice, the security of a SPV wallet is equivalent to or better than that of a full node.  
+
+Services like this adopt-a-node site are then useful for:
+
+- Giving people a voice (you can set your node's block size limit to whatever you want) that will show up on sites like nodecounter.com and coin.dance.
+
+- Adding more nodes that will relay blocks > 1 MB to strengthen the backbone of big-block network, support "innovation at the edges," and comfort miners.
+
+- Allowing large numbers of nodes to be quickly spun up if the need arises (e.g., if an emergency release needs to be deployed quickly).
+Greg: "Everyone needs to be able to cheaply run their own nodes!!1!"
+ 
+_BU creates service to allow even non-technical users to cheaply and easily run their own nodes (you can even connect your Breadwallet to your adopted node)._
+
+Greg: "Users running their own nodes is a Sybil attack!!1!"
+> the rules for determining block validity must remain specific and universal.
+
+But today over 10% of the nodes reported by bitnodes.21.co accept blocks larger than 1 MB.  So today block validity is neither specific nor universally consistent.  
+
+How can you require node operators to all set their node's block size limits to the same size? 
+
+Good luck to you too.  Yes, my hats off to the lawyers out there.
+What's new is that my [paper on subchains](http://www.ledgerjournal.org/ojs/index.php/ledger/article/view/40/55) has now gone through [peer review](http://www.ledgerjournal.org/ojs/index.php/ledger/article/view/40/47) and was published by an academic journal.  The journalist probably noticed the paper in [Ledger's first issue](http://www.ledgerjournal.org/ojs/index.php/ledger/issue/view/2), that was published late December 2016. 
+
+I had previously posted a working paper in December 2015, and I gave a [talk](https://www.youtube.com/watch?v=7CFwy_DC1OQ) on the concept at the Satoshi's Vision conference in San Francisco in September.  This new paper is a significant improvement that addresses the criticisms that came up in peer review.
+
+Subchains are an implementation of weak blocks, which is an older idea still.  
+The majority of r/btc has always thought Lighting Network was important and worthwhile work--even if a lot of those people (like myself) have doubts about the practicality of LN as a replacement for on-chain transactions.  LN is a long way from a decentralized payment network that can support thousands of transactions per second.  The scalability of this alpha version released today is admittedly worse than Bitcoin. Perhaps the routing problem is too difficult at scale and will never be effectively solved.
+
+But people at r/btc tend to be technological optimists and get excited by permissionless innovation.  We can't predict what the future has in store, so we like to see lots of people trying lots of things, and then pick for ourselves the ones that work the best.  Maybe LN will be awesome and everyone will use it.  Or maybe it won't.
+
+The hostility in this sub is not towards the innovators--no, it is towards those who attempt to block progress and censor free discussion. It is towards those who lie, claiming that by loosening your node's consensus rule sets (e.g., by running Bitcoin Unlimited) that you are attacking the network.  It is toward those who ostracize others for expressing their individual preferences (even though it is critical for members of a decentralized network like Bitcoin to communicate their genuine preferences in order to evolve).  It is towards those who use their privileged positions as moderators to prevent open discussion of these topics, and their privileged positions as Github committers to keep the users locked out from configuring their nodes the way they want.  
+
+The hostility is towards the blockers.
+This is great work!  One of the most cogent articles to explain _why_ the network benefits when competing interests vie for influence over its evolution. 
+
+When I've spoken to some of the bigger Bitcoin businesses--usually to encourage them to increase their nodes' block size limits and publicize doing so--I'm met with a sort-of ho-hum hesitation "Peter, we'd love bigger blocks but we don't want to rock the boat--we'll only increase our nodes' block size limits with community consensus." But by being ho-hum like this, they signal to the market that they're neither serious nor committed to larger blocks.  And so nothing changes.  
+
+We need to get the word out that the health and evolution of the network _depends_ on people expressing their preferences through signalling and commitment strategies, like you describe.  You're not "breaking consensus" and threatening the stability of the network; the network is not that fragile--you're just communicating your preferences to the other participants. If you want bigger blocks, you don't have to wait for anything.  Simply run a node that accepts bigger blocks today!  And if you're a Bitcoin business, signal the fact that you're doing so to the rest of the community.  
+
+We'll win this war, node by node, and hash by hash.
+
+
+So that readers are clear, this is a very different scenario than what I was talking about.  Instead of considering the cost of spam blocks, we're now considering what happens if a minority (20%) of the hash rate attempts to enforce a smaller block size limit than the majority.
+
+In this case, indeed the minority pays a price for trying to enforce a limit smaller than the Nakamoto consensus. This is a feature!  It provides an incentive for the hash power to converge upon a common Schelling point for max block size.  
+
+Note that this is significantly _better_ than the case today, where if the mining majority decides to increase the block size limit--or if a minority decides to attempt to decrease the limit--the minority will be permanently forked off the network (at least until they manually intervene) and thus lose  much more in wasted hash power.  
+On the one hand, since fees are priced in btc, we expect the fees per tx to _increase_ due to a rising bitcoin price. But on the other hand, we expect fees (measured in btc) to fall due to improvements in block propagation (reduced orphaning risk) and the reduced subsidy. 
+
+Although I expect fees in the far future to be pennies or less (assuming a limit above demand), it's not at all clear to me whether or not fees per tx _measured in $_ will continue to climb or start to fall over the next decade. For that reason, I did what was simplest and assumed they remained flat.  It's easy to adjust the fee prediction arrow to match whatever you believe.
+> But if he's coming around to at least a more reasonable immediate increase, that's a good sign.
+
+I've become a fan of Emin's recent work (e.g., Falcon and Bitcoin-NG).  He's also got some great students working with him who I believe will make helpful contributions to Bitcoin over the coming years. 
+
+Although I do NOT believe selfish-mining is a serious threat, IMO Eyal and Emin's article on SM was one of the best academic Bitcoin papers written to date.  Even if selfish mining never becomes a problem, the paper was quite important in getting us to properly consider the degree to which a malicious entity can gain an advantage in excess of its mining power.
+
+Also, in fairness, no one has been able to convincingly refute *why* we don't see selfish mining attacks in the wild (although I think eventually someone will).  
+Thank you for the attention, /u/eragmus. I'd like to take this opportunity to share my recent paper to help scale Bitcoin:
+
+http://www.bitcoinunlimited.info/downloads/subchains.pdf
+$2700 / BTC.  
+
+Fingers crossed :D
+> Isn't Metcalfe's Law concerned with the number of participants, not the number of transactions? 
+
+Correct.  But like you said, we don't have reliable data on the number of participants.  Interestingly, using the "number of unique addressed used per day" produces a similar fit.  
+
+Here is a [link](https://www.youtube.com/watch?v=ad0Pjj_ms2k) to the "fee market" talk at Scaling Bitcoin Montreal, and here is a [link](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf) to the corresponding research paper.    
+******
+**Abstract.**  This paper shows that a Bitcoin transaction fee market would exist without a block size limit provided the inflation rate is nonzero and more than one miner or mining pool exists. To show this, the paper first introduces the *block space supply curve* and the *mempool demand curve*. The former describes the cost for a miner to supply block space by accounting for orphaning risk. The latter represents the fees offered by the transactions in mempool, and is expressed versus the minimum block size required to claim a given portion of the fees. The paper explains how the supply and demand curves from classical economics are related to the derivatives of these two curves, and proves that producing the quantity of block space indicated by their intersection point maximizes the miner’s profit. The paper uses this result to show that an unhealthy fee market—where miners are incentivized to produce arbitrarily large blocks—cannot exist since it requires communicating information at an arbitrarily fast rate. The paper concludes by considering the conditions under which a rational miner would produce big, small or empty blocks, and by estimating the cost of a spam attack.
+
+*******
+Public discussion thread: 
+
+https://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/
+The problem is that some people think BIP101's conservative schedule is actually hyper-aggressive.  If demand grows fast, I don't see why we can't scale up **faster** than what is shown in the chart too.  People will be less worried once they see that 8 MB is a piece of cake.
+**Is Bitcoin's block size "empirically different" or "technically the same" as Bitcoin's block reward?**
+
+Without *a priori* knowledge of the Bitcoin source code, it is trivial to empirically determine that Bitcoin has a block reward limit of 25 BTC per block (and 50 BTC prior to the first halving). From the following animation of real Blockchain data, it is clear that Bitcoin strictly adheres to a particular inflation schedule [[link](http://imgur.com/izo03ie)].
+
+However, it is very difficult to *empirically* determine whether Bitcoin has a block size limit. Instead we first see evidence of some sort of "obstruction" at 250 kB, giving way to a new obstruction at 350 kB, followed by 750 kB and today an obstruction near 1 MB. A reasonable guess could be made that the present obstructions at 1 MB may give way to new peaks at a higher block size [[link](http://imgur.com/uPneQ5N)].
+
+Further reading on Empiricism versus Rationalism in regards to Bitcoin [[link](https://bitco.in/forum/threads/bitcoin-and-epistemology-rationalism-versus-empiricism.197/)].
+
+Hat tip to @dgenr8 for the raw data.
+> If core implements BIP101, I'll use core
+
+Do you think it is better for the majority of nodes to run the same implementation, or for nodes to run multiple implementations?
+
+Great job (as usual) /u/gavinandresen!
+
+What is becoming clear to me is that are two *distinctly different* classes of protocol rules: 
+
+- Rules related to TXs being valid and not already spent (and the PoW meeting the difficulty target)
+
+- Rules that are useful because of technological limitations (block size limit, # bytes hashed, # sigops)
+> having a third party define them for us is just a way of being more transparent.
+
+Who is the third party that defines the terms for you? 
+
+Are you trying to stonewall /u/rydan?   /s
+
+
+The paper estimates the cost that this bad actor would have to pay the miner to create such a spam block.  Refer to Section 9 and Fig. 8 in particular.
+He seems to make two points:
+
+1.  Because transactions will more frequently become stuck as a result of fee pressure from the 1 MB limit, replace-by-fee (RBF) is necessary to unstick them. 
+
+2.  Because zero-confirm transactions aren't completely secure, let's make them completely _insecure_ (e.g., by deploying full-RBF rather than first-seen-safe RBF or child-pays-parent).   
+
+I don't understand this.  Why purposely make 0-conf less secure?  How about, instead, we keep this system that many people enjoy working?  Like they do now, vendors will continue to choose the level of security required for their use case (0-conf, 1-conf, etc), evaluating risk based on network heuristics.
+Quote taken from: 
+
+http://www.nytimes.com/2015/05/03/magazine/how-bitcoin-is-disrupting-argentinas-economy.html?_r=0
+
+Credit to Smooth from BCT for pointing it out.  
+It's immune to key-loggers (e.g., when used with your computer).
+
+It's immune to wallet.dat stealers (since your important private keys are offline).
+
+It's resistant to attacks on the sigsafe supply chain or poor random seed selection (since the other seed is generated by an independent party).    
+
+It's resistant to man-in-the-middle attacks (see below).
+
+Regarding signing rogue TXs, I avoided too many details in the video (it's described in the white paper), but the device will only sign transactions authorized by its "signing rules." For example, the device can set "per tap" spend limits (or daily spend limits with the optional battery), verify an ECDSA signature (to reduce the threat of a MITM attack), check a PIN, etc.
+
+Consider this scenario: My tag is configured to only sign up to 1 BTC "per tap." In the (IMO very) unlikely event that my wallet app "goes rogue" and remains undetected through several "day-to-day" transactions (even though it *could* just steal the online funds) until the moment that I'm about to transfer from my sigsafe, then modifies the TX in an undetected way, authenticates successfully with the sigSafe, and then I sign the rogue TX by tapping, the damage is sill limited to the per-tap spend limit. The attack must occur in the brief moment when your tag is in contact with the NFC reader and would be very difficult to execute.
+
+There's no perfect security and there's certainly benefits to having a screen, buttons, etc. But we should also weigh probability of loss versus the cost and complexity of the security solution. I think a device like this is simple to use, low cost, and reduces the attack surface significantly.
+
+That being said, I'd still like to make a more expensive version with a screen and capacitive touch sensor :)
+
+Stop DMing me, Greg. The gig is up.
+> Why is it that I have to pay into the fee bucket but he doesn't? Why is it not shared with some ratio, perhaps the channel balances?
+
+That is simply default LN wallet behaviour. The one who "opens the channel" provides the initial funding AND is responsible for maintaining the fee bucket at the appropriate level.  But yes, one could imagine new LN wallets that dealt with the miner fees differently (although I don't think the underlying problem can be fixed).
+
+> If it takes both of us in cooperation to move funds to (and from) the fee bucket, then that means I've accepted that he could close the channel after that. The "through no fault of my own" almost isn't true anymore if it does require me to allow funds to move into the fee bucket.
+
+Yeah, I think that's the best argument for it _not_ being "through no fault of your own": when you opened the channel you implicitly agreed to the condition that you were responsible for maintaining the fee bucket even if that meant losing all of your balance.  But I don't think most LN users actually realize that they've agreed to these terms!  If fees spiked to $100 and most of the LN channels were closed down and lots of money got sent to the miners, I suspect people would pissed.  I don't think they'd say "oh yeah, that's what I had signed up for -- it's worth risking all of my funds because it's more decentralized that way."
+Wow, you're a real piece of shit, Greg.  Did you actually hear that, or did you just make that up?  I know that truth (and reality and log charts for that matter) has always been a bit fuzzy for you.
+
+
+I don't think it would be a pure PoW-based system any longer.  It would be an Avalanche-PoW hybrid system.  That was the point I was trying to make (perhaps ineffectively) when I said that we'd be giving "a new group the power to _subjectively_ define any transaction as invalid."  Rather than miners independently enforcing a static ruleset, you have a new group of Avalanche/Miner-hybrid entities that now also have the power _and a mechanism_ to dynamically alter the rules.  This property is obviously useful for defining a double-spent but otherwise valid transactions as _invalid_, but it's perhaps also useful for accomplishing more nefarious ends.  Whether more helpful or harmful, it's a significant departure from PoW-based Nakamoto Consensus. 
+
+EDIT: Not trying to say Avalanche is bad -- I think it has lots of potential.  I'm just saying that it is a significant change. 
+If I was more careful with my writing I would have said "move slower with changes of a more fundamental nature like CTOR or Avalanche."  I don't want to move slowly in general, especially for the low-risk easy stuff.  I agree we _could_ make progress more quickly and in a more positive environment if things were a bit different.  
+
+I still like BIP135.
+
+
+Good thing the person who found the bug reported it responsibly and didn’t exploit it for profit.
+"The workshop's main focus is to develop strategies for improving instant transactions that can be implemented over the short term (addressing the fast-respend and reverse-respend vulnerabilities). Examples include double-spend relay, super-standard transactions, and double-spend proofs. A secondary focus will be on longer-term ideas, such as those based on pre-consensus techniques, to address the double-spend vulnerabilities that involve miner collusion."
+> Canonical Transaction Ordering would improve propagation and validation of blocks which is desirable.
+
+It would make only a small improvement for block propagation, and it looks like it could actually slow down block validation.  I think we need more information before we can make a decision on this.  
+
+
+Yes!!
+> I think the #1 important thing to remember is that the method by which Bitcoin secures transactions is by confirmations of blocks in the blockchain.
+
+I think we're on the same page.  
+
+> Double spending involves two valid nascent Bitcoin transactions, either of which could legitimately be mined by a miner. I think it's important to remember this.
+
+With double-spend proofs and double-spend relays (the main purpose of the Instant Transactions Workshop), we're simply trying to ensure that the payee is notified that a potential double-spend attack is underway.  Like you said, we can't be sure which transaction _actually_ gets mined, but for a lot of use cases that doesn't matter: if the payee _knows_ within a few seconds that the payer is trying to defraud him, he can choose then to call the police instead of handing over the merchandise.
+
+
+
+If you've read any of CSW's papers, I think it becomes very clear that he is _not_ the same person who wrote Bitcoin's white paper, or communicated on bitcointalk.org in the early days.  That said, he does seem to have an unusual amount of information and knowledge about early Bitcoin development.  Personally, my hunch is that he was involved somehow from the beginning.  
+Segwit is a soft-forking change so BU nodes will go along with the longest chain whether that chain contains segwit TXs or not.  This is true whether or not BU provides segwit support in its client.
+Did you actually watch my talk?  Judging by your comments, if you did watch it you didn't understand the arguments.  
+
+The design flaw in Segwit I discuss is recognized for example also by [Peter Todd](https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-December/012103.html) and [Tomas van der Wansem](https://bitcrust.org/blog-incentive-shift-segwit).  Take a look at each of their write-ups on this problem by following the links.
+
+A key point is that this design flaw in Segwit _could have_ and _still could_ be fixed.  Why _knowingly_ implement Segwit with a security weakness like this?  
+
+
+Yes, our nodes will accept larger blocks _today_ and relay them to other nodes.  There is no activation or "fork" required.  
+
+Of course, since the majority of the network hash power will _not_ accept blocks larger than 1 MB, eventually the branch that contains only blocks <= 1 MB will become longer, and BU nodes will orphan the large block in favor of the small-block chain.  
+
+However, once the majority of the hash rate is willing to accept larger blocks, then the BU nodes will follow the large block chain.  
+
+I'm not sure what you're thinking when you say "EC."  The main point of BU is to:
+
+1. Allow node operators to easily adjust the size of blocks their node will accept.
+
+2. Allow miners to easily adjust the size of the blocks their node will produce.
+
+3. Provide tools to both groups to signal their block size preferences to the network.
+
+The most likely outcome in my opinion is that once enough support for larger blocks is obtained, that a new static block size limit will emerge (perhaps at 2 MB or 8 MB).  
+
+How do you think we should upgrade to larger blocks?
+The chart is based on the information contained in the user-agent strings for all nodes reported by bitnodes.21.co.  If you have a suggestion for how to get a more accurate picture of the distribution of block size limits by nodes, please let us know!
+Right, a miner can fill his own block with a huge amount of spam but that block will propagate slowly because:
+
+1. It's big.
+2. The spam transactions have not been pre-propagated so techniques like Xthin won't work to speed-up the block's propagation time.  
+
+The result will be that the block is much more likely to be orphaned, and thus attempting the attack will impose a direct cost on the miner.  [Here is a chart](https://imgur.com/a/3n7GE) that estimates this "attack cost" as a function of the network propagation impedance and the size of the spam block.  Here the [full paper](https://www.bitcoinunlimited.info/resources/feemarket.pdf).  
+
+cc: /u/RHavar, /u/thezerg1
+Yes, we're planning to live stream to YouTube.
+Incidentally, Ari Juels is also one of the authors of this [recent paper](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) that suggests the bottleneck to scaling Bitcoin is block propagation to *nodes*.  The authors recommend a max block size of 4MB so that at least 90% of the nodes can receive a max-sized block in the 10 minute block interval, given the current performance of the p2p network. 
+
+Peter Tschipper's (/u/BitsenBytes) work on [Xthin blocks](https://bitco.in/forum/threads/buip010-passed-xtreme-thinblocks.774/) [[illustration](http://i.imgur.com/GSNANP0.png)] for Bitcoin Unlimited is designed to address this exact roadblock (propagation to nodes is [improved by over an order of magnitude](https://np.reddit.com/r/Bitcoin/comments/46gtjm/thin_blocks_early_results_messages_are_on_average/)).  I find it curious that /u/nullc, /u/adam3us and /u/phantomcircuit seem so opposed to Xthin.  But AFAIK, they also dismiss the claims of the paper linked above.   
+Awesome!!
+
+Perhaps /u/theZerg1 or /u/awemany could help too.
+The reason I like the "block space as a commodity" perspective is that it sort of kills the argument that there are "appropriate" uses and "inappropriate" uses for block space.  Instead, if you pay for the space you're using, then you can use it as you see fit.  No different than how the Royal Canadian Mint buys commodity silver to make coins while Lululemon buys it to add to clothes for silver's anti microbial properties.  There is no central silver organization saying that "you can use silver for coins but if you add it to clothes you're spamming the environment."
+
+In fairness to the small-block proponents such as /u/luke-jr, there is a fundamental difference between block space and other commodities.  For example, the amount of silver produced by a silver miner does *not* directly affect what other silver miners are required to do (although it indirectly affects them through market dynamics).  However, when a miner produces more block space, it *directly* affects the other miners/nodes because they have to download and process that increased amount of block space in order to remain part of the Bitcoin system.  
+This is a simple animated GIF that visualizes one possibility for how multiple protocol implementations might emerge over time. 
+
+Decentralizing development and supporting multiple forkwise-compatible implementations of the protocol is a worthwhile goal that will simultaneously make Bitcoin more robust *and* more responsive to the will of the Bitcoin community. 
+
+**EDIT: this post has now been censored and I have been banned from this sub-reddit.**
+In my opinion, it is important that we work towards multiple (forkwise-compatible) implementations of the protocol.  The 90% node share that Core presently has is a danger to Bitcoin's future development.
+
+Cross-post: https://www.reddit.com/r/Bitcoin/comments/3n3z9b/centralization_in_bitcoin_nodes_mining_development/
+Correct me if I'm wrong /u/dpinna, but I believe:
+
+1.  It builds on this paper [here](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf) which shows that a transaction fee market exists without a block size limit. 
+
+2.  It addresses Dave Hudson's criticism of the paper linked above^1 that miner's "don't orphan their own blocks."  It does this by making the propagation impedance a function of the ratio of the miner's hash rate, *h*, to the total network hash rate, *H*.   
+
+3.  It shows that although miner's with a large portion of the network hash rate have an advantage over small miners, this advantage *decreases* as the block reward drops or as total fees increases. 
+
+This is important because it shows the second-order concern brought up by Dave Hudson regarding the health of the fee market (in the absence of a block size limit) actually gets reduced (a) if blocks become bigger and include more fees in total, and (b) as time progresses and the block reward becomes less important.  
+
+
+ ^1 To make the math tractable, the paper above made the simplifying assumption that the chance a miner mined two blocks in a row was small enough to ignore. 
+Instead of viewing orphaned blocks as a negative, why not view them as a natural constraint against blocks that are too large?  This paper shows how the fact that orphaning is possible serves to create a healthy transaction fee market:
+
+https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+Hehe yeah I thought this was funny. Lightning is supposed to be BTC's payment network and solution to high fees, but the design is so bad for certain payments that--in the words of a Lightning proponent--it would be stupid to use Lightning for _that_!
+Sure he's not prefacing his speculations with "this is what I think will happen" but when someone says "X will happen in the future" I normally take that to mean that that someone "thinks X will happen in the future."
+
+LN proponents regularly speculate about the future and present it as fact.  Re-read the intro to the LN white paper -- it is 95% speculation presented as fact.  Or take the "LN hubs won't be regulated as money transmitters" idea. LN proponents state this as though it's a fact.  I simple argue that "no, I disagree, I think they will be regulated and here's why..." and I'm accused of FUD.  
+
+I'd go as far as to argue that the entire LN boondoggle is being held up by a suspension of disbelief by LN proponents on a radical scale.
+To clarify, I don't think this is that big a deal. I think it just means that your routing channel partner could steal some dust from you when routing.  I'm not even sure they can do it profitably.  I think /u/markblundeberg knows more about the details than I.
+
+But the fact that LN isn't trustless for micropayments is a great way to counter the criticism against instant BCH transactions (0-conf) not being perfectly trustless either.  In both cases, it probably doesn't matter that much because there's not a lot of value at stake.
+I'm playing Devil's Advocate here, but bear with me. In LN, it is the sending wallet that determines the route that a payment will take.  Thanks to the LN onion routing, the intermediary hubs only know one hop back and one hop forward, and do not know the final destination of the payment.  So what damage can a single bad hub really do (assuming the other hubs behave as we want them to behave)?  They cannot filter payments based on destination address, because they don't know the final destination.  And if they just stop routing payments at random, then users will simply route around them.  I think the point Jacob is making is that even if LN were centralized around a few large hubs, and even if a few of those hubs were bad, the system could still be reasonably robust.  
+
+It feels to me that there is a way to break this argument, but I'm not sure what it is.   It feels to me like a network centered around 10 LN hubs would be much worse than a network centered around 10 large miners. But why?
+Bitcoin is not secure against 51% attacks. This applies regardless of whether you’re using a SPV wallet or a full node. 
+
+People who think their “full node” will protect them against a majority of dishonest miners do not understand bitcoin’s security model.
+SPV is great for confirmed transactions, but requires more trust than using a full node when accepting instant transactions. Businesses that accept a lot of instant transactions are examples of businesses that will probably want to run their own nodes.
+Thanks for the writeup, Tom.  I think your post is comprehensive with respect to what was discussed and accurate with respect to the reactions and opinions of the participants.  
+Emil Oldenburg from Bitcoin.com will be giving a talk on Tuesday related to this very question at the Instant Transactions Workshop:
+
+https://satoshisvisionconference.com/#dayone
+Yes, their plan is to make another forking change to the Merklix tree.  
+
+I only realized this a few weeks ago (although it was in plain sight the whole time, it just never clicked for me).  I think most people don't realize this at all, at this point.
+
+ABC plans to make significant changes to the design of Bitcoin.  The TTOR -> LTOR is just one of those changes.  
+
+Part of me _likes_ the Merklix tree idea, but part of me really wonders why we're changing the design when it doesn't really seem necessary.  
+
+I also think that _most_ the people interested in BCH were perfectly happy with the design of Bitcoin _except_ for the block size limit.  I think if more people understood ABC's plans, they would be opposed to those plans.
+By users I mean “users of the full node client,” so miners would be users, as would business, exchanges, or hobbiests running the client.
+
+Yes I do work with BU. Thank you for choosing our client. Looks like we performed best during the stress test.
+I think you're misunderstanding something. Bitcoin Unlimited _already_ allows a node operator to set his block size limits as he sees fit.  The miners could run BU and set it to 128 MB tomorrow if they wanted to.  nChain releasing a client that also allows node operators to do so would not be new.  
+
+Right now, the miners have decided to orphan any blocks larger than 32 MB.  I don't see why they would decide to increase this to 128 MB in November: the average block size is over 100x smaller than the current 32 MB limit.  
+
+I agree that we could all set our block size limits to infinity and things would _probably_ be fine.  Yes, the network would collapse if blocks became extremely large for an extended period of time, but that would require that the majority of the hash power was making those consistently large blocks.  Why would they do that if the network couldn't handle it?  
+
+But that's not the only concern. The other concern is that there will always be a block of _some_ size that ~half the mining nodes can process and ~half the nodes can't.*  If a malicious miner creates such a poison block, this could lead to a temporary split.  What I've learned from the miners is that they don't want to take risks like that.  They'd rather use a block size limit that they know ~100% of the miners can accept.  
+
+
+*To explain further: 100% of the network can accept 8 MB blocks, but 0% of the network could accept a 1 TB block today (even with the block size limits removed).  If you imagine increasing the block size from 8 MB to 1 TB and plotting the % of the network that can accept that block without crashing, you're curve will go from 100% down to 0%.  The danger zone is around 50%.  We saw this phenomenon with our Gigablock testing: when we were pushing bigger and bigger blocks, it was not uncommon for a portion of the network to process a 1.1 GB block, while the other portion choked on it, and ended up on a parallel fork.
+
+ 
+That is not how bitcoin works.
+
+- How can miners stop nodes from sending out double-spend proofs?
+
+- How can miners stop nodes from improving the rate at which transactions spread across the network?
+
+- How can miners stop nodes from transferring blocks with the Graphene protocol?
+
+ANSWER: they can't. 
+Nice work!
+
+Another interesting fact is that if you take into account that difficulty will reset lower due to the orphaned blocks, you can show that any miner with more hash power than the "unilateral embargo"-miner can increase his revenue by gaming the embargo. Here's an article on this topic:
+
+https://www.yours.org/content/gaming-coingeek-s-mining-pledge-for-fun-and-profit-aa9b0dc586e1
+
+I'd like to take this opportunity to predict that /r/buttcoin will eventually emerge as the subreddit where honest technical discussion related to bitcoin takes place.  If you present positive research results about on-chain scaling on r/bitcoin, you're banned by Blockstream PR. If you discuss weaknesses with instant transactions or acknowledge that terabyte blocks are more than 6 months away on r/btc, you're attacked and downvoted by nChain trolls.
+No. Someone already verified this (I forget who). Besides, copying nearly verbatim from Kolmogorov would be nearly as bad.
+> SegWit does not discard witness data nor make it easier to do so.
+
+Miners no longer need to "witness the signatures" in order to update their ledgers of which coins are owned by which entities.  In segwit, the "signatures" are subordinate to the flow of coins.  If a bitcoin block is missing even a single bitcoin signature, the only thing a miner can reasonably do is attempt to orphan it or mine an empty block above it.  On the other hand, if the witness data is missing, a miner can update his UTXO set, and carry on as normal attempting to build a non-empty block above it.  So the situation is definitely different.  
+
+Thought experiment: Imagine that you have 100 BTC in a segwit address and a few days later you notice that they've been transferred to an address that you do NOT control.  You try to find the signature that authorized the transfer to prove the theft (you're _sure_ your private keys were secure so you think the signature must be bogus) but conveniently nobody seems to have it saved.  Can you prove that your funds were stolen?
+
+
+> Any hard fork creates a new network with different rules. Everyone can call that new network Bitcoin, but it's still a new network. If there's one full node left on the old network, then there's still two networks.
+
+Please help me to parse what you're saying.  
+
+You're using the term "hard fork" as a noun to refer to a _thing_.  What _thing_ precisely are you referring to?  
+
+Is it an _event_?  If so, what is the event?  
+
+Is it when a node switches from Core to BU, and thus the network experiences hard-fork events every day? 
+
+Is it when a block larger than 1 MB is mined and included in the blockchain, even if this event is permissible according to the majority of nodes' rules?
+
+Or is it not an event at all, but something else?   One reason this debate has lasted so long is the lack of precise language.  So let's try to be precise.
+
+The only objectively _measurable_ events are _Blockchain_ forks: when the Blockchain splits into two different chains with a common ancestor block.  This can happen with an increase in MAX_BLOCK_SIZE if a minority of nodes and miners refuse to upgrade, or it can happen with the activation of Segwit, if a minority decides to fork-off (see /r/btcfork) at the activation block.  In my opinion, an increase in MAX_BLOCK_SIZE is less likely to cause a Blockchain fork than activating Segwit.  
+
+Here is a great post by /u/capt_roger_murdock on the topic: https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-868#post-33012   
+
+
+
+How can large miners "leverage large blocks to orphan smaller miners' blocks"?  This seems to be an often-repeated statement that is simply not true.
+From my perspective, it was more of a "pre-announcement" and I suspect we'll be hearing more details about the grant program over the coming weeks.  I'm not sure enough details we're really released for the press to write an article about it.  I know that I still have many questions.  For example, what type of projects qualify for funding?  What is the application procedure?  Who decides which proposals receive funding and which do not, and how does this group make funding decision?  
+
+I think this is a great initiative and I look forward to learning more about it.  I'm also confident the bitcoin media will pick it up once these additional details have been released.  
+> A quarter of the nodes on the network will not connect out to BU nodes due to their lack of witness support.
+
+Will these nodes also not connect to pre-segwit versions of Core, due to their lack of witness support?
+> There's some level of fees where miners won't pick up a transaction, what do you do then without RBF?
+
+Child-pays-for-parent if you're in a hurry.  Or just wait till it expires if you're not.  
+
+Also, the minimum fee-rate for transaction inclusion would be much more stable if the block size limit were much higher than demand, so the "stuck transaction" problem would occur less often to begin with.
+
+It is your point that is moot.  So what if two different nodes have a different view of which transaction came first?  PoW is a method to come to consensus on the ordering.
+
+My point is that unconfirmed transactions are _not_ trivially double-spendable, as the poster above claimed.  The reason for this is because most miners are default compliant--that is, most miners will not accept a bribe to disobey that protocol and swap the first-seen version of a transaction with a double-spend. 
+> Zero confirmation has never been secure - transactions in any given mempool are trivially double-spendable
+
+Not really: http://imgur.com/a/zPH5V
+
+These are the kind of comments I'm never sure whether it's worth responding too.  Does responding clear the air so that we can move forward?  Or does responding just add fuel to the toxic fire already burning across the Bitcoin community?  
+
+This will be my only response.  
+
+##What is the story andytoshi is referring to?##
+
+My "Transaction Fee Market" paper had a positive reception, both on the bitcoin mailing list and [on reddit](https://np.reddit.com/r/Bitcoin/comments/3fpuld/a_transaction_fee_market_exists_without_a_block/).  Indeed, a lot of people had not appreciated that block space--although completely digital--still had the properties of a normal economic commodity and thus was governed by the laws of supply and demand (something that now sounds obvious).  
+
+Before that paper, I was relatively unknown in bitcoin; after that paper, the eye of Sauron was cast upon me.  Peter Todd publicly called me an idiot and Greg Maxwell emailed me in private, claiming that the paper was fundamentally flawed, and requesting that I issue a public retraction.  
+
+At that point, I considered Greg a friend, and I respected his expertise in Bitcoin, so I acknowledged that indeed I might be wrong and tried to understand the points he was attempting to make (see the transcript you posted).  
+
+I learned later that he was cherry-picking comments from this private email conversation and sending them to various people to "prove" that I thought there was a problem with my fee market paper, when in reality all I was doing was trying to understand the points Greg was making.  Upon learning that he had been doing this, I decided to post the entire email chain to get everything out in the open.  That was when I lost my trust in Gregory Maxwell.
+
+##What are the weaknesses of my fee market paper?##
+
+I'm still puzzled at how [this paper](https://www.bitcoinunlimited.info/resources/feemarket.pdf) triggered such an emotional response in many small-blockers, when it's really pretty basic and the results are almost obvious in hindsight.   Nevertheless, there were two valid criticisms:
+
+1. I didn't _explicitly_ model the self-propagation advantage of large miners.  
+
+2. Questions remained regarding what pre-consensus techniques like weak blocks would do to my model.
+
+(2) is what Greg was concerned about.  For the next six months, I worked on analyzing this problem and showed that the fee market would _not_ break down with weak-block pre-consensus techniques such as [subchains](https://www.bitcoinunlimited.info/resources/subchains.pdf).  In fact, I showed that weak blocks could actually increase the fraction of fee revenue diverted to PoW security!   
+
+##Scaling Bitcoin Hong Kong##
+
+> I don't know why Peter R's talk was rejected from Scaling Bitcoin
+
+My Hong Kong Scaling Bitcoin talk was initially accepted and I even received a phone call from a primary conference organizer welcoming me to Hong Kong and helping me prepare for my trip.  I've been told by two separate sources that the selection committee was then "shuffled" last minute and some acceptances that should have been rejections were "corrected."  Mine was apparently one of these last minute rejections.
+
+##My proposal for Milan##
+
+It's funny that we're talking about weaknesses of my fee market paper, because that's exactly what my Milan presentation was going to address.  [Here is my proposal](https://www.dropbox.com/s/p2r0pfhahplt3pv/SubchainsAbstract.pdf?dl=0).  
+
+Incidentally, I also noticed that Greg had been laying the ground work for getting my proposal rejected for the past few months.  For example:  
+
+- He blatantly lied and publicly said that I was ["physically threatening"](https://www.reddit.com/r/btc/comments/4nvfxw/part_5_of_5_massive_onchain_scaling_begins_with/d496vn8) people in Montreal.
+
+- He [claimed](https://www.reddit.com/r/btc/comments/54zfdl/this_is_why_bu_was_banned_from_stalling_bitcoin/d870cpv) many times that my subchains paper was plagiarized from his own work [yet he cannot provide proof for this allegation despite plagiarism being very easy to prove and even though I both cite his work in my references and thank him in my acknowledgments.]
+
+##Moving forward##
+
+My cousin is a history professor and I was explaining to her what I thought was a problem in Bitcoin research: we all agree what the facts are, but there is so much hostility surrounding the interpretation of those facts and the narrative that that interpretation fosters.  
+
+What I learned is that in history, an _outstanding paper_ is one that uses the same facts to shape a completely _new_ narrative.  Work that challenges conventional thinking is _embraced_, not fought, even if it turns out later to be dismissed.   Only by viewing reality through multiple lenses can we hope to understand the truth.  
+
+300 transactions per second is already [15% of Visa's 2000 tps average and over twice PayPal's 115 tps average](http://imgur.com/QoTEOO2).  Such use would imply significant adoption and a much higher market price per bitcoin.  That this success case only requires archiving 5 TB per year seems quite remarkable--especially, when considering that only archival nodes require the full chain (relay nodes and mining nodes need only the UTXO set and enough historical data to recover from chain reorgs).  
+> Ethereum has been doing it for half a year; the block times are actually REALLY stable
+
+Feedback is tricky; I know because it bites me on a regular basis in my non-bitcoin work.  
+
+In a feedback control system, you can often increase the "gain" and get better tracking at the expense of the system's "gain margin" -- despite improved performance metrics, your system is actually operating closer to a point of *instability*.  Of course, since the performance appears superficially better, one might not notice the problem until the system acts strangely in the presence of some disturbance.
+
+Perhaps there really is no problem with this, but to me it's not obvious at all and could probably be studied for years before we had a good feel for the ramifications.  There is an entire branch of engineering dedicated to this subject of [feedback control](https://en.wikipedia.org/wiki/Control_theory) and over 100 years of mathematical developments for how to analyze systems in the presence of feedback.  I'd love to see some analysis, for instance, of whether an attacker could exploit the new system dynamics caused by the continuous feedback in some way.  
+
+
+One advantage of ripping out the mining code would be to figuratively state to the community: "Bitcoin Unlimited is for non-mining nodes!  You guys are our customers and we want to listen to your wants and needs and work to keep you happy" (i.e., without having to worry about what miners want). 
+
+Did I convince you? :D
+Agreed.
+
+With regards to Bitcoin Unlimited, we've been calling it the "acceptance limit"--a block greater in size than the acceptance limit is considered an "excessive blocks" and is treated differently.  
+
+There is also the miner's "generation limit," which miners should ensure is less than the network's *effective* acceptance limit in order to reduce their orphaning risk.    
+
+What do you think of that terminology?
+I believe [these charts](http://imgur.com/I6iAntU,odvHZSD) are significant because they reveal that transaction fees will directly contribute to the proof-of-work cost even in the absence of a block size limit.  This is important because investigators have previously argued that fees that result from orphaning risk do not contribute to network security.  For example, Maxwell [argued](https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-May/007880.html), “the fact that verifying and transmitting transactions has a cost isn’t enough, because all the funds go to pay that cost and none to the POW ‘artificial’ cost.”  This was in fact one of the argument put forth by small-block proponents for the need of a *restrictive* block size limit in the first place.  
+
+Here is a [link](http://www.bitcoinunlimited.info/downloads/subchains.pdf) to the full paper from which the chart was excerpted (refer to Sections 4 and 5).  
+
+CC: /u/jonny1000, /u/nullc, /u/adam3us, /u/kanzure, /u/maaku7
+If you examine the [Bitcoin Unlimited Federation Articles](http://www.bitcoinunlimited.info/articlesOfFederation), you'll see that there are actually three leadership positions, to increase accountability: President, Secretary, and Developer.  Someone like Gavin or Jeff would make an excellent President (if either were interested), as it would allow them to participate in a high-level leadership role without getting brought down into the bike-shedding details.  Someone like G. Andrew Stone would make a great lead developer, as would someone like /u/statoshi or /u/dgenr8 (Jameson Lopp or Tom Harding).  
+
+In any case, all the leadership positions are elected.  If you are interested in becoming a member (it's fee), sign up and tell us a bit about why you want to join and in what ways you can contribute:
+
+https://bitco.in/forum/threads/bitcoin-unlimited-membership-join-us.208/
+
+If you are interested in running for a leadership position, then please do so when the elections open up!
+> Look, I know you are trying to stir up trouble
+
+Still stone walling I see.  But now you're also throwing in some ad hominem for good measure, hey?
+
+Anyways, the top hit for me is a wikipedia article. Try it yourself:
+
+https://www.google.ca/?gfe_rd=cr&ei=FqUdVtmXE8WV8QfF1K_YDw&gws_rd=ssl#q=stone+walling
+
+For the record, I'm not trying to cause trouble; I am trying to point out how this sub-reddit has become a complete parody of its former self.  
+> His paper amounts to little more than spherical cows in a vacuum
+
+I can assure you that spherical cows in a vacuum would be neither simple nor pretty:
+
+https://www.youtube.com/watch?v=bWd31AefKns
+
+Adam is wrong that "fees will drop to basically zero" if the limit is increased from 1 MB to 8 MB.  In addition to empirical evidence that shows this is not the case (e.g., fees existed when the average block size was much smaller than today), this paper shows that a transaction fee market would exist even in the *absence of a block size limit*:
+
+https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+
+If the block size is not constrained by the protocol, then the fee per kilobyte is governed largely by the orphan cost.  The orphan cost is a function of the propagation impedance for block solutions.  Raising the block size limit does not affect the propagation impedance.  Fees per kilobyte would be largely unchanged; however, since more kilobytes of transactions could be included in a block, the *total* fees per block could grow higher.  
+
+As the average block size grows, so would the total fees collected by miners, assuming the network propagation impedance remains constant.  
+> It also assumes that verification times are equal amongst miners, which isn't the case.
+
+Agreed.  It is a simplified model so that the effect can be easily isolated and understood.  It would be interesting to try to model a distribution of verification times, among other details.  In any case, I suspect the important result will be the same. 
+> Scaling: I agree with scaling onchain. I mean 32Mb is fine, even 128MB is fine, but 1GB or 1TB blocks is crazy. Is the community open to second layer scaling too?
+
+I am open to 2nd-layer scaling. More options are a good thing. What I'm not open to is handicapping the main chain to push people onto these second layers.
+
+Regarding the size of blocks, we will continue to identify and remove bottlenecks as we find them, e.g., using the [Gigablock testnet](https://www.youtube.com/watch?v=5SJm2ep3X_M).  We can't do gigabyte blocks today, but I'm confident this will be possible in the future—on a consumer desktop with a fast Internet connection—with only improvements to the source code. Moving beyond ~1GB will require specialized hardware (assuming no advancement in tech), which I'm also not against. If there's a demand for low-cost fully-validating nodes, this specialized tech could still be very affordable to the home hobbiest, even at 50,000 transactions per second (global adoption levels).
+
+>  What is the current development status of UTXO commitment?
+
+This is where the work is now, as far as I know (in other words, pretty far along):
+
+https://www.yours.org/content/first-utxo-commitment-on-testnet-db7bf45bf83d#
+
+For me, UTXO commitments are second priority after getting double-spend proofs running on mainnet.
+Bitcoin is a peer-to-peer electronic cash system. Its main design goal is to allow A to send money to B without going through an intermediary.  This is important in order to prevent intermediaries from blocking payments, and to keep transaction fees low. 
+
+BTC/LN hardly fits this description any longer, while BCH does. Roger and Bitcoin.com are doing important educational work to communicate what Bitcoin is and the problems it was intended to solve. They are trying to remove confusion, not add confusion.
+
+What would be deceptive was selling 1 BCH for the price of 1 BTC, or something like that.  But that's not happening.  Promoting the fact that BCH adheres to the original design of Bitcoin more that BCH isn't deceptive at all: it's communicating the truth.
+I didn't say Bob needs 1000 coins of _outbound_ capacity in order to be paid.  That would just be stupid.  Like you said, he needs 1000 coins of inbound liquidity.  That's the problem!  Where does he get it from?  He needs to borrow/swap/pay or otherwise secure that liquidity BEFORE he can get paid.
+
+By trying to correct me, you are making my point for me.  
+
+Further, see Emin's clarification here:
+
+https://twitter.com/el33th4xor/status/1106193712550498305
+Interesting way to look at it.  
+
+Now compare the damage a hacker could do if he gained control of a 10% miner for 24 hours, versus 1 of the 10 main LN hubs for 24 hours.  Which would be worse?  I think the hacker could do more damage with control of the LN hub, for the reasons you mentioned.  A 10% miner going rogue couldn't cause nearly as much damage.
+Someone on Twitter linked me to this EXCELLENT 4min 37sec video on LN scaling challenges.  It's definitely worth a watch:
+
+https://www.youtube.com/watch?time_continue=10&v=yGrUOLsC9cw
+And I didn’t say that _only_ businesses that accept a lot of instant transactions will _probably_ want to run full nodes—that was an example. So what point are you trying to make?
+Certain devs are hesitant to do this work, and BU is hesitant to fund it, because of the (IMO high) risk that it will not be adopted because it could be seen to compete with avalanche.   
+
+Get a clear commitment from the ABC team that they want to see double-spend proof relay live on the network and that they will incorporate it into ABC when ready, and it will get done.  
+I think one way the hash war could have been a real battle over the consensus rules, was if SV had mined blocks that were both CTOR + TTOR compatible (so that ABC would accept them) but reject blocks that did not satisfy TTOR.  If SV had sufficient hash power, the result would have been that the ABC miners would have had all non-TTOR blocks orphaned with WITHOUT causing a chain split.  After a while, the ABC miners might have given up on CTOR.  
+
+Perhaps this is what CSW wanted to do, and why he said "there would be no split," but he and his devs didn't have the skills or knowledge to carry it out.
+I doubt most nodes could handle _sustained_ 64 MB blocks today.  We started seeing problems right around _sustained_ 100 TPS on the Gigablock Testnet, which corresponds to 20 - 30 MB sustained.  If we even see _sustained_ 32 MB blocks, I suspect the resulting network response will not be graceful.  
+Trying to gild again (first attempt failed):
+
+gild u/tippr
+Yes, definitely.  If we leave things as they are today, miners can experiment with various orderings.  If fork to enforced lexical orderings, only that one ordering is possible.
+> They don’t need to prevent you hobbiest from sending it, but they can orphan blocks containing it making your shit mute
+
+Your statement is a non-sequitor.
+
+1. Double-spend proofs are not mined into blocks.  They are used to provide notification to a payee that the payer is trying to defraud him.  There is nothing for "miners to orphan."
+
+2. If nodes relay transactions more quickly, it simply means that merchants don't need to wait as long to scan for double-spends.  Again, there is nothing for "miners to orphan" -- miners just learn about the transactions a bit faster.   
+
+3. Graphene does not change the contents of a block, it is just a way that Node A can use to tell Node B about a new block that is faster than sending the block in full.  Again, there is nothing for "miners to orphan."
+
+Miners have control over which transactions are included in their blocks and which blocks they build upon.  Miners cannot otherwise control the flow of information in the network.  
+
+
+Every block would still be valid.  But such out-of-preconsensus blocks would have a higher probability being orphaned.  
+
+Unlike the Coingeek method, the orphaning with the subchain proposal isn't _active_ in the sense that miners are _intentionally_ orphaning such blocks.  It is _passive_ orphaning in that sense that miners _try_ to accept them but since they take longer to accept, there is a greater chance of a faster block being found at the same time and causing the first block to be orphaned.
+I've been down all these roads with you-know-who last summer.  
+
+The assumption the Markov chain model is making is that the probability of finding the next proof-of-work for the SM is α and for the HM is 1-α (i.e., equal to the SM's and HM's hash power share, respectively).  It is like assuming who finds the next block can be settled by rolling a 100-sided die.  If the die comes up greater than 100α, the HM finds the next proof-of-work; otherwise, the SM finds the next proof-of-work.
+
+In reality, both SM and HM are hashing block headers frantically looking for a magic nonce to solve the bitcoin mining problem.  Last summer when this came up, it was not clear to a bunch of people that deciding who solves the next PoW by rolling a single die was equivalent to a hash race to find a special nonce.  And so we did a bunch of simulations to confirm that indeed the two methods are equivalent.  
+
+If you understand memoryless, you can see that really the two methods have to be equivalent.  If two miners, one with hash power fraction 1-α and the other with α, start mining at the same time, it should be pretty obvious that the first will win with probability 1-α, and the second will win with probability α.  But since mining is memoryless, it doesn't matter at what time either started! It only matters that they have not yet solved a block (i.e., it only matters which Markov state they are in!).  For example, if the HM begins mining at t=-10 and still has not solved a proof-of-work by t=0, the HM is no closer to finding a solution!  The work he did, didn't count for anything. If the SM starts mining at t=0, he will still find the _next_ PoW with probability α regardless of the fact that the HM started earlier.  The result is that the state transition probabilities are purely a function of the current state in the Markov model, as modeled by Eyal & Sirer.  If they weren't, it would mean there was some "memory effect" taking place.  
+
+Incidentally, this is the debate that lead to CSW and me betting over the [answer to this question](https://bitco.in/forum/threads/wright-or-wrong-lets-read-craig-wrights-selfish-miner-fallacy-paper-together-and-find-out.2426/page-2#post-41767).  He claimed that there was some "negative binomial" effect going on that resulted in the Markov probabilities not being static but dependent on what happened previously.  Once he published the paper on the topic, it was easy to identify that he was implicitly assuming that mining had memory without realizing it.  
+We can receive both BCH and BTC at this address (but yeah we should update the website to clarify):
+
+https://www.bitcoinunlimited.info/donate
+> Rizun is on Roger Ver's payroll so not much better
+
+This is news to me.  Do you know when I'll receive my first paycheque?
+I guess it depends on what you mean by "technical knowledge."  Does understanding of money, human nature, and economics count as technical knowledge?
+No, it would be pointless because those rules aren't under debate -- there is little to no demand to change those things.  The rule that is under debate is what is the maximum number of bytes the leaves of the Merkle tree whose root is committed into the block header may correspond to.  And I am not _suggesting_: I'm describing the reality that users _do_ run node software that allows that parameter to be changed (whether via the GUI in BU or by recompiling in Core).
+
+The bigger point I'm making is that "users and miners would break bitcoin if it were easier for them to change stuff on their own nodes" is a pretty crappy security model.  I'd like to believe that Bitcoin would _not_ break even if every user and miner reviewed, modified as they saw fit, and then compiled their own code.
+My understanding was that both would be activated at the same time with the same BIP009 bit (Bit 4).  However, it seems some people think larger blocks come first, and others think segwit comes first, and still others think the two changes are independent of each other and that activation of either would depend on miner signalling.
+Segwit is a soft fork, so BU nodes will automatically follow along whether BU implements segwit support or not.  The decision of whether we implement it would have to be decided by a vote from BU's members.  What do BU miners and node operators want?
+Great comment, jonald!  It's nice to see that you've joined the discussion here at Reddit; I always enjoyed your comments at bitcointalk.org.
+> do you honestly believe Core (any significant amount of the main contributors) is going to adapt to track BTU consensus?
+
+I'm not sure what you mean by "BTU consensus." They don't need to implement EC if that's what you mean. But yes I'm confident they would modify Core to accept larger blocks and follow the hash power majority once it's clear that the small-block chain is not viable.  This would result in the value of the BCU token expiring worthless.
+
+
+"Quadratic hashing" applies only to very large transactions, not blocks.  A block that is twice the size and contains the same mix of transactions as some other block will verify in twice as much time (not four times as much time).  
+
+In Bitcoin Unlimited, transactions greater than 1MB are deemed "excessive" and by default are not accepted, thus avoiding the quadratic hashing issue for very large transactions.  
+On-chain transactions can increase _or_ decrease the number of unspent outputs.  
+
+We expect the number of non-lost unspent outputs to be proportional to the number of users.  /u/awemany's point (if I understand correctly) is that LN adds additional unspent outputs equal to the number of users multiplied by the number of open channels the average user has open.
+> no, optimizations such as Xthin do not work under adversarial conditions.
+
+I've seen lots of people claim that such attacks are possible but when I push them for an explanation, their envisioned attack usually involves the miner purposely making his own block propagate more slowly.  But this has little to do with Xthin because miners can make their blocks slower by simply waiting a bit before announcing them!  Except for the specific and IMO academic case of the selfish mining attack, this only ends up hurting the "attacker" anyways.  
+
+> You can't use child pays for parent in situations where you are sending the transaction to someone else, so you are stuck, that solution does not work for users.
+
+Of course you can. Just re-spend your change from the stuck transaction back to yourself with a big fee.  
+I wrote a script to scrape blockchain.info for all of the orphaned blocks they knew about.  Comparing the moving averages like this removes sensitivity to orphaned blocks that occurred but that were not reported by blockchain.info (assuming only that the ones that were reported were representative of the population).  
+Come on, you didn't even get the capitalization right.  
+There appears to be some concern that I overlooked certain references when compiling my paper.  My Subchains paper includes the following 20 citations to papers, emails, posts, and books.  If you feel strongly that another reference should be included, please provide a link **and a short description of the contribution made by the work** and I will certainly consider including it in the next revision.  
+
+Lastly, please also consider contacting the Editorial Team at [*Ledger*](http://ledgerjournal.org) to let us know that you want to help in the peer-review process, which is designed in part to catch things like this! 
+
+**Citations**
+
+ Murdoch, S. J., Drimer, S., Anderson, R., Bond, M. “Chip and PIN is Broken.”  2010 IEEE Symposium on Security and Privacy, Oakland, California (16 May 2010) http://www.unibank.org/toposign/chip_and_pin_is_broken.pdf
+
+ Rizun, P. R. “A Transaction Fee Market Exists Without a Block Size Limit.” No Publisher (2015) https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+
+  Stone, G. A. “An Examination of Bitcoin Network Throughput Via Analysis of Single Transaction Blocks.” No Publisher (2015) http://www.bitcoinunlimited.info/1txn
+
+  Barski, C., and Wilmer, C. Bitcoin for the Befuddled. San Francisco: No Starch Press (2014)
+
+  Carlsten, M., Kalodner, H., Narayanan, A. “Mind the Gap: Security Implications of the Evolution of Bitcoin Mining.” Scaling Bitcoin Montreal (12 September 2015) 
+
+  “Bitcoin Network Capacity Analysis – Part 6: Data Propagation.”  Tradeblock Blog (23 June 2015) https://tradeblock.com/blog/bitcoin-network-capacity-analysis-part-6-data-propagation
+
+  Decker C. and Wattenhofer R. “Information Propagation in the Bitcoin Network.” 13th IEEE International Conference on Peer-to-Peer Computing, Trento, Italy, September 2013
+
+  Pseudonymous (“rocks”). Comment in “Gold Collapsing. Bitcoin UP.” Bitcoin Forum. (12 November 2015) https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-99#post-3585
+
+  Andresen, G. “[Bitcoin-development] Weak block thoughts…” Bitcoin-development (23 September 2015) http://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-September/011157.html
+
+  Pseudonymous (“TierNolan”). “Decoupling transactions and POW.” Bitcointalk (18 April 2013)  https://bitcointalk.org/index.php?topic=179598.0
+
+ Andresen, G., Comment in “Faster blocks vs bigger blocks.” Bitcointalk (3 July 2014) https://bitcointalk.org/index.php?topic=673415.msg7658481#msg7658481  
+
+  Rosenbaum, K., Russell, R. “IBLT and Weak Block Propagation Performance.”  Scaling Bitcoin Hong Kong (6 December 2015) 
+
+  Maxwell, G. “[Bitcoin-development] Block Size Increase.”  Bitoin-development 7 May 2015 (accessed 13 December 2015) https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-May/007880.html
+
+ “Scalability.” Bitcoin Wiki (13 December 2015) https://en.bitcoin.it/wiki/Scalability
+
+  BitFury Group. “Proof of Stake versus Proof of Work.” No Publisher (13 September 2015) http://bitfury.com/content/4-white-papers-research/pos-vs-pow-1.0.2.pdf
+
+  Pinna, D. “On the Nature of Miner Advantages in Uncapped Block Size Fee Markets.” No Publisher (2015)  http://www.scribd.com/doc/276849939/On-the-Nature-of-Miner-Advantages-in-Uncapped-Block-Size-Fee-Markets
+
+  BitFury Group.  “Incentive Mechanisms for Securing the Bitcoin Blockchain.”  No Publisher (2015) http://bitfury.com/content/4-white-papers-research/bitfury-incentive_mechanisms_for_securing_the_bitcoin_blockchain-1.pdf
+
+  Andresen, G. “Back-of-the-envelope calculations for marginal cost of transactions.” No Publisher (2013) https://gist.github.com/gavinandresen/5044482. 
+
+  Pseudonymous (“awemany”). Comment in “Block Space as a Commodity.” Bitcoin Forum (26 September 2015) https://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/page-4#post-1409
+
+  Sompolinsky, Y., Zohar, A. “Secure High-Rate Transaction Processing in Bitcoin.” No Publisher (2015) http://www.cs.huji.ac.il/~avivz/pubs/15/btc_ghost_full.pdf
+> It doesn't matter that I said the content was fine.
+
+That's my point.  It *doesn't* matter what the mods say; it matters what the mods do, and what the mods do is find excuses to remove persuasive highly-upvoted content that:
+
+- promotes bigger blocks
+
+- promotes decentralization of development
+
+- illustrates Blockstream's conflicts of interest
+
+- reveals the censorship at /r/bitcoin and the efforts to conceal that censorship
+
+> ...since zero confirmations are perfectly safe
+
+No one is claiming that.  "Secure" and "insecure" are not absolute adjectives.  Something can be more secure or less secure than something else, for example:
+
+   0-conf (+ full-RBF)   <   0-conf (as is)   <  1-conf   <   2-conf …
+
+Where the symbol [ < ] means "less secure than."  It is up to the recipient to choose the level of security required for the exchange, based on network heuristics like the current card companies do.
+
+What is the benefit of purposely making 0-conf less secure?
+Are you being intentionally obtuse, Jorge?  Yes, if miners follow different consensus rules, the chain can split.  But you know this already.  Yes, with BU you can create custom settings to fork yourself off of the network.  But you already know this too.  
+
+It is not possible to prevent forks, if people want to split.  BU simply gives you more control over the chain your node follows.  
+The 1 GB blocks took 10 minutes on average to propagate and process. 
+
+(Thinking about that now, that sounds slow but it was faster than BSV's 64 MB yesterday).
+Nassim Nicholas Taleb's thesis is that antifragile things are _improved_ when subject to stressors^* : your bones strengthen when subject to high loads, your health improves with intermittent fasting, and your recently-published book sells better if widely criticized.  
+
+To the extent that bitcoin is antifragile, the shock of the halvings probably does more good than bad.  Arguably, the sudden drop in the inflation rate helps to kick-start the next adoption cycle when prices begin to rise due to reduced supply but ~constant demand.  Arguably, the sudden (and known) loss in mining income at the future halving forces miners to think longer term when making investment decisions, and thereby become more invested in the long-term success of the network.
+
+This is a devs-gotta-dev proposal IMO.  It's a change to address a "problem" that might not exist, and where the "solution" could lead to worse outcomes than the status quo.  I think the motivation is aesthetics: some devs just think that "smooth curves" are prettier and so they make up stories that aren't back be empirical facts to convince other devs who also think that smooth curves are prettier.  
+
+I think LTOR is the same phenomenon at play: it doesn't solve an empirical problem and arguably could make scaling worse, but it makes the code more asthetically-pleasing in the eyes of certain devs.
+
+^* To the extent that the stressor wasn't so great that the antifragile thing didn't survive.
+A SPV wallet needs to be connected to _at least_ one honest node.  It could be connected to 9 dishonest nodes, but as long as the 10th node is honest (and itself connected to the network), the SPV wallet will work correctly. 
+
+But a full node also needs to be connected to _at least_ one honest node, so I don't see this as SPV-specific.
+This is an exciting idea and a well-written paper, Vitalik.  Thank you for sharing.  
+
+The paper is written how a research paper should be written: by describing things as they are and not how you think they ought to be.  The BCH/BTC split has lead to his unfortunate polarization where many BTCers think that SPV is insecure, while many BCHers think that SPV has the same security properties as full nodes.  Your description is perfectly accurate: SPV works well under the assumption that the hash power majority is controlled by honest participants.  If the network is briefly over-powered, there are attacks that SPV nodes are vulnerable to that full nodes aren't.  Having the _option_ to make lite clients less vulnerable at the cost of additional bandwidth and CPU resources is only a good thing.  
+
+ 
+Unlimited received advanced notice of the vulnerability.  But Unlimited was not at risk.  BU does not have this vulnerability.
+If you say so; I guess Bitcoin Core’s consensus rules are now secured by Proof-of-Assert().  
+
+“Bitcoin Core is secure because the network crashes if a miner tries to create free coins! But BTC is for hodling so who needs a network anyway!”
+ 
+
+I still prefer PoW.
+In the fall of 2013, Ittay Eyal and Emin Gün Sirer published a landmark paper titled "Majority is Not Enough: Bitcoin Mining is Vulnerable." In this paper, they showed that by strategically withholding and releasing blocks according to what they named the "Selfish Mine" algorithm, a deviant miner could earn more than his fair share of block rewards.
+
+It was well understood since the Satoshi white paper that a miner with at least 51% of the network hash power could earn 100% of the revenue (by performing the so-called 51% attack). However, at the time of Eyal and Sirer's publication, it was generally assumed that a miner who controlled less than half of the hash power would be incentivized to "play by the rules" because it was thought that all deviant strategies would result in a loss of block rewards to the deviant miner.
+
+What was important about Eyal and Sirer's work was that it showed this assumption to be false: indeed, a deviant strategy did exist that a miner with less than half of the network hash power could apply and be rewarded with increased revenue.
+
+What the author of the linked article is missing is that the important result (that a deviant strategy also exists for miners with _less_ than 50% of the hash power) does not rely on the value of gamma.  Even if the selfish miner loses all block races, he still earns more than his fair share of the block rewards (once difficulty has readjusted) if he controls at least 1/3rd of the network hash power.  
+
+Whether the selfish mining attack is a practical attack is debatable.  For example, in order for the strategy to turn a profit, the selfish miner must maintain the attack for a length of time to allow network difficulty to reset and hope that during that time other miners don't retaliate by adopting similar strategies.  But what is not debatable is that the 51% attack is not the only deviant strategy that results in the attacker earning more than his fair share of block rewards: the selfish-mining attack works also for some minority hash rates.  
+Yes, agreed.  I wasn't trying to imply that _all_ big-blockers blindly followed him, just that a smaller subset did.  
+Most the devs are full time.  I am not, however.  
+Without a government-enforced cola quota, the price of a can of Coke will fall to 1 penny and all the lakes will drain to supply the water!
+BU's recommendation (at least for the time being) is that BU miners use the BTC1 client through the upgrade.  
+
+That said, miners _can_ still mine with BU.  However, there are at least three reasons that they may prefer not to:
+
+1. They cannot include segwit TXs in their blocks, and thus they miss out on that potential revenue stream.
+
+2. They cannot validate the signatures of any segwit transactions in the previous block ([although this risk is very small](https://bitcrust.org/blog-incentive-shift-segwit.html)).  
+
+3. BTC1 nodes will not request blocks from nodes without Compact Block support.  This means that BU blocks would end up relayed through Classic or XT nodes that support both Xthin and Compact Blocks, increasing propagation delay and thus increasing orphan risk.  
+
+I think #3 is most serious. The good news is that /u/jgarzik has said that he is totally open to adding Xthin support to BTC1 after the upgrade.  IMO Xthin is superior to Compact Blocks and I believe its benefits will become increasingly clear as the blocks size grows, as we're already seeing on the gigablock testnet. 
+> So they were able make a 262 MB block that was compressed 55 times. So it was a ~5 MB block of data transferred?
+
+Yes, BU nodes support Xthin block transmission, developed by /u/bitsenbytes.  It really shines for large blocks.  You can read more about Xthin here:
+
+https://medium.com/@peter_r/towards-massive-on-chain-scaling-presenting-our-block-propagation-results-with-xthin-da54e55dc0e4
+You're still missing the critical detail that makes segwit coins different than bitcoins.  With segwit coins, miners can update their UTXO sets and mine non-empty blocks even if they are missing signatures from recent transactions.  With regular bitcoins they cannot.  
+
+The problem isn't that an "invalid transaction" might get mined; it's that a transaction might get mined, and blocks built above that transaction, and the witness data never arrives (or some people claim to have seen it but _you_ never do).   How long do you wait for the witness data to show up?  At what point do you reject the chain tip and start mining from an earlier block?  Will the other miners agree and forfeit the block rewards they've already earned, or will they just keep waiting longer?  The witness data must be around here somewhere, right? ;)
+/u/awemany /u/forkiusmaximus: GMSI^1 is rising; you know what that means.
+
+
+
+^1 ^Greg ^Maxwell ^Shrillness ^Indicator
+/u/awemany /u/forkiusmaximus /u/solex1:
+
+26 minutes.
+
+Like I always say: you know you're on target when Greg Maxwell is called out quickly to do damage control.
+>> How do you think we should upgrade to larger blocks?
+>
+> Using specific and universal rules to determine block validity.
+
+This is what the miners want too.  If a mining node enforces a block size limit either above _or_ below the median, then he exposes himself to potential risk.  And this is why the miners intend to agree on a new specific block size limit once sufficient support for larger blocks is obtained.  
+
+But I don't think we'll ever go back to a time where _all **non**-mining nodes_ also enforce the exact same block size limit as the miners.  Bitcoin Unlimited has shown that this is not required and is in fact helpful, as nodes already willing to accept blocks larger than the max size currently being made by miners makes future block size limit increases easier to coordinate.  
+
+No, it's not officially part of BU and I don't suspect it will ever be (unless miners specifically ask us to make it part of BU).  
+
+> yes, I don't see how BU can be associated to low fees. If anything, fees will just be less predictable (since wallets can't tell what the maximum block size is) and overall more expensive (since RBF has been disabled, there's no fee discovery logic available)
+
+Is this what you actually believe, Nicolas?  That fees would be higher with Bitcoin Unlimited and larger block sizes?
+
+
+It's simply Nakamoto consensus. If the majority of the hash power is willing to accept the larger block, then it will be included in the longest PoW chain.
+BU implements the "meta" block size limit proposal, BUIP001.  This allows BU nodes to track consensus as defined by the longest PoW chain composed of valid transactions, under a wider variety of cases.  BU tracks BIP109 if the BIP109 chain is longest.  If the small block chain is longest, then BU will track that. 
+
+But I think you knew this already.  
+> How is it incompatible? 
+
+I guess it depends on what you mean by "incompatible," but by the definition I'm using, it's not.  
+
+The spirit behind BU is to be conservative with the blocks your node produces and to be permissive with the blocks your node accepts.  With this spirit, convergence across competing implementations becomes more robust to edge cases. 
+
+In the current case, BU is operating on the most work chain, because it is valid according to its rules.  If the other chain becomes longer, then BU will switch to that.  This is as designed.  
+
+BU sets Bit 28 for two reasons:
+
+1. to help the Classic 2MB HF activate (BU may in the future signal support for other block size limit proposals too)
+
+2. to indicate that if other miners begin producing blocks greater than 1 MB in size--and if the longest chain contains such blocks--BU nodes will follow that chain.
+
+Greg's argument appears to be that the BU nodes should have broken _away_ from consensus and followed the _minority_ chain during this forking event.  Instead, BU did the right thing and followed the longest PoW chain composed of valid transactions.      
+> Compact blocks / xthin blocks will change the situation. With those technologies fully working, arbitrary huge blocks will not get orphaned, so there won't be a penalty for producing too big blocks.
+
+Xthin reduces the amount of seconds it takes to communicate each megabyte of block information; however, the propagation time is still ~linear with the size of the block.  This will permit much larger blocks for a given network orphaning rate, but it will not _remove_ blocksize-dependent orphaning risk.  
+
+(In fact, Xthin will make it relatively more difficult for miners to propagate huge spam blocks, as it relies on partial mempool synchronization. If the other miners do not know about the transactions in the spam block, then the spam block will propagate much slower than a comparably-sized block filled with standard transactions.)    
+
+
+Thanks for the comment.  I was writing for a more general audience and I wanted to follow the example I gave just above of searching through the 1000 numbers to find a one in a million collision.   Like you said, you do not _need_ 3 TB of storage and nor did I claim that.  The point I was making is that if you _had_ 3 TB of random transactions, there's a good chance that two of those transactions would collide in the first 64-bits.  I'm not sure what the _most practical_ design of the Xthin Collision Tool would look like: there's a time vs memory tradeoff.  But really, this is getting into unimportant details: the point is that collisions are feasible.
+
+I'm really hoping that Greg publishes his Xthin Collision Tool.  It would be interesting to see how he finds the collisions and also to see the tool in action!
+> Earlier this year Mike's implementation for XT was redone in BU. The folks working on it there refined it by inverting the direction of the bloom filter. AFAIK-- unlike the rest-- this is novel and hadn't been proposed out loud before 2015...This trick also not part of compact blocks. 
+
+Agreed. Bitcoin Unlimited's use of the Bloom filter is novel.  
+
+> I think it is a not a great idea and the numbers on the performance in practice seem to support belief (post on the unlimited forum I found last night say 66% of blocks require an additional roundtrip).
+
+Larger number of extra round trips can happen for some edge cases but is not typical performance.  Can you link to this post?  We have been performing a thorough test over the past few weeks, and we are seeing additional round trips less than ~1% of the time IIRC.  Very few extra round trips also makes sense from a theoretical perspective, as it requires a false positive in the Bloom filter query.  
+
+> 00:17 < sipa> if we need to ask for missing transactions, there is an extra roundtrip, which makes it likely slower than full block download for many connections
+
+Do you have data on the typical delay added by an extra round trip during block propagation?  I'm not sure I agree with this statement by Sipa (although I haven't analyzed our data concerning this question yet).  
+
+> Why would anyone want to mine infinitesimal amounts of bitcoin worth less than the cost of the electricity?
+
+I don't believe this is currently true:
+
+Presently, it takes about 600,000 PH to mine a block (25 BTC) [1 billion GH/s x 600s].  So each PH is worth about 25 BTC / 600,000 = 42 bits.
+
+The efficiency of the 21.co chip is [~0.16 MJ/PH](https://support.21.co/21-bitcoin-chip/what-s-the-hash-rate-of-the-21-bitcoin-chip).  0.16 MJ is the same as [0.044 kW-hr](https://www.unitjuggler.com/convert-energy-from-MJ-to-kWh.html?val=0.16). 
+
+The average price of electricity in the US is [$0.12 per kW-hr](http://www.npr.org/sections/money/2011/10/27/141766341/the-price-of-electricity-in-your-state), so 0.044 kW-hr of electricity costs about 0.044 x 0.12 = $0.0053.  At an exchange rate of $400/BTC, that works out to 13 bits.
+
+Therefore, the 21.co chips currently earn 42 bits for every 13 bits spent on electricity (based on the US average electricity rates).    
+
+> Do you really think that the general population wants to hook up extra hardware to generate amounts of pocket change found in the couch cushions?
+
+I think the plan is to eventually integrate these chips into consumer electronics such as computers and mobile devices so that there would be no "extra hardware."  
+
+> It would take a month to be able to buy a cup of coffee.
+
+I don't think the mined coins would be used to "buy a cup of coffee" but instead to bypass a paywall, pay for wifi access when travelling, or used for some other innovative micropayment idea.  
+> I want to point something out about an Unlimited block size.
+
+Bitcoin Unlimited does *not* have an unlimited block size.  The word "unlimited" refers to giving freedom of choice to the node operator, so that consensus regarding things like the block size limits emerge through a "bottom up" decentralized process. 
+
+I support BIP101 as well and see it as complementary to BU.  I suspect it has already defined a set of Schelling points at 8, 16, 32 MB, ... in our collective consciousness that we are now likely to follow (whether a node operator runs XT or BU).  
+
+Work to promote [decentralization of development](http://i.imgur.com/DNxdXTR.gif), add multiple protocol implementations (e.g., by supporting [Bitcoin Unlimited](http://www.bitcoinunlimited.info/)), and increase the transactional capacity of the network and improve 0-conf security (e.g., by integrating [subchains](http://www.bitcoinunlimited.info/downloads/subchains.pdf)).
+This paper represents novel work related to privacy techniques for cryptocurrency, so it is entirely relevant. 
+Yes, that is what the data shows.  It will be interesting to see if the two curves begin to correlate strongly with each other again (as they have in the past), or if the historical relationship has already broken down.  
+There is a quote from Greg Maxwell taken from [this email](https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-May/007880.html) that has been cited a lot recently by the small block side of the debate.  The quote suggests that fees will not add to network security without an artificial constraint on block size: 
+
+"**For fees to achieve this purpose [added security], there seemingly must be an effective scarcity of capacity. The fact that verifying and transmitting transactions has a cost isn't enough, because all the funds go to pay that cost and none to the POW "artificial" cost**; e.g., if verification costs 1 then the market price for fees should converge to 1, and POW cost will converge towards zero because they adapt to whatever is being applied."
+
+It is easy to show that this argument is wrong with this simple diagram.  The fee revenue goes to three things: miners' profit, orphaning cost, and increased security.  The exact mix between profit, orphaning cost and increased security depends on the competitiveness of the market and the concavity of the two curves.  The point is that fee revenue will always add to security and will never subtract from it.
+
+I need to give credit to /u/mengerian because he originally made a similar diagram months ago.
+This is a simple animated GIF that visualizes one possibility for how multiple protocol implementations might emerge over time. 
+
+Decentralizing development and supporting multiple forkwise-compatible implementations of the protocol is a worthwhile goal that will simultaneously make Bitcoin more robust *and* more responsive to the will of the market.  
+
+Cross-posted: https://www.reddit.com/r/Bitcoin/comments/3nhq5a/deprecating_bitcoin_core_visualizing_the/
+
+**UPDATE: The cross post to /r/Bitcoin has now been censored and I've been temporarily banned for vote brigading.**
+Awesome work, Noosterdam!  It's a great illustration because it shows that LukeJr's original diagram doesn't change in any way whether BitcoinXT is the "alt-coin" or Bitcoin-1MB is the "alt-coin."  In other words, his diagram actually served to discredit his argument.  
+
+On the other hand, cryptocurrencies building from a different genesis block would look very different on such a diagram.  
+
+/u/changetip $2
+Holding bitcoin in a registered account, for example.  As a Canadian, there is presently no vehicle that allows me to easily tax-shelter bitcoin gains in my TFSA or RRSP.  When the COIN ETF begins trading on the NASDAQ, that will change.  I will be able to purchase COIN shares directly into my TFSA or RRSP. 
+It's even worse than that because a better definition of "dust" is outputs that are uneconomical to spend because doing so would cost more in fees than they are worth.  At $100 fees, _most_ LN payments will lose the trustless property.  
+
+If BTC devs were to artificially lower the dust threshold from when fees are $100 down to $1, it would not be a "fix" at all -- it would just confuse the issue.  The same problem would still apply: payments on the order of $100 in value or less would not be trustless.
+The only thing I think Rick got wrong was that there is no proposal for watchtowers to accept incoming payments when you're offline.  But that _strengthens_ his argument.  
+
+I have no problem with people speculating about the future (e.g., Rick saying that LN nodes will need to regulated) but I do want to refute factual errors or misunderstandings.  But I didn't see any in his video except the watchtower thing.  Did you?
+Yes, if you lose your channel states you're in trouble.
+
+It's actually worse than that in LN V1.0: even if your channel partner force-closes the channel honestly, and your channel balance is returned to your on-chain wallet, you won't be able to spend it!  The reason is that the private key for your funds cannot be derived purely from your wallet seed (e.g., the 12 words you write on paper), but depends also on a "dynamic" piece of information that was lost when your hard drive crashed.  
+
+The LN developers believe they can fix this in LN V1.1 (and I think they probably can).  But right now it's pretty ugly.  
+
+Even after this fix, the problem of backing up your channel states remains. 
+Yes, the entire amount "in flight" is at risk if HTLC are unenforceable.  HTLC are unenforceable for amounts below the dust threshold and I think (but not sure at the moment) are impractical for amounts below the on-chain fee rate.
+By your definition, how is proof-of-stake not Nakamoto consensus?  Imagine a PoS coin with a tiny PoW component, but really everything is settled by PoS.  Is not your argument that Nakamoto consensus is defined by the fact that nodes express their acceptance of a block by building on top of it?  Yet this applies also to my imaginary PoS coin with a sprinkling of PoW.  Nodes use the PoS process to decide which blocks to build upon, and the PoW is just there for show.  I think most people would call this a proof-of-stake coin at this point.  
+
+My view is that what makes Nakamoto consensus "Nakamoto consensus" is the fact that nodes can objectively determine the validity of a transaction with only knowledge of the (effectively static) consensus ruleset and the blockchain.  Pure Nakamoto consensus is purely objective; there is no subjective element to it like there is with PoS or Avalanche.  Because Avalanche can dynamically define certain transactions that would otherwise be valid as "invalid" (e.g., double-spent transactions), I would say that it is a departure from traditional PoW-based Nakamoto consensus.  (I'm not saying that Avalanche is a bad idea -- in fact I like it in many ways -- I just think that it represents a significant departure from pure PoW).  
+
+Right now, the Nash Equilibrium of respecting first-seen-safe is not stable in a strict game-theoretic sense.  A miner controlling 1% of the hash power can increase his (short term) profit by deviating from the default strategy and accepting bribes. 
+
+With something like what Chris just proposed, we now have two stable states: full RBF or first-seen safe.  If we are in the "first-seen-safe" state, a miner with 1% of the hash power cannot increase his (short term) profit by accepting bribes. If he tries to cheat, he will see that he actually earns less, and will thus return to the "first-seen-safe" strategy.
+Yes this is exactly my point!
+
+Even if a crazy madman tries to prevent making some script “efficient” we can do a pretty damn good job of making it efficient in a permissionless way anyways. The end result is something with properties and efficiency close to the desired op-code. So let’s go right to the compact op-codes for things that we’re confident will be useful. And let’s leave open a path for “controversial” op-codes to prove their worth in an evolutionary way via the process I alluded to (and thezerg [describes](https://medium.com/@g.andrew.stone/forkless-inclusion-of-functions-loops-and-new-opcodes-in-bitcoin-script-6bd1155a9f5a))
+> So... Wright is right then? And it does not matter?
+
+But if it (CDS) doesn't matter, then why fight it so hard?
+ 
+He is worried about the time it takes to sort a block using Gavin’s GTOR, and how easily that can be parallelized. Maybe /u/awemany has thought about this question.
+With the BU client, miners can set their limit as the see fit. BU works hard towards making bigger blocks possible. Google “Gigablock Testnet” for a good example.
+The limit hasn’t been hard coded in BU for years. I fought to get rid of the hard coded limit. Users can very easily set their block size limit to whatever they want in a few seconds.
+
+You are completely misrepresenting my position. My position is that miners have explained to BU that they want to be able to set a limit, and so we give them a tool to do that. If we make it impossible for them to set a limit, I don’t think they will run our software. How is this unreasonable?
+>Non of that matters unless it is a miner doing it and you know it.
+
+A double-spend proof that a merchant received from a non-mining node is equally useful to a double-spend proof received from a mining node: in both cases the merchant receives proof that a customer is trying to defraud him.
+
+> If you want to run a node but can't keep up with miners you should be running an spv. Connect to a miner for the data you require, all the data comes from them anyway.
+
+I don't see how this comment is relevant to anything I've said.  
+
+
+
+To understand the instant transaction debate, you need to understand that there are _two_ distinct classes of double-spends being discussed.
+
+"Synced double spends" or "race double spends" occur when a fraudster pays a merchant but broadcasts a conflicting transaction (that sends the money back to his wallet) into another part of the network around the same time, hoping that the conflicting transaction will confirm.  
+
+"RBF double spends" or "bribe double spends" occur when a fraudster pays a merchant and delivers a conflict transaction _with a much higher fee_ to a dishonest miner, hoping that the dishonest miner finds the next block confirming the conflicted transaction.  
+
+With synced double spends, like you said, the head start is all that is needed to be pretty sure the legitimate transaction will be mined.  What's nice is that the merchant can wait longer: 4 seconds, or 10 seconds, or X seconds,s to lower his risk to synced double-spend attacks to whatever risk level he's comfortable with.  
+
+Our plan for synced double spends is just to (a) make TXs propogate as quickly as possible, to reduce the amount of time the merchant has to wait, and (b) to make it easier for the merchant to receive notification that a double-spend attack is underway, so that he can withhold the merchandise. 
+
+RBF double-spends are a different beast that rely on dishonest miners who knowingly swap the first-seen legitimate transaction for a higher-fee-paying fraudulent transaction.  This is a much harder problem to solve, and the ideas to solve it are controversial.  I gave a talk on one such idea in Tokyo last spring:
+
+https://www.youtube.com/watch?v=yXFuNkaYcPQ 
+I think Selfish Mining is a real vulnerability in the same way I think a 51% Attack is a real vulnerability.  
+
+The logic for why a miner who has the ability to selfish mine may choose not to, mirrors what Satoshi said about a 51% miner:
+
+> "He ought to find it more profitable to play by the rules, such rules that favour him with more new coins than everyone else combined, than to undermine the system and the validity of his own wealth."
+Nice work, as usual, /u/jvermorel.
+
+You articulated several important points that I believe many people miss with respect to instant transactions.  
+
+For example, I enjoyed your comments about RBF and how miners that willingly accept bribes are essentially "organized crime" members.  You pointed out that this strategy obviously has higher risks than what one might think by drawing a box around the network and viewing it purely as a computer science problem.  Your commentary also sheds light on how RBF in BTC was so dangerous because it slowly modified the social contract to one where RBF was considered a helpful feature.  
+
+I was happy to read your comment about longer block times actually being helpful for securing 0-conf transactions, as this was an unexpected result I noticed in my work on subchains preparing for SV Tokyo.  Perhaps 10 min was a wise choice for more reasons than people might have initially imagined.  
+
+Also, your comment about larger blocks being _helpful_ for instant transactions because it forces miners to compete on propagation is something I've been pushing since [writing this paper in 2015](https://www.bitcoinunlimited.info/resources/subchains.pdf).  If blocks are very easy to propagate, all sorts of deviant strategies become possible; these strategies become less effective when timely block propagation is not trivial.  
+
+In general, I like very much the idea of pre-consensus.  Indeed, I too believe rational miners will _want_ to remain in sync with the pre-consensus technique (whether that is Ansible, subchains, or something else) so that they minimize their orphan rates due to the faster block propagation and thus maximize their revenue.  This also has the benefit of discouraging selfish mining, as the selfish miner will likely be far out of sync with the pre-consensus.  
+
+I need to read your section on Ansible a few more times to wrap my head around it, before I chime in on whether I like _this specific_ proposal.   Also, I think this needs a lot more analysis on its correctness and robustness to other attacks, as well as whether this is a slippery-slope to a permissioned mining network.  Nevertheless, your article brings up lots of interesting ideas and discussion topics.  Good work! 
+
+EDIT: But why include "faster than light" in the title?  It makes it seem sensational when you're instead using synchronized clocks for time-stamping.  
+
+
+
+The current protocol is to mine on the longest chain.  CSW is proposing to alter that part of the protocol to instead mine on a shorter chain if the miners agree (through some undefined algorithm) that the block at the tip of the longest chain contains a 0-conf double spend.  
+
+If this is not a change to the protocol, then what would a change to the protocol look like?
+
+EDIT: I'm not saying that changes are necessarily bad, but let's not pretend that changes aren't actually changes.  
+Sorry for the sarcasm, it's just that we've been debating these issues for half a decade now.  The idea that fees will fall to zero and blocks will grow unbound without a block size limit has been shown to be absurd both empirically and theoretically.
+
+https://www.bitcoinunlimited.info/resources/feemarket.pdf
+
+https://m.youtube.com/watch?v=ad0Pjj_ms2k
+
+BCH has an 8 MB block size _limit_.  The actual size of a block is determined by the miner who mines it.   In my opinion, the block size _limit_ should be infinity.  Miners won't produce ridiculously-sized blocks because they will likely be orphaned.  On the gigablock testnet, we did not run into problems until over 100 tx/sec sustained throughput and blocks over 100 MB.  
+
+BCH is a token on a blockchain.  BU, XT and Classic are open-source projects that maintain node software.  You cannot compare them.  For example, BU has node software that tracks the BCH blockchain and different node software that tracks the BTC blockchain.  
+Our best-performing node was a $2000 desktop machine in Sweden.  That is $2000 not $20,000.  Besides, users can verify their own transactions and "be there own bank" with an SPV wallet, that has bandwidth requirements as low as sending a handful of SMS (text) messages per day.   Today there are 4 billion SMS users.  Those users are already using the computing and bandwidth requirements to use an SPV wallet.
+Here's a simplified version of the question: what is the expected arrival time of the next block solution _given that it is not found in the first 10 minutes of trying_?  
+
+And we _know_ the honest miners don't find a block between t = -10 and t = 0 because otherwise how could the selfish miner solve the next block (at height N) at t = 0?
+
+Conditional probability.  If you don't believe me, simulate it.  The answer is t = 15 min.
+Great job on this site, Sina!  
+
+I love how we can give our adopted nodes a name.  I called mine "my_lil_node" and it shows up when I check for my node at bitnodes.21.co:
+
+http://i.imgur.com/17Gmv6P.png
+This is already in motion (well, perhaps not the specifics of the 1-day conference call).  But first we need more miners to signal their willingness to begin producing larger blocks, by including the "EB" flags in their coinbase strings.
+Yes.  
+
+In fact, Stage 3 is a soft fork too, applied to the minority chain.
+It's worse than that. The only way BCU expires with value is if what's in the Core repo _at a point almost a year in the future_ doesn't track the most work chain.
+> Its also on my todo list to write a more detailed professional bio
+
+Chop chop. We need this for the new BU website launching in a few weeks.  :D
+>> UTXO growth is based on more people using Bitcoin.
+
+> This is just unsupported nonsense.
+
+Let:
+
+     N_outputs = (avg active outputs per user) * N_users + lost outputs
+
+The term `avg active outputs per user` obviously depends somewhat on use patterns (e.g., /u/awemany argues LN will result in _more_ outputs per user) but it will _probably_ be a number like 5 or 12 or 50, regardless.  The number of lost outputs will only slowly increase with time (people don't like losing money).  But the term `N_users` (the number of Bitcoin users) can increase dramatically from (say) 5 million today to 2 billion in the future.  `N_users` is the important independent variable in the above equation.  
+
+So I think /u/tomz's statement is accurate.  A more precise way of saying it would be that the size of the UTXO set scales with the number of people using Bitcoin, ceteris paribus. 
+But clearly that is not true.  If node operators enforce EB1/AD∞ then their nodes enforce the same block size constraints as current Core nodes.  
+
+All BU really "does" is make it easier for node operators to do something that they can already do today _anyways_.
+So in other words, you were wrong.
+
+
+That was my favorite presentation of the day.  Well done!  
+Emin has been doing great work! It's awesome that top academic researchers are contributing to Bitcoin.
+Indeed; however, another often stated but incorrect claim is that it was Greg Maxwell who came up with the proof.  As far as I can tell, the proof originates from a paper titled "[Impossibility of Distributed Consensus with One Faulty Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf)," by Fischer, Lynch and Paterson.  In fairness, the proof applies to a "system of asynchronous processes" where the "system boundary" encircles only computer systems; the system boundary for Bitcoin encloses the human miners and node operators too.  Because of this, Bitcoin's properties depend on more than just "code" but on the mental processes in every miner and node operator's mind, as they make decisions based on Bitcoin's incentive structure.  Incidentally, Mr. Maxwell's thinking still appears to be amiss on this point.
+Marginal orphaning risk cost denominated in BTC will fall as things like interconnectivity, coding gain, and signature checking improve--but this is a good thing!  For example, if Bitcoin were to 10x in value, then it would cost ~$0.50 per transaction given today's orphaning risks.  By reducing this risk by a factor or 10, miners could produce block space more affordably, hopefully keeping fees denominated in $ low (or lower) than they are today.  
+
+The bottom line is that we *don't know* what the [free-market equilibrium transaction fees](http://www.bitcoinunlimited.info/public/downloads/feemarket.pdf) will be ten years from now. Will they be low enough that we can use Bitcoin to buy our morning coffees?  Or so high that Bitcoin is only useful to make our mortgage payments?  Let's let the *free market* figure this question out -- not /u/adam3us and his Blockstream Central Planning Committee.  
+
+Lastly, also note that it will never "cost nothing" to make larger blocks, even ignoring orphaning risk, as resources must be consumed somewhere.   
+Sure.  It was an email that I wrote in response to Pieter Wuille's email earlier this morning.  You can read it here:
+
+https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-202#post-7362
+
+The rest of the thread contains additional context.  
+Thanks for the questions!
+
+> This just requires network protocol changes, correct? Basically, people can reconstruct the block candidate (including actual header) by just looking at the existing subchain and new incoming data.
+
+Correct.  Neither a hard nor soft fork is required (however, the technique is basically useless unless a significant portion of the hash power participates).  
+
+> There's no specification of the Δ-block format. I assume we've still got some work to be done on that front, or is it mostly done? 
+
+The high-level specification is actually done (it's just extremely simple).  A diagram for a Δ-block is shown in Fig. 2f.  It is just a regular block (same block header, coinbase TX, etc.,) but only containing the new transactions.  The "reference to the subchain's tip" is just the hash of the previous weak block (similar to how strong blocks work).  The agreement is that that reference refers to the contents of the previous block *verbatim*, but with the block header and coinbase TX stripped out.  
+
+> Are Δ-blocks designed to be purely additive append-to-end things, or do we need/want other machinery?
+
+It depends on one's vision for Bitcoin.  If Δ-blocks are "append only," then zero-confirm transactions have some measurable security (and the network protocol is dead simple).  If your protocol allows for "cherry picking" and removal of TXs, then the zero-conf security degrades considerably, and the protocol becomes more complex.  However, the benefit of fees going to increased hash power still remains.  
+
+If one's vision for Bitcoin is that TXs should be easily alterable for 10 minutes, then you're probably not going to appreciate the 0-conf security because it may be extremely difficult to double spend even an unconfirmed TX.  
+
+> If we were able to hard-fork to support this at a protocol level, is there an incentive scheme that improves security further? (I'm thinking maybe you get half the fees from the transactions in your weak block, and the eventual strong block gets a difficulty reduction equal to half your effective work, effectively splitting both the reward and the work). Or does the added complexity bring us nothing? It certainly sounds like just decreasing the block interval at that point.
+
+For me--now that I've had time to think about this in great deal--I've come to the belief that in the future, the block time will hardly matter at all.  The fact that we can build subchains--and adjust the nesting and difficulty of those chains--without changes to the consensus layer means that we can basically get most the advantages of very short block intervals without the associated risks.  So no, I don't believe there would be much of an advantage to implement this as a fork.
+
+> You seem to have an unstated assumption that miners only store a small amount of weak blocks (only the dominant chain), which is where the extra resistance against an double-spend comes from. But for any reasonable weakness (1/81 and even less), you'd want to keep track of all chains, so you never have to wait to start working on the new longest chain. Then the propagation time doesn't become additive, and the security guarantees become weaker. 
+
+Indeed.  This is why I mentioned the nested subchains in Section 9 (but didn't delve to deeply into them, as the paper presented enough new concepts).  But the basic idea is that miners only need to care about the 1/81 weak blocks that are built on top of the highest-fee subchain at the 1/27 nesting level.  If this becomes a "mess" and they don't converge to a single subchain, then that just means that there's too much latency for subchaining to be effective at this very-fast level.  If it wasn't effective, then miners wouldn't support it in the first place.  Instead, when the network infrastructure improves, they would say "ok, the network is fast enough now to support 1/81 subchaining" and then maybe everyone starts participating at this level too.  
+
+Personally, my suggestion would be to just implement non-nested subchains at perhaps 1/4 difficulty (or maybe 1/10), and take it from there.  That would already give a 4X (or 10X) throughput increase without affecting orphan rates.
+
+> Alternatively, was the assumption that the attacker wouldn't publish any weak blocks until he was ahead?
+
+No.  The security comes from the fact that the attacker is actually unlikely to even find a weak block before the network finds a strong block.  
+
+Gavin also makes a great point about the UTXO set being bounded. Thinking more about this topic, the total amount of satoshis that will ever exists is:
+
+    (21 x 10^6) x (10^8) = 2.1 x 10^15 = 2.1 "peta-sats".
+
+The UTXO set is maximized if every output is exactly 1 satoshi; in this case, the UTXO set consists of 2.1x10^15 outputs.  
+
+For each output, let's assume we store the transaction hash (32 bytes), the value (8 bytes max), and the scriptpubkey (25 bytes for P2PkH), which is a total of 65 bytes.  So, a reasonable "worst case" upper bound on the size of the UTXO set is:
+
+    (2.1 x 10^15) x (65 bytes) = 137 petabytes.  
+
+How much memory is this?  A quick google search turned up 128 gigabyte microSD cards [[img](https://ip.bitcointalk.org/?u=http%3A%2F%2Fi.imgur.com%2F2725tQW.jpg&t=557&c=nFgcrAX2rPDc-A)].  
+
+To store the worst-case UTXO set on an array of these cards would require about one million of them (yes, I realize we’d need RAM in addition to FLASH as well as other supporting hardware, but we’re just getting an order-of-magnitude idea here):
+
+    (137 x 10^15) / (128 x 10^9) = 1.07 x 10^6.
+
+This calculation shows that storing the worst-case UTXO set is currently well beyond the limits of a home user, but it's actually within the limits of the world's largest data centers such as the Prineville campus for Facebook that stores 1,000 petabytes of data (about 8X more).
+
+...OK, now let's be reasonable!  Let's assume that 10 billion people on Earth each control about 4 unspent outputs on average.  That's a total of 40 billion outputs, or
+
+    (40 x 10^9) x (65 bytes) = 2.6 terabytes
+
+With these assumptions, it now only takes about 20 of those SD cards to store the UTXO set:
+
+    (2.6 x 10^12) / (128 x 10^9) = 20.3,
+
+or, three 1-terabyte SSDs, for a total cost of about $3,000 [Ok, ok, it’s probably more than this factoring in RAM and other supporting hardware...] 
+
+Of course, by the time there's a need to store this much data, we will likely have special-purpose hardware to do so quite efficiently.  
+
+**TLDR:** 
+
+1. The world's largest data centers could already store the UTXO set even if every satoshi was a unique unspent output.
+
+2. Under more reasonable assumptions, power users and small businesses should be able to store the UTXO set even if 10 billion people each had 4 unspent outputs (using *today's* technology).
+I shared the link to my post here, at bitcointalk and at bitco.in to encourage participation in that thread by more of the community.  Nowhere did I solicit people to upvote certain posts or anything like that.  
+
+Does anyone know /r/bitcoin's definition of "vote brigading"?
+It's funny because it's true.
+Right.  Furthermore, we should capitalize the word "Core" because that is the name given to one implementation of the Bitcoin protocol (albeit the most popular implementation at the moment).  Like Noosterdam has pointed out before, referring to it as "core" (lower case) could unintentionally imply that it is somehow the permanent core of Bitcoin.  
+I agree.  I know Greg Maxwell and many others have suggested similar ideas in the past.  
+
+Why can't this be added as part of the isStandard() test?  Scale the min relay fee by a variable that is > 1 if the TX increases the UTXO set and < 1 if otherwise.  
+Here's a plot shared a few weeks ago that illustrates differently when we may bump into the 1MB limit:
+
+http://i.imgur.com/ost0xs5.gif
+
+It's perhaps easier to visualize the exponential trend line using a log axis because it becomes a straight line.
+- The area of each gray disk (assuming the disks stack) represents the corresponding M2 money supply, converted to USD.  
+- Bitcoin's disk is the very small orange one in the center. Its area represents Bitcoin's market cap in USD. 
+- The figure was made in Mathematica.  I wrote a script to plot each circle with a radius proportional to the square root of the M2 money supply (so that the circle's area is linearly proportional to the money supply).  
+
+Edit: added note from Noosterdam re stacking.
+Thanks for the credit, tacotacoman1.
+Thanks for helping educate people on the pitfalls of Lightning!  I think you're spot-on with your criticisms.
+
+I'll try to answer some of your questions:
+
+> 1.a. However, I also recognize that we might not need to find the most optimal route - “good enough” might work. But can we achieve good enough without relying on centralized hubs?
+
+Yes, I think we can find "good enough" routes without relying on centralized hubs, but there are a few "gotchas." First,  it will require most users being well-connected (lots of channels) which might not be realistic in a high-fee future.  Second, finding the route won't necessarily be easy or possible to do on small devices with low-bandwidth connections. See my answer to the next question for the reasons why this will not be easy.  I suspect that most users would then rely on "routing servers" to find the best route for them in a future WITHOUT centralized hubs (but I think we would have centralized hubs).
+
+> 1.b. How do LN wallets today manage to route messages? Do they maintain a network map? What is the anticipated consequence of a network with millions of users?
+
+LN transactions, as you know, are _source_  _routed_.  This means that the wallet must find the path from itself to the destination.  The way this is done is that all LN nodes advertise their channels (actually only their _public_ channels but this is a minor detail). A Lightning node like LND then maintains a map of the channel graph, as you suspected.  If you are playing with LND you can "see" the channel graph with the command:
+
+```lncli describegraph```
+
+Recently, LND increased the "block size limit" for the channel graph to 50 MB (for communicating the graph to nodes that just came on-line, AFAIK).  This was needed because more and more channels were opening up and so the graph to describe how the channels were connected got a lot bigger.  And that's with only ~8,000 LN users (there are about 8,000 Lightning nodes and you need a node right now to run a wallet).  So if we imagine a future with a billion users where the channel graph is reasonably decentralized, it's obvious that the channel graph would be HUGE!
+
+In such a future, will it be reasonable for a LN wallet to come on-line after a few days off, download this huge channel graph and then route a payment?  No! 
+
+However, if all the "users" connected to one of perhaps 10 "megahubs," and if all the megahubs were fully interconnected, then routing a payment would be trivial: all I need to know is that the recipient is connected to "MegaHub of America" and the payment will go through.  I no longer need to network graph.
+
+> 1.c. Additionally, what happens if, when using onion routing, an offline node is encountered? Doesn’t the end destination need to be revealed if a new path is to be determined? In other words, won't the onion encryption need to unwrapped?
+
+The payment just fails.  And then your wallet could try again.  There is no need unwrap the onion.
+When I do the numbers for a global adoption scenario, I estimate that I'd need at least 1 Gbps internet to run a node (and more for mining competitively).  Here in Vancouver, I couldn't get this in my apartment, although many of the office towers downtown could.  So yeah I think if we were to scale to global adoption THIS YEAR most nodes would be run from data centers (which I don't see as too big a problem, personally).  
+
+But I think by the time we get there, residential 1 Gbps and 10 Gbps connections will be more common.  
+I guess it depends when you define the official start date.  But the fall of 2015 was when BU really came together IMO.  I wrote the paper on the fee market in the absence of a block size limit in August of 2015, which was before we started taking BU seriously and before the repo was forked, but I suppose we were discussing the general idea as far back as 2013/2014.
+It's due to the way payment channels work.  It is not a one-way procedure like sending a bitcoin; instead it is a back-and-forth procedure where we each trustlessly update the two balances in our payment channel. If my private key if offline, I cannot participate in the channel-state update.
+
+I'm thinking we need some nice animations for both how payment channels work and how HTCLs work.
+Yup, the more-aware LN proponents now understanding that LN fundamentally will not work (except with centralized hubs and custodial accounts).  Their solution is to transition from a two-layer system (Bitcoin + LN) to a three-layer system (basically another Lightning Network on top of a Lightning Network).  
+
+What's interesting is that a lot of less-aware LN proponents don't realize this yet, and still think the original design of LN will work.  I hope that many of these people wake up when the three-layer idea is more loudly promoted as a solution to the problems with the two-layer solution!
+Bitcoin.com was in October when I ran some 0-conf experiments. 
+I’m sorry but neither of those two statements are true.
+
+1. There are non empty blocks that satisfy both CTOR and TTOR.
+
+2. Reorging does not require a hidden chain. Imagine a 51% miner only mining empty blocks on top of empty blocks, and not hiding anything. The blockchain will then contain only empty blocks, as all non empty chain tips will get re-orged away.
+Yes, I agree.
+In the double spend experiments I did (Exp 1 and 2 in particular), the fraudster waits to see that the merchant has accepted his payment _before_ broadcasting the double spend.  He either succeeds in getting the goods for free, or pays full price. There is no downside (outside of real-world effects like jail time if caught). 
+
+Wouldn’t it be a bad strategy to broadcast both TXs at the same time, because, as you point out, the attacker may end up paying the merchant and not recieving the goods?
+
+Well done! Roflol 
+
+u/tippr $5
+I think a better analogy would be a genetically-engineered new type of super banana that was bigger and easier to produce, but was 1000x more radioactive.  I'd be the physicist going around pointing out that "yeah the radioactivity is still low, but this new fruit is quite different than the bananas that came before it."  Sure maybe the super bananas end up being totally safe, but we won't _really_ know that for decades (as the negative effects might not be immediately apparent). 
+The point of the talk was to bring up some of the nuance, that people were missing, about how segwit coins did in fact have different properties than bitcoins.  We should think hard about the consequences of any change before making it, and I think my talk did a good job of that.  
+
+I agree that most the economic force on BTC is now enforcing segwit, so the attack I described would be difficult to perform.  That said, my view remains that segwit coins have weaker private property guarantees than bitcoins.  Maybe 10 years from now we'll see that indeed segwit was a big mistake.
+With a pre-consensus technique like subchains, the temporal resolution could be improved. 
+
+https://youtu.be/yXFuNkaYcPQ
+
+Without a soft fork, it would not be _mandatory_ that blocks are built this way, but blocks that _were_ built this way would have finer time-stamp granularity.
+Yes, I probably get more recognition than I deserve.  BU includes many awesome people who make things happen including /u/s1ckpig, /u/bitsenbytes, /u/awemany, /u/solex1 and of course /u/thezerg1 (who did the hard work to make BU a real thing in the first place).
+
+cc: /u/Crully
+In our [Gigablock Testnet experiment](https://www.youtube.com/watch?time_continue=1&v=5SJm2ep3X_M), the average propagation/verification time for a 128 MB block was 77 seconds.
+Note that there is a canonical ordering that respects causality (i.e., it is not a fork) that would be equally-efficient in terms of propagation as lexical ordering:
+
+https://gist.github.com/gavinandresen/e20c3b5a1d4b97f79ac2
+I like double-spend proofs better too.  We're having a workshop specifically on this topic in October (assuming BUIP092 passes).  
+
+The way BU's governance model works is that we will implement any features that we get working code for and that passed BUIP voting.  It's interesting to note here that both double-spend relay (BUIP085) and double-spend proofs (BUIP088) passed the vote.  So if we get quality code for double-spend proofs we will merge that too.  
+
+
+The effect is totally overstated by BS/Core proponents (IMO the effect is negligible at historical orphan rates), but it certainly isn't a "myth." If the network orphan rate is 5% rather than 0%, a miner controlling 10% of the network hash rate will earn 0.5% more revenue hash-per-hash than a miner controlling a small hash rate in an apples-to-apples comparison. 
+We can do much more than 100 tps per CPU core today.  
+
+https://www.youtube.com/watch?v=5SJm2ep3X_M
+https://bitcrust.org/blog-incentive-shift-segwit
+
+https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-December/012103.html
+
+https://www.youtube.com/watch?v=VoFb3mcxluY
+
+
+You're assuming that regular users are the ones opening channels and holding private keys.  But with very high transaction fees, this may not be practical. Instead, banks may have channels open with other banks and regular users will just have accounts with those banks.  In this case, it is very easy to create "unbacked" IOUs.  
+> The client and mining software would still have to contain all the SegWit code. It would be needed to properly process and validate all blocks in the interval when SegWit was allowed.
+
+Once the dark days of segwit were far enough in the past, the segwit code could be removed completely (in fact, BU has no segwit code right now and can mine blocks and track the most-work chain).  Any remaining segwit outputs would then be seen as anyone-can-spend outputs.
+True but the incentives for miners to validate the witness data are weaker than the incentives to validate the regular bitcoin signatures.  There is an objective difference in the security model between bitcoins and segwit coins.  Whether it is enough to "matter" only time will tell.
+He's a few megabytes short of a full block.
+Agree is spirit: if people actually begin to use segwit TXs to any significant extent, BU will likely add optional support.  
+
+However, the risk of not doing so is less than your post implies.  Presently, segwit TXs are non-standard to BU; a BU miner won't accidentally mine a segwit-invalid TX, nor would a BU node accidentally accept a segwit-invalid TX into mempool.
+I didn't see it.  Anyone have a screen shot?
+Ignoring the fact that a 1 yottabyte block would never propagate (for one, it is vastly higher than the max message size), Bitcoin Unlimited nodes with a hard block size limit would declare such a block invalid.  
+
+Bitcoin Unlimited users running nodes with small block size limits (e.g., 2 MB) may want to configure their nodes to accept blocks larger than 2 MB once it is clear that the nework as a whole will accept them--so rather than being forked from the network and having significant down time while you upgrade your client, BU allows users to automate this step.  It is completely optional, and users who prefer to set a rigid block size limit can do so. 
+> Even after over a year's discussion, both Classic and Unlimited have punted on the sighash denial-of-service vector, for instance.
+
+It is only a "denial-of-service" vector because Core can only work on validating a single block at a time.  During this time, Core nodes are essentially "frozen" until the block is either accepted or rejected.  
+
+With parallel validation, that /u/shmazzled mentioned below, Bitcoin Unlimited nodes can begin processing the "slow sighash block" while accepting and relaying new transactions as well as other competing blocks.  If the nodes receive a normal block when they're half-way through the "slow sighash block," then the normal block gets accepted and the attack block gets orphaned.  This rotates the attack vector 180 degrees so that it points back at the attacker, punishing him with a lost coinbase reward.
+
+I agree that the fact that the number-of-bytes-hashed increases as the square of the transaction size is not ideal, and if there was an easy way to change it, I would probably support doing so.  But with parallel validation, the only non ideal thing that I can think of is that it increases the orphaning risk of blocks that contain REALLY big transaction, and thus miners could have to charge more for such transactions.  (Let me know if you can think of anything else.)
+
+Note also that segwit doesn't "solve" this problem either; it just avoids it by indirectly limiting the size of a non-segwit transactions to 1 MB (because that's all that fits).  The problem reappears as soon as Core increases the 1 MB block size limit.
+> You're pretty good at spin
+
+It's not spin, it's simply the common-sense truth.  
+
+I view Bitcoin Unlimited as a tool to facilitate convergence upon new Schelling points within the framework of Nakamoto consensus; however, BU can't change the properties of the Nakamoto-consensus framework itself.  This means that attempting to fight the majority has a cost and this applies to all clients, not just BU.  That the mining power remains net econo-rational is probably a requirement of Bitcoin in general.
+
+I think you're still missing a few things, because "the only downward pressure on the block size is block propagation time to the majority of hash power" is not a true statement.  For example, let's assume the "economic majority of nodes" enforced a block size limit of 1MB, how can the miners bypass this limit with BU yet not bypass this limit with Core?
+
+
+
+
+
+
+The left side of the graph is _real data_, corresponding to a period with the block size limit above demand. Not only did people still pay fees, but the average fee per tx consistently increased! What you're saying is impossible is exactly what has happened (also, you're not guaranteed to be in the next block [if you don't pay a sufficient fee](https://m.youtube.com/watch?v=ad0Pjj_ms2k)).
+
+
+> Oh I thought that was the default behavior...
+
+Yes, voting for BIP109 is default behavior.  ViaBTC and bitcoin.com turned this feature off, however.  
+This was a great read. Thanks Christoph!
+> Premise 1: Decentralization is undeniably the main feature of Bitcoin. 
+
+Disagree.  _Sound money_ is its main feature (decentralization is a means to an end).
+
+> Premise 2: Decentralization is hard to measure, but it's clear there can be more or less of it...All else being equal, greater decentralization is better for Bitcoin.
+
+Agreed. 
+
+> Premise 3: Any increase in the block limit will lead to greater node resource consumption over time...
+
+Probably, but I think it would be more precise to say that larger block sizes lead to greater resource use as opposed to a larger block size "limit."
+
+> ...and greater incentives for larger mining pools. 
+
+Why?
+
+> We can't be sure what definite cost this will have on the network's decentralization, but that cost is greater than zero. 
+
+Disagree.  I suspect larger blocks will permit more adoption, generate a higher bitcoin price, and lead to greater decentralization.  
+
+
+
+
+
+Interesting.  Thanks for responding.
+
+May I ask how exactly they got $320k worth of developer time for free?  What was done for the Chinese miners that was worth $320k?
+> In the real world yes, they do.
+
+Agreed.  And this is why ["a transaction fee market exists without a block size limit"](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf).   
+
+Originally, you, /u/nullc, and other Blockstreamers argued that my fee market paper was "fundamentally broken" because I assumed that "big blocks take longer on average to propagate to the network's hash power, and are thus more likely to be orphaned."  /u/nullc claimed that this was not true and cited the relay network as evidence.  
+
+In reality, techniques like the relay network and thin blocks reduce--but don't eliminate--block size dependent propagation delays.  It is these delays and the associated orphaning risk that are responsible (in part) for the cost of block space.  
+
+I like your thinking!  However, I think we can add some nuance.
+
+From the *miners'* perspective, both hard and soft forks benefit from synchronous coordination.  For example, a miner would not want to build on top of blocks larger than 1 MB (hard fork) unless he's confident the majority of the hash power will do the same.  But also imagine a (soft fork) block size limit reduction from 2MB back to 1MB: a miner would not want to orphan a potentially-valid 1.5MB block unless he's sure the majority of miners would do the same.  So both hard and soft forks benefit from synchronous coordination between miners.  
+
+From the *non-mining nodes* perspective, *synchronous* coordination is *not* required.  For a soft-forking change, the nodes can upgrade asynchronously *after* the miners begin enforcing the new rule.  For a hard-forking change, the nodes can upgrade asynchronously *before* the miners stop enforcing an old rule.  
+
+For example, non-mining nodes can increase their block size limits TODAY in preparation for larger blocks in the future (e.g., this is the Bitcoin Unlimited approach).  On the other hand, if the block size limit were being reduced, non-mining nodes could do nothing today and reduce their block size limit after the miners began enforcing the more restrictive rule. 
+You're right. That is how it behaves now.  
+
+What Gavin was suggesting is that if BU is "just for nodes," then why not *make it* truly unlimited? Let the miners (and non-BU nodes) worry about keeping out blocks that would clog up the network.  
+Like /u/ForkiusMaximus once said, visuals have a "faster time to epiphany."  Words with a picture like this have a bigger and more-immediate impact than if the words were shown alone. 
+
+Besides, if you don't like them, you are free to downvote!
+
+EDIT: the other advantage is that /u/windowly is putting in the link to bitcoinunlimited.info and /r/btc in case these images spread to North Korea. Doing this in plain text can get you banned over there :)  
+It sets the BIP101 version bits in blocks it mines:
+
+https://www.reddit.com/r/btc/comments/3xz3ad/bitcoincom_has_added_bitcoin_unlimited_next_to/cy9qwt8
+
+Also, it will not fork with respect to BIP101 (even though its block size limit may not be identical). 
+To me it seems like a simple and organic way to scale Bitcoin, while adhering to Satoshi's original vision:
+
+http://i.imgur.com/i1lT65l.png
+
+Whether or not it works I think comes down to human behaviour.  If miners believe that Bitcoin transactions should not be double-spendable (even after only a few seconds), and if they passively enforce this by supporting append-only subchains, then I think the answer would be "it works." 
+
+But there are many Bitcoiners who support double-spending during the first 10 minutes (on average) after the transaction was posted.  If miners in aggregate agree that double-spending like this is a useful feature, then subchains would be less effective.
+
+Also, for the subchain technique to offer the correct incentives so that miners extend a common chain, it really requires that we don't bump into the block size limit during normal operation.  The analogy would be a limit to the *total size* of the blockchain, and miners had to wait for enough fees to orphan a block so that another could be added.  
+This is just a chart showing two time series plotted on the same set of axes.  
+
+The correlation coefficient is 96%, by the way.  
+> As a side note, unrelated to the removal, your post could have instead made as a self post that said "Core may shrink and XT may grow". Those seven words of speculation were the entire value of your post. 
+
+You should take another look at the animated GIF if that's what you got out of it.  The purpose was to visualize how Bitcoin protocol development could become more decentralized in the future with the deprecation of Core, resulting in a pie chart that looked more like the mining pool pie chart.  This would be a positive thing for Bitcoin.
+
+
+> Does forkwise compatible mean they all have the same consensus rules?
+
+In order for each implementation to follow the longest chain composed of valid transactions, implementations would all have the same consensus rules for what constitutes a valid transaction.  
+
+Regarding isStandard() tests, they would likely have different rules here (e.g., different fee relay policies).  They would also have different rules for dropping transactions from mempool (lowest fee density vs random TXs) and they might support new ideas like 'weak blocks' in different ways (at least initially).  
+
+Regarding transport-layer rules like the max block size, implementations could have different rules *to a limited extent*.  For example, nodes could run Bitcoin Unlimited (no block size limit) and still follow the longest chain.  However, nodes that enforced too small a block size limit would eventually be forked off the network if they refused to follow consensus and increase their limits.  
+Some people are missing the point:
+
+"We can only enforce the rules that most people agree with anyways."
+
+The production quota is to the left of the free-market equilibrium.  This means the market *wants* an increase.  It requires *force* to keep the quota.  
+
+On the other hand, the market doesn't *want* to change the coin supply.  So that rule gets enforced. (It's on the other side of Q* and so doesn't distort the free market).   
+**Central banking**: the idea that a group of educated men can control the money supply better than the free market.  
+
+**Central (core) deving**: the idea that a group of talented coders can control the block space supply better than the fee market:
+
+https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+
+
+If you look really close on the right side, about half way up, you can just make out the letters "Bount..."  I think it's a Bounty Select-A-Size paper towel :)
+I can't stop thinking about the possibilities with this technology...imagine an "ultra reality show": some interesting guy or girl _commits_ to wearing a headcam+audio for 1 month and streaming _everything_ live.  Let's call them the protagonist.  Word eventually gets out and more and more people start tuning in to watch segments of the live video (perhaps the protagonist announces interesting events in advance).  Suddenly, everyone's talking about this crazy ultra-reality video experiment.  The person ends up making a killing, bitcoin gets some attention, and a new genre of video is born!
+Haha so cool!  It really works!  Would you mind doing something more entertaining, though? :)
+
+Some comments about the service:
+
+1. I found it somewhat annoying that I had to input a return address for my change.  I paid with my phone very quickly by scanning the QR code, but then I had to dig up a valid bitcoin address and paste it into the text box in order to watch the stream.  At the risk of upsetting the never-reuse-an-address crowd, would it be possible to default to sending the change back to the address it came from if no return address is entered (or doing something else, just make it less work to get the stream playing)?
+
+2. The service didn't work at all for me on Safari for some reason (worked on Firefox though).  
+Investors are continuously diversifying as the price grows.  They did this on the growth spurt to $30 in 2011, on the growth spurt to $266 in spring 2011 and on the growth spurt to $1242.  They will do this again if we rise to $3000, more so should we rise to $10,000, and so on.  There does not come a specific "point" where everyone "cashes out at once."  Every day certain individuals are divesting (reallocating their capital).  
+
+Who do you think is selling coins right now?
+But once it is generally understood that bigger blocks are necessary, that in itself will give further legitimacy and value to BCH.  We'll end up with two competing dynamics at play: people exiting BTC for BCH (since it was right all along) and people voicing the need to increase the block size limit of BTC to keep BCH at bay.
+
+It is not at all clear to me which dynamic will win.  However, if one believes like I do that big blocks are the superior solution, then BCH is considerably undervalued vis-a-vis BTC.  
+LN watchtowers nodes will be regulated because they provide a service to customers that -- if done poorly -- can result in customers losing money.
+
+LN routing nodes will be regulated because they transmit money across the network and could unknowingly be complicit in money laundering. Destroying the "secret HTLC nonce" may be forbidden via regulation so that law enforcement can trace funds through the Lightning Network when necessary. 
+
+LN banking-hubs will be regulated because they can both steal and lose customer funds, and prevent customers access to their money.  They can lose customer funds in a few ways including:
+
+- HTLCs below the dust threshold are not trustless
+- By stealing the customers funds if the customers' node dies since the customer may no longer possess the revocation transaction.
+- by unilaterally closing the customers' channel when the customer's channel balance is $50 and fees are $100.  Although the customer gets his $50 back on chain, he effectively had his money taken from him as it is now useless as fees are too high to spend.
+
+LN banking-hubs can prevent customers access to their money simply be refusing to route payments unless certain conditions are met, or excessive fees paid.  If the cost of escaping to a different hub is greater than the customer's balance, the customers funds are effectively held hostage by the hub.
+
+
+Let me first clarify that I don't think this is too big a problem because the routing nodes still can't steal funds, they can just effectively divert a micropayment to the miners instead. So I doubt we'll see this happening much in the wild.  
+
+What I think is interesting about this is the potential legal ramifications.  Coincenter has been [working](https://coincenter.org/entry/making-sense-of-lightning-network-nodes-and-money-transmission-licensing) to ensure that services that cannot steal or lose customer funds do not require regulation (which I agree with).  
+
+An earlier post from Coincenter stated that "Federated Sidechains" thus shouldn't be regulated, which is complete BS because a federated sidechain can definitely steal or lose your coins.  
+
+In this post Coincenter said that Lightning routing nodes shouldn't be regulated because these nodes cannot steal or lose customer funds.  But LN nodes _can_ lose customer funds, at least for some types of payments (e.g., micropayments below the dust threshold).  So because of this fact, _should_ LN nodes thus be regulated?  Or maybe because they can only lose funds for certain payments, they shouldn't be regulated?
+
+But now this turns into a messy grey area.  If your rule is that "services that cannot steal of lose customer funds do not need to be regulated," saying that LN nodes do not need to be regulated is hypocritical: "if you don't count all the ways a LN node CAN lose customer funds, then LN nodes cannot lose customer funds 100% of the time and thus shouldn't be regulated!!1!"
+
+My feeling is that LN hubs will ABSOLUTELY be regulated in a LN future, for many reasons including the one described in this post.
+Yes, you’re right. And even if other miners eventually learn of the $50-fee transaction, the act of not forwarding it will at least give you a statistical “head start”—you might have had a few more seconds to work alone to try to claim the fee.
+
+I’m not sure this effect would ever be significant enough to become annoying though. Even if all of the miners played the game you described, surely relay nodes would still exist to gossip the transactions across the network. And it is in the interest of the person making the payment to relay the transaction as widely as possible.
+I think it could make sense for preconsensus (0-conf security), and should be studied more. I know that /u/awemany was giving this idea some serious thought.
+
+For post-consensus (51% attack prevention) it makes less sense. 
+When avalanche is being discussed in the context of improving instant transactions, avalanche is _not_ simply used to reduce the amount of data that needs to be transmitted.  The avalanche process is used to define certain otherwise-valid transactions as invalid (i.e., transactions defined by the avalanche group as double-spends).  If a miner were not privy to the avalanche result and built a perfectly-valid-according-to-the-current-consensus-rules block -- but unknowingly included the "wrong" transaction -- then his block would be orphaned.  
+
+In other words, avalanche can make an otherwise-valid block invalid.  That is the sense that it is a departure from pure PoW. 
+
+EDIT: again, I'm not saying I think avalanche is a bad idea.  I'm just saying that it represents a significant consensus-level change.  
+Imagine global adoption of BCH.  10 billion humans each controlling 10 unspent outputs.  That's 100 billion outputs.  To make the math easy, let's say each output is 100 bytes long.  
+
+10 billion people x 10 outputs x 100 bytes = 10,000 GB
+
+Ballparking, RAM costs about $6 / GB and NAND FLASH costs about $0.30 per GB.  So storage costs for my global adoption levels would be about
+
+$60,000 using RAM,
+
+or
+
+$3,000 using FLASH
+
+I believe we will be able to build custom UTXO hardware databases that are plenty fast and use mostly lower-cost FLASH memory.  By the time we get there, I think it is reasonable that a UTXO database that supports global adoption levels could be purchased for ~$1,000.
+
+
+Thanks for putting this together!  I think an adaptive block size limit that adjusts based on the actual block size is fine.  
+
+In fact, I think it hardly matters what algorithm we use to increase the block size limit so long as 
+
+
+1.  the limit is maintained above real demand, and 
+
+
+2. it is easy for all miners to understand what the limit is at any point in time.  
+
+
+In other words, there is a huge number of solutions to the block size limit problem that will all produce essentially the same end result.  So I don't think we really need to bike shed over the details of the solution.
+
+But I'm going to bike shed over those details anyways :D
+
+
+1. I don't see the point of the 10 TB hard limit.  It's too high to practically test against, so what is the point?
+
+
+2. Realistically, if this proposal were adopted, all miners would need to have the same code running on their nodes to determine the block size limit dynamically, as the block size limit changes every block.  The entropy of the possible time-series sequences of block size limits is very large in this proposal.  But this entropy is not really buying us anything as far as I can see.
+
+
+
+Have you considered ways to reduce this entropy?  For example, what if the new block size limit were adjusted only once every year (or some other time period)?  Maybe use a multiple greater than 10 if you're worried about running into the limit before the next adjustment.  And what if the new limit took effect with a delay of several weeks or months?  And what if the possible new block size limits were super-low resolution, e.g., the block size limit can only increase by a power of two?
+
+Maybe this is not important and my concerns are misplaced, but I bring it up because if implemented as I described above, then I think it would be much harder for different implementations to accidentally fall out of consensus.  Because by the time the new block size limit takes effect, it is already widely advertised and known what that new limit is.  
+
+Just some thoughts.  Really, I'm fine with any solution that keeps the limit above demand.
+
+Core's mistake was this PR.  This was the first public disclosure and caused a bunch of eyes to try to figure out what was going on:
+
+https://github.com/bitcoin/bitcoin/pull/14247
+
+The title sounds pretty bad by itself, and with a bit of inspection it wasn't hard for people to see that inflation was a risk.  
+
+Core should have initially hid this in something completely innocuous looking.  
+Miners can still choose to use a canonical ordering under AOR, giving the same benefits for Graphene.
+> See above? Do you disagree increasing the efficiency by 86% is at least a reason? You may disagree with that reason (but do you actually?) but that is the reason right there.
+
+I disagree.  Miners could use a canonical ordering today and achieve the same efficiency.  So "more efficient Graphene propagation" doesn't seem like a valid reason to me, because it is also possible without ABC's lexical ordering.
+
+I keep coming back to "what the heck is the real reason for this change?"
+
+
+No.  Wright copied from Liu & Wang.  Liu & Wang's paper is fine (they did NOT copy from Kolmogorov and cited prior work correctly).
+What I've seen the last few years is that people will invent all sorts of convoluted narratives in order to maintain their belief systems.  Bitcoin has taught me a lot about human nature.  
+This has been done by at least 5 independent people now since this debate first came up last summer. All simulations show that selfish mining indeed works as Eyal & Sirer claimed, and that the answer to "The Bet" is t = 15 min.
+Your question was "How does the LN make Bitcoin 'inaccessible to the average user?'"
+
+The answer is that LN doesn't make bitcoin "inaccessible to the average user" but handicapping the main chain at 1 MB in order to push users to second-layer networks (such as LN) sure does.
+At a recent meeting between BCH developers from several implementations, getting the new address format rolled out looked to be top priority to me.  
+
+By the way, Bitcoin Unlimited members passed approval for both the bech32 and Bitpay proposals, so the BU members recognize the need for a distinct BCH address too.  
+Even an aggressive forecast wouldn't predict 1 GB blocks before 2030, so you still might get another decade or two out of that machine :)
+Bitcoin is susceptible to attacks by entities controlling a large fraction of the network hash power.  There is no defence against this.  
+
+If such an attacker wants to defraud you, he can do it in one of two ways:
+
+1. An invalid-block attack
+
+2. A re-org attack
+
+The invalid-block attack only works on SPV wallets, is very difficult to coordinate, leaves proof of fraud, and wastes the attacker's hash power (he generates block rewards that have no value).  The re-org attack works on both SPV wallets and full nodes, is easy to coordinate, leaves weaker evidence of fraud, and does not waste the attackers hash power (he gets the benefits of the attack _and_ he keeps all his block rewards).  
+
+The strongest attack is thus a re-org attack and both full nodes and SPV wallets are susceptible to it.  In a practical sense, SPV wallets are equally as secure as full nodes (and arguably more secure).
+> Peter Todd wished it were so but knows it isn't and doesn't promote it; Peter R is trying to force changes onto Bitcoin (in the form of BU) to make it mandatory. 
+
+Just to be really clear: Yes, I would like to see an increase in the block size limit.  No, I do _not_ want to fiddle with the inflation schedule.  
+
+/u/awemany has shown something very important.  LN will not appreciable reduce the number of unspent outputs per user (and may in fact make that number larger).  If the size of the UTXO set was one's primary concern regarding scaling, the LN does not help in this regard (and possibly makes it worse).  
+To a Bitcoin Unlimited node, blocks larger than 1 MB are already allowed.  So from the perspective of a BU node, there is no hard fork.  Brain teaser :D
+He misspoke.  By exponential he means superlinear. 
+Clearly Core nodes would lose sync with the Bitcoin network if a significant majority of the network began accepting blocks larger than 1 MB.  A Bitcoin Unlimited node wouldn't.  
+
+If you don't understand this (there are even lots of simple diagrams in the article to make this obvious) then you don't _want_ to understand it.    
+There's always been a fee market.  Such a market exists without a block size limit, based on demand for block space and the cost to supply it.  
+> Side note, p = 3 x 10-329 !? What the hell how is that even possible with so few data points and so much overlap.
+
+This was bugging me too (seems too small), but I couldn't find a mistake.  I think it does make sense given the assumptions of ANOVA.  Very approximately, the standard error of the mean for each bin can be visualized by imagining squishing each distribution in Fig. 3 about its midpoint by a factor of the square root of the number of samples in each bin.  The "squish" factor is sqrt(4464)=67 and sqrt(1481)=38.  These squished distributions would hardly overlap at all. 
+> Also witness data becomes no longer part of UTXO which is another scaling cost.
+
+Signatures are already dropped from the UTXO. For each unspent output, a node needs to know its value and the conditions under which it can be spent (the scriptPubKey); once the signatures have been verified they can be dropped. This is true with or without segwit.
+
+Speaking of "untested alpha code" from those of us "wearing beer hats on the sidelines," have you seen the latest latency results for Xthin? 
+
+https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-443#post-15747
+> Now you're just playing ignorant to leave the obvious conclusion to the reader... ;)
+
+Guilty as charged :D
+
+Great job, /u/theZerg1!  Very clear explanation of the concepts behind Bitcoin Unlimited!
+> Please. There is nothing to be gained from digging into the identity of Bitcoin's creator...it simply doesn't matter who created it
+
+It doesn't really matter with respect to whether Bitcoin works or not, but who created Bitcoin still matters (at least to some people) for any number of reasons.  Personally, I hope we never find out who Satoshi is, but still: Who are you to claim that the people who feel otherwise have "nothing to gain" by looking into it?  It might lead to the story that launched a young journalist's career!
+
+> It has a life of it's own, rather than being yoked to it's creator.
+
+Indeed, Bitcoin is governed by the code people choose to run and the ledger they choose to value.  I'm glad to see that you're coming around to this view ;)  
+
+Yes, I agree on both points, and in fact if you look at Table 1 (p. 11) in the [full paper](http://www.bitcoinunlimited.info/downloads/subchains.pdf), you'll see I was able to roughly quantify the cost to drop a weak block.  
+
+What is cool though, is that as the transactional load on the system increases, the cost to *not* build off the subchain grows (as the square of the transaction rate).  This means that the risk of having a weak block dropped *decreases* as the average block size *increases,* thereby helping to further secure zero-confirmation transactions.  
+In my paper, I attribute the "subchain" idea in the form presented to [this post](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-99#post-3585) by rocks from bitco.in.  There are literally thousands of references to discussions about 'weak blocks' that could be listed but I tried to include at least one reference to each of the people I knew were most active in researching them (such as Rusty Russell and Gavin).  I included [these 20 citations](https://www.reddit.com/r/btc/comments/3xkok3/reduce_orphaning_risk_and_improve/cy66bjy).    
+
+I don't view this paper as an invention of some technique (the technique was pretty obvious and simple anyways...it's basically just how Bitcoin already works, but applied in a nested fashion).  Instead, I viewed this research from the lens of discovering that the incentives may align from an economics perspective such that subchains might actually work, and then describing that with math and diagrams.  
+
+I feel the most significant results are that:
+
+1.  Fee revenue from orphaning risk can pay for proof-of-work security in the absence of a block size limit (this had been debated up to this point: see talk by /u/jonny1000 in Hong Kong).  
+
+2.  Append-only subchains can add measurable security to zero-confirm transactions.  
+
+3.  With nested subchains, we can create a fractal-like blockchain structure where transactions are processed almost continuously.
+
+My submission was actually initially accepted by the committee (of which two conference organizers independently brought to my attention), but then it sounds like Blockstream pulled some string and had it removed.  I now have three informants who have indicated that this was true (I only had two sources of information when I wrote [this](https://bitco.in/forum/threads/clearing-up-the-confusion-my-hong-kong-presentation-proposal-was-not-accepted.209/) after many people asked me to explain what had happened.)
+
+I've also learned that Blockstream attempted to have [my talk from Montreal pulled](https://www.youtube.com/watch?v=ad0Pjj_ms2k) from the YouTube feed (and this explains why the Morning Session III was initially posted--and then removed--and only put back up several days later whereas the other sessions were all posted immediately).  
+Nice work, John!  It's great to see more people getting involved--especially on much-needed projects such as 'weak blocks' initiatives like this.    
+Hopefully one day.  What I'd like to do is create a series of graphs plotting all the relevant variables against each other, and create a "table of correlations" and another table estimating the power-law relationships between the variables.
+
+Too many interesting things to work on...
+I believe we're now linearly interpolating between the 8, 16, 32 MB, ... , 8 GB points.  So imagine a ramp with some wiggles rather than a staircase. 
+If your point is that Bitcoin has intelligent people from a variety of disciplines contributing, then I agree.  That doesn't change my opinion that Blockstream's expertise lies in coding and crypt.
+
+And all that is beside the point of this thread that using the block size as a policy tool (as Blockstream wants to do) is antithetical to the spirit of Bitcoin.  That is why we need more implementations.  We need choice beyond just Blockstream Core.  
+
+
+
+
+> The fee market doesn't work in general.
+
+But it *does* work.  It's been working empirically since 2009 and we can understand one way in which it's guaranteed to continue to work by considering orphan costs as per my [fee market paper](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf) or my [talk in Montreal](https://www.youtube.com/watch?v=ad0Pjj_ms2k).  
+
+> If blocks are kept artificially small, at least a certain amount of fees will be guaranteed
+
+Here, you're assuming that miners and nodes have no power to limit the size of blocks themselves; it's as though you're arguing that we need some "top-down policy action" to save us from ourselves.  
+
+A decent analogy for why this won't happen is software: companies sell their premium software for more money even though the marginal cost of production is no different than for their lower-tier software. Sure, their competitors could start discounting their premium software to force a race to the bottom, but this doesn't happen because it would destroy the industry. 
+
+In Bitcoin mining the "premium product" is "next-block service."  Miners are already purposely delaying lower-fee transactions to create a premium market for "next-block service," demonstrating that they have pricing power.  
+
+Like /u/cypherdoc2 always says: miners won't keep their foot on the pedal if they see a cliff approaching in the distance.
+
+> If blocks are kept artificially small...
+
+I find it strange that you view the block size limit as some "policy tool" that must be set in a top-down fashion in order to "keep Bitcoin decentralized."  Do you not believe it can naturally come about as an emergent phenomena by all the participants in the network making the decisions they think are best?  All we need to achieve this is free communication, education, and open discussion.
+
+I think what your missing is that the only consensus that matters is that formed by the longest persistent chain. If the longest chain includes blocks larger than 1 MB, well that is just Bitcoin's consensus system doing what it's supposed to do. If--in the distant future--there was some important reason to maintain a small perpetual inflation rate, then the longest chain would probably include some small perpetual inflation. But these sorts of events are not to be feared--they are what allows Bitcoin to adapt to challenges as they arise. They would not result in bitcoins having no value as some fear, but are what prevents Bitcoin from losing its value in the face of obstacles.
+
+This is what the Bitcoin experiment is all about! If we can't trust the market to make good decisions for the health of Bitcoin--and if we really do need people like Greg and Adam making those decisions for us--then Bitcoin has already failed.
+Awesome work everyone!!
+
+It looks like /u/NxtChg's site is paying out over 100,000 bits to the coinbase TX in the new blocks now:
+
+https://cryptoplay.net/vote/
+> @NickSzabo4:
+> 2015-08-29 06:05:12 UTC
+> Transaction fee market without block size limit would lead to too low a level of security for Bitcoin: [papers.ssrn.com](http://papers.ssrn.com/sol3/papers.cfm?abstract_id=2400519)
+
+I've been finding @NickSzabo4's comments quite strange since the block size debate blew up.  For example, here I believe he is making a reference to ["A Transaction Fee Market Exists Without a Block Size Limit"](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf) and cites N. Houy's paper as a reason why the security level would be too low.  **However, Houy's result assumes that miners can create block space for no cost.**  Houy's result is only valid if the orphan cost is ignored.  This makes me think that @NickSzabo4 didn't actually read the paper he appears to be criticizing because the Introduction of that paper explains:
+
+*Houy showed that if the marginal cost to a miner to add a transaction to a block was zero, then a miner would “[include] all transactions whatever the fee attached.” He concluded that either a minimum fee or a limited block size was required. Andresen explained, however, that due to the increased chances of orphaning a block, the marginal cost was not zero; a rational miner should only include a given transaction if its fee is sufficient to cover the added risk of orphaning. Extending on the work of Houy, we account for Andresen’s orphaning factor and show that a rational miner will not in general include all fee-paying transactions, and that a healthy fee market is, in fact, the expected outcome of rational miner behavior, if block size is unconstrained by the protocol (and notwithstanding the assumptions stated explicitly in Section 10).*
+It does.  If the scenario you're imagining plays out (which it won't), then the small-block chain will become the longest and the XT nodes will fork back to follow that chain.  
+
+The truth table is correct either way.  
+The dips in the green and brown lines are not real.  Remember when blockchain.info went down due to the database bug?  Ever since then, their charts have had "holes" in them.  The charts are still correct, but the spikes are not real.  I expect the fit to look even better once I remake these graphs after Mr. Cary is able to repair his charting engine.  
+
+BTW, Blockchain.info has been a fantastic service to the bitcoin community!  Thank you very much Nic!
+Double-spending "with a higher fee" is not a risk.  Nodes won't propagate transactions they recognize as double-spends and miners won't add them to their memory pool *even if* they are sent with a higher fee.  
+
+Coinbase, BitPay, and the Vancouver Bitcoin Co-op's Coinos system all work fine at brick-and-mortar stores using zero-confirm transactions.  
+
+I wrote a post here about how difficult it actually is to double-spend:
+https://bitcointalk.org/index.php?topic=369589.msg3970813#msg3970813
+From the definition of the curve (secp256k1) itself.  When we say "curve" we mean more than just y^2 = x^3 + 7; read this to understand:
+
+https://en.bitcoin.it/wiki/Secp256k1
+
+You can think of "G" as a constant for this curve; everyone uses the same value of G.
+Thanks.   Let me say once again that I'm not opposed to avalanche.  I think polite debate like this is important and healthy for BCH
+What is most uncertain is getting our first billion users in the first place.  That is where we need to focus.
+
+I can't wait till we grow to point where the whole world uses bitcoin and people are complaining that they need a $1,000 piece of specialized hardware to store the one hundred billion unspent outputs that exist then. It means we made bitcoin successful.  
+
+Note to readers: No technological or scientific breakthroughs are required for bitcoin to scale to global adoption levels -- just continued hard work and state-of-the art engineering.
+
+This isn't removing the UTXO set, it's removing the need for a node to maintain a UTXO set in order to validate.
+
+On this topic, I thought Gavin's proposal based around Cuckoo filters was very elegant:
+
+https://gist.github.com/gavinandresen/e9177aae1183226937fca8e8cbfc5f79
+
+The tradeoff here is that you're reducing memory requirements (storing the UTXO database) but increasing bandwidth requirements (the outpoints being spent need to be sent along with the transactions).
+
+
+> /u/Peter__R will Bitcoin Unlimited be following this shit-show with code patches? I mean if you guys don't implement this there is a great attack opportunity to split the chain with those clients not following those consensus rules, right? BU would go along with old versions of ABC and the new shittier ABC could end up on a minority chain where they could be seriously screwed, right?
+
+If one implementation used the re-org control and another another didn't, a persistent split would only be possible if a long reorg occurred and the side _without_ the re-org control became longer.  If a long re-org occurred and the side _with_ re-org control became longer instead, then the other chain would re-org back to the first chain.  
+
+In other words, as long as most miners run with the same re-org control, everyone else will follow along and long re-org attempts will fail.
+The assert() causing a crash was the reason that a node wouldn’t accept the bogus coins. According to the block verification code, the bogus coins were treated as though they were valid. This was a very we serious bug. Fake coins getting confirmed and included in the Blockchain would be very bad.
+Yes, by generating a bunch of zero fee transactions bouncing coins back and forth. Very easy to do.
+You’re question was about removing the limit, no? If the limit were removed, then even if 99% of the miners produce responsibly sized blocks (and I’m confident they would), one bad apple can produce a poison block like I described.
+To actually get to 1 GB, we'll need to improve block propagation by a few orders of magnitude.  So when we get there, I suspect we'll be taking less than 20 seconds or so at 1 GB.  
+
+But the network today is not nearly this fast.  When we did the gigablock testnet experiments last fall, 1 GB blocks took on average 10 minutes to propagate.  And that's with all nodes using Xthin.  On the real network, a 1 GB block would probably be even slower.  
+> i'm quite interested in the the reason "why" people want lower orphans? what is the *problem* people think they are trying to solve? (this time)
+
+The orphan rate is totally fine at today's numbers of transactions per second.  But if blocks were on average 1 GB, they would take around 10 minutes to propagate.  The orphan rate would obviously be too high if block propagation was that slow.
+
+So it is not that people want to reduce the orphan rate from 0.5% to 0.05% "just because"-- an orphan rate anywhere below a few % is totally fine.  People want to see a falling orphan rate because it is indicative of improved block propagation.  If the network is better at propagating blocks, it suggests the network is then ready to deal with bigger blocks (which will of course drive the orphan rate back up where it previously was with the smaller blocks).
+
+This reminds me, did you learn anything further about the additional delays Core added (that Cash inherited) that affect transaction relay?
+
+In my opinion, we should make relay as fast as possible, as this also reduces the window of time over which merchants need to scan for double-spends.  Agree or disagree?
+The biggest problem IMO is that there currently is no reliable way for payment recipients to be notified of 0-conf double spends. If you look at Satoshi’s “vending machine” thread, you’ll see he talks about waiting a few seconds to scan for conflicting double spends before releasing the merchandise; this is not easy to do right now.
+Because I'm a scientist involved in Bitcoin protocol development.  Understanding the protocol's weaknesses are important.
+In case you’re not be intentionally obtuse: big-blockers aren’t against LN; we’re against handicapping the main chain at 1 MB in order to push users to second-layer networks.
+As blocks get bigger, it becomes more costly to run a node, all else held constant.  
+
+But bigger blocks also means more users and a bigger economy.
+
+And all else isn't held constant. Technology and bitcoin node software advances making it easier to deal with increased transaction throughput. 
+
+Overall, I think growing Bitcoin improves its security, counter to the small-block argument.  
+Sounds reasonable. If BTC gets its act together and facilitates massive on-chain scaling, BCH could be doomed.  I don't rule out that possibility.
+Here is more information on Xthin, if you're interested:
+
+https://medium.com/@peter_r/towards-massive-on-chain-scaling-presenting-our-block-propagation-results-with-xthin-da54e55dc0e4
+Confusion indeed -- there would be no proof that the theft had occurred.  
+
+If miners steal real bitcoins, proof would exist in the blockchain.  
+
+So which type of coin has the stronger security model?
+> what you plagerized here
+
+u/deadalnix (and others): Don't be fooled! 
+
+The word "plagerized" is not to be confused with the similar-sounding world "plagiarized."  The latter means to pass on someone else's work as one's own, while the former is a term invented by Greg Maxwell which means to succeed at accomplishing something important that also made /u/nullc envious because he didn't do it himself.  
+
+cc: /u/awemany  
+Well yours is a fine opinion to have.  No one knows that answer.  I just think you should be clear: you believe bitcoin's security depends on it being technically difficult for users to change the value of certain variables.  
+Very cool!  I just uploaded a PDF version of BUIP055.  The site gave me a string to sign that included the hash of the file I uploaded, I signed the string off-line with my BU signing key, pasted the signature, and the site smoothly accepted the proposal!  I can now see it under "unpublished proposals."
+
+/u/awemany: Is the idea that the vote master would publish the proposals as soon as they're ready, or only when we're ready to vote on them?  
+Here's a great article on this topic, written by /u/forkiusmaximus:
+
+https://www.reddit.com/r/btc/comments/614su9/adjustableblocksizecap_abc_clients_give_miners/
+I don't believe the exchanges will actually list coins on the large-block chain as BTU.  I think many people are confused at the moment about the likelihood of survival of a small-block fork.  
+
+Once this event is over, it will become more clear to the world that Bitcoin is the most-work chain composed of valid transactions.  From this new refined perspective, any exchange that sold useless coins to customers that exist only on a non-operable blockchain as "bitcoin" will look misguided at best and like opportunists at worst.
+> I've been told that if they select size 1 MB but the majority of miners set the block size to 2 MB, after N=144 blocks on top of of a bigger-block, the nodes will accept it rewardless
+
+Well you've been misinformed.  Here's an article about how a BU node deals with "excessive" blocks (see note 2 regarding the 144 block confusion): 
+
+https://medium.com/@peter_r/the-excessive-block-gate-how-a-bitcoin-unlimited-node-deals-with-large-blocks-22a4a5c322d4
+
+
+That would be interesting and worthwhile, but it would be something different than what this chart is trying to show.  The purpose of this chart is to show the distribution of block size limits _by nodes_ (or rather nodes that are visible to bitnodes.21.co).  I like this chart because it is easy to monitor for changes, as a simple script can prepare it using the bitnodes API.  
+I liked your correlation chart showing transaction volume to market cap! The deviation from historical behaviour when we approached the 1 MB limit is very clear.
+/u/nullc: BU validates all transactions.  I think I could explain how it works better in person with a white board.  Perhaps we can discuss in Milan. 
+
+/u/thezerg, /u/solex: we should give a talk or write an article with nice diagrams on BUIP001.  It's been over 6 months and there is still a lot of confusion.  I think even more people would like it if they understood how it helps to _prevent_ forks.
+> Getting an immediate or very soon blocksize HF is what we hopefully can all(*) unite behind for now.
+
+Agreed.  I hope we're moving in that direction now.
+
+> he was AFAIR a quite outspoken smallblockist, without really having a solid foundation for his arguments
+
+Have you seen [this](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) (recent) paper co-authored by Emin?  (I cited it a few times in our Xthin series.)
+
+The authors argue that block propagation _to nodes_ is currently the dominant bottleneck.  Based on real block propagation measurements, they calculated that at 4.1 MB, 10% of the nodes may be unable to keep up, and at 37 MB, 50% would be unable to keep up.  Based on this, they suggest that blocks should be no bigger than 4 MB.  
+
+I liked this because (1) they went out on a limb and actually made a suggestion, (2) they backed up their suggestion with real data and solid arguments, (3) they identified the bottleneck that needs to be eliminated for even _more_ scaling (which is incidentally what Xthin addresses).
+I do agree with you that his infamous "tweet" that bitcoin was broken was a bit much.  But water under the bridge now :)
+> That would imply he is not covered by the "Bitcoin Core developers" line. And he is.
+
+But it sort of implies also that Core is the original implementation and that Satoshi endorses it.
+
+What about:
+
+Copyright (c) 2009-2010 Satoshi Nakamoto
+
+Copyright (c) 2009-2014 Bitcoin protocol developers
+
+Copyright (c) 2014-2015 The Bitcoin 'Core' Developers
+
+Copyright (c) 2016 The Bitcoin 'Classic' Developers
+
+Yes, good point.  The reason I used ANOVA was because we do a more in-depth ANOVA calculation in Part 3 of 5 where we look at all 4 bins (as a 2x2 factorial experiment).  I didn't want to introduce more than one statistical test in this article series (maybe that was a mistake...I'm certainly not a stats guru).  In any case, the p-value will be *very* small any way you slice it.
+
+Thanks for your thoughts!
+> While I think the miners came out far "ahead" on the agreement
+
+What do you mean, exactly?  When you said they came out "ahead," it suggests there was some sort of negotiation.  What were they/you negotiating for?  What would be a result that would put them even further ahead?  How could they come out "behind"?
+
+
+Well, we're all standing on the shoulders of giants, as it were.  It should come out in the peer-review process what exactly my contributions were (it could even be that this is all crap...so let's not get ahead of ourselves!).  Perhaps rocks' idea and my "nesting twist" was totally novel, and it could very well be because one would only "believe" this paper in the first place if one also believes my fee market paper (which rocks does but Blockstream apparently doesn't) and believes that 0-conf transaction security is good (which rocks does but apparently Blockstream doesn't).  
+
+Here is my cover letter, by the way, where I attempt to explain how my work is novel:
+
+*******
+Dear Editors of Ledger,
+
+Enclosed please find my manuscript titled “Reduce Orphaning Risk and Improve Zero-Confirmation Security With Subchains,” which I am submitting for consideration for publication in Ledger.  
+
+The paper explains—with the help of diagrams and charts—an application of weak blocks that I refer to as “subchains.”  As far as I know, this is the first scholarly paper on the topic of append-only subchains (including the nested variety), and also the first to analyze their effect on the transaction fee market, equilibrium hash rates, orphaning risk and scaling, and the security of zero-confirmation transactions.  
+
+I believe the paper is significant because it shows both that security of zero-confirm transactions can be significantly enhanced, and that transaction fees will directly contribute to the PoW cost even in the absence of a block size limit.  The second point is particularly important because investigators have argued previously that fees that result from orphaning risk do not contribute to network security.  This was in fact one of the argument put forth by small-block proponents for the need for a block size limit in the first place.  
+
+I believe the following individuals would be suitable reviewers:
+
+<NAMES WITHHELD>
+
+Sincerely,
+Peter Rizun
+********
+
+
+They are plotted on the *same* set of axes.  The chart compares the market cap to the number of transactions *squared*--hence why it's referred to as the Metcalfe relationship.
+Yes, this is correct.  
+
+I would add that this can also occur with non-SPV mining (and for a similar reason).  Once a miner has verified a block he received from a peer, it still takes a finite amount of time for him to build a new block template from his mempool.  During this time, he may mine on an empty block, before switching to the non-empty block a few moments later.  So here once again, if a block is found quickly after another block, it is more likely to be empty.    
+
+/u/cypherdoc2 also made another interesting observation about empty blocks: they appear to occur more frequently when mempool is large.  This is probably due to the fact that the function getBlockTemplate() that miners call to build a new block takes longer to execute the bigger the mempool is.  
+I've noticed strange voting patterns in both directions, and only on /r/bitcoin.  I've seen my own posts and submissions get heavily upvoted over 10-20 minutes, and at other times heavily downvoted over a similar time period.  
+
+One side-effect of the censorship is that it's made everyone suspicious.  I think what has happened is that people from both sides of the debate think people from the other side of the debate are manipulating the voting, so some of them start to do it too to "achieve balance."  The end result is that on any particular thread, one of the camps "wins" and that thread then has a "pro big block" slant or "pro small block" slant.  
+Awesome work!  It will be very interesting to see how the re-investments of the mining revenue work out!
+
+I just donated the remaining 900,000 bits of the million bits I pledged:
+
+https://blockchain.info/tx/4d6b503ed9e9e4f97f2d7e99075c2f6e4d6bbe95fa737ae60fd713fd1fd47e11
+
+I'm still hoping to get you the calculations we talked about! Sorry for the delay!!
+Well..."crippling" is a loaded word.  I think one could show using standard arguments from economics that a restrictive block size limit would result in *more* $ flowing through Blockstream solutions at a given demand curve.  If Blockstream (Core Dev) controls how much transactions flows through their dam, they can control the hydrostatic pressure forcing transactions through sidechains and lightning networks (for which they could earn fees).  Here is a cartoon that was controversial but that I believe honestly describes Blockstream's business model as well as its opposition to raise the block size limit:
+
+http://imgur.com/DF17gFE
+
+
+I will happily play along with your rules, but I'd like to know exactly what they are.  In the future, if I share the link and prefix it with 'np' will that suffice?  Or is sharing the link here, at bitcointalk and at bitco.in for the purposes of encouraging greater participation in a discussion against the rules at /r/bitcoin?
+
+For the record, I have *never* solicited people to up-vote or down-vote any content, but indeed I have shared my submissions with the community.  It is my opinion that dissemination of new content is a positive thing.  
+> locked into a N.E. in which there can be no change?
+
+I think with multiple implementations it would actually be easier to make changes that had the support of a super majority.  One implementation would implement the solutions (e.g., using a technique like the 75% requirement for activation from BIP101), and nodes would migrate to this implementation.  In an effort to retain their dwindling node share, at a certain point the other implementations would capitulate and also make changes to ensure forkwise compatibility.
+
+**In other words, consensus would be determined by the code we run.** 
+
+*Also* what happens when 21,000,001 people make it their personal goal to have at least 1 bitcoin?
+> this is unfortunately impractical given the current limitations of technology. 
+
+But it appears that btcd is already doing this--and with a fork rate (albeit based on sparse data) of the same order of magnitude as Core's self-fork rate.  This suggests to me that *it is practical now* (because it's already being done) and will become increasingly practical with the completion of libconsensus.  
+
+EDIT: BitcoinXT is also doing this (albeit with essentially Core's consensus code).  
+
+
+> bigblockbounty.com
+
+Cool.  I hadn't seen that before.  
+
+What I'd prefer to contribute to instead, though, would be a scheme that automatically paid to the coinbase of *every* BIP101 block.  For example, a bot would always pays out 50% of the current "pot" to the next BIP101 block.  Miners could determine very easily how much more BTC they would earn by mining BIP101.  
+I think schemes like this to implement coding gain (the "gamma" variable in my model) are what is necessary to reduce the network propagation impedance to make it more affordable for miners to produce larger blocks in the future.  
+
+I am happy to continue this discussion at a leisurely pace in [this thread](http://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/).  
+Yet moderators over there continue to delete my submissions, even when they are not breaking any of your subreddit's "rules." 
+
+I've decided now to no longer submit content over there.  That subreddit is dying.
+Is it feasible for a miner (or a node) to simultaneously show support for BIP100 *and* BIP101?  The idea would be that whichever proposal is ratified first is the one that gets activated in the software.  
+Great essay Richard!  I think you nailed the essence of the debate: one side is most worried about a technical failure, the other side is most worried about a practical failure.
+Thanks for the comment.  I'm going to rule this as a "stylistic decision" rather than an error.  I find always writing "his or her" disrupts from the flow of the prose.   
+Hmm, that was actually intentional.  My grammar expert thinks I should have rephrased that sentence however, so I will pay out in good faith.  
+
+https://blockchain.info/tx/9ecd0edfed1699ec8f8e5c7f6588bbad67b384dc35f7fe5fe5cd64ff9e91d475
+The same place the "moderate," "limited," and "failure" growth curves come from ;)
+Thanks mulpacha!
+
+Regarding the lack of a display, my "pitch" is that the device would act as a second signer for a multisig address on your phone (or computer).  So you'd see the transaction before you tap your tag to produce the second signature.  I suppose your wallet app could "go rogue" [and there are some potential solutions here too], but, like you pointed out, it requires a more sophisticated attack since one of the keys are permanently offline.
+
+For brevity, I kept the video as simple as possible.  But through the NFC APDU interface, users can load their own private keys, set passwords, require cryptographic authentication from the wallet app (check an ECDSA signature), lock the "spend address", set per "tap" or daily spend limits (this requires the optional battery), etc.  I discuss this in more detail in the white paper. 
+
+The challenge though is coming up with a simple "pitch" for how this could very easily be integrated with the popular wallets.  What's the simplest but still useful realization of this technology?  
+
+My answer is "a second signer" for a multisig wallet.  Integrating this into existing apps should not be too difficult:
+
+- To initially create the multisig address, the app would request the user tap his tag to the phone and the app would read the pubkey (which it would then use together with one of its own keys to create a P2SH multisig address).
+
+- To transfer funds from the multisig address, upon user acknowledgement the wallet app would sign the TX, and then pass the TX to the sigSafe to get the second signature.  The user "taps" his tag to sign.
+
+There's *lots* of additional cool things you could do later to improve both useability and security, but I think it's nice to start out with something very simple. 
+
+The plot simply shows that the bitcoin market cap does appear to be obeying Metcalfe's Law.  The dark black line is the bitcoin market cap in dollars.  The other two lines represent two different estimates of the bitcoin network's "Metcalfe Value" (V~N^2 ).  
+
+N is the number of users in the network, but since we can't directly measure N, I used two separate proxies for N: the number of transactions per day (excluding popular addresses) and the number of unique addresses used per day.  They both seemed to fit the Metcalfe model quite accurately.  
+Wow, I didn't realize that.  Thanks for the tip.  
+You also have to convince the nodes (power users).  Last time I checked there were about 250,000 of them.  
+
+Users will not voluntarily debase their currency.  
+The bottom line is that Lightning -- at least from the 1000-foot view -- is just payment channels + HTLCs (hash- and time-lock contracts).  So Lightning can do whatever payment channels can do, _and_ more.  The more is the fact that Lightning allows for atomic payments _across_ multiple payment channels.  
+
+I might be the loudest opponent of Lightning as a scaling solution for bitcoin, but let's be honest here. If payment channels are "good" then payment channels + HTLCs should be at least as good, and possibly better because there could be advantages to atomically routing payments _across_ channels.
+> are we really expecting people to run nodes with Peta/exa byte storage plus Tb bandwidth usage as the norm?
+
+We are expecting specialists to run nodes and for users to run SPV wallets.  With SPV wallets, users can be their own banks, verify their own transactions, and send payments to any other user without going through an intermediary, all with tech no more advanced than a feature-phone and a 3rd-world SMS plan.
+
+Still, running a node in your 4 GB-block scenario wouldn't be out of reach for even a hobbyist with access to something like Google Fiber and wiling to spend a few thousand dollars on hardware.  We need to make significant improvements to the Satoshi client codebase first, but the bottlenecks due to hardware and the laws of physics are a long long way away.  I can go over the numbers if you're interested.  
+
+Also note that a node doesn't need to store the blockchain.  The amount of data you need to store depends on the purpose of running the node.  If you are mining, you only need to maintain the UTXO set--you can prune all historical blocks.  If you are serving SPV proofs to lite clients, you need to store more data, but still a lot less than the complete blockchain.
+I'm not sure anyone has found a lower bound on Craig Wright's technical ability. 
+Electron Cash already works for SV. You just need to select an SV server in the options. I know because I use EC for BSV.
+Yes all valid points, which is why thezerg’s method is so nice. I think it addresses all of your concerns:
+
+ https://medium.com/@g.andrew.stone/forkless-inclusion-of-functions-loops-and-new-opcodes-in-bitcoin-script-6bd1155a9f5a
+
+It is an incremental way to turn the big long scripts that actually end up being useful to something that can be highly optimized. 
+Andrew Stone is Lead Dev, not me. But I can confirm that most of the Graphene data is ordering information. I can also confirm that this could be addressed today without any consensus level changes.
+I won’t speak for others, but I know I have been consistent in opposing LTOR without more data and a clear and valid reason for the change. 
+Could very well be. I think it should be possible to prove this mathematically, one way or another.
+
+
+First I'll say that I don't think this is a big enough deal to split the chain over.  At the end of the day, BU will follow the hash power.  
+
+> Would you agree to a change that would just remove the requirement that child TXs must go after parent TXs and the order would therefore didn't matter at all, allowing miners to use whatever ordering they see fit?
+
+I think a strong argument can be made for this change: when validating a block, a miner does not have to check that the order of the transactions in the block he just received is indeed topological.  This seems to me like a hard check to parallelize (and /u/deadalnix agrees), but I think u/ThomasZander (and maybe /u/jtoomim?) said that this step could be efficiently parallelized (I'd like to understand how).
+
+> We could dedicate 8 bits to encode the type of ordering used giving us 256 possible ordering rules, CTOR/LTOR could be encoded as 0x00 and if any other advantageous orderings are discovered in the future, they could be assigned another code and be used instead if the miner chooses to do so.
+
+> Would that be acceptable?
+
+This seems like a better way to start.  If years down the road, most blocks are ordered lexically and people love it, then we can consider making it mandatory.  
+
+
+Since the proposers don't have their ducks in order, we don't really know. Arguments can be made for and against both proposals.
+
+I disagree that we should make forking changes just for the heck of it.  Consensus changes increase risk.  Unknown unknowns.  We should only make forking changes when we have a good reason to do so.  I don't believe this bar has been met yet with ABC's CTOR proposal.  What is the reason for this change?  I never get a good answer.  I might change my mind in the future, but from the data I've seen, I think _enforced_ lexical ordering will hurt more than help.  I prefer to wait until we understand the ramifications of this change better.
+Soft limits describe the size of blocks miners produce. It is the hard limit that controls the size of blocks they accept.
+
+But yeah like I said, a split like this wouldn’t be the end of the world. Some miners would lose some money and some confusion would ensue.
+That's what they do now.  They orphan blocks that they think are too big.  The OP is talking about removing the limit so that they stop orphaning such blocks (or at least stop _intentionally_ orphaning them).  
+> Scenario 1:
+No other miner accepts this block (all have a 32Mb soft cap) and miner A continue mining on his own chain or realize its stupid throwing money away and rejoin the 32Mb soft cap chain.
+
+This is the case today. Miners have a 32 MB cap on the size of blocks they will accept.  But you’re using the word “soft cap” differently than I do: the “soft cap” in my terminology refers to the max size miners will produce, not the max size they accept. I call the max size they accept the block size limit.
+That was over a global network. The nodes were all over the world, and 0.6 s/MB is the least-square best-fit regression coefficient over thousands of blocks. 
+I’ve consistently expressed opposition to this idea without first seeing strong evidence that (a) it actually leads to significant improvements, and (b) the risk that it breaks something is very low.  I’m sure I could dig up several public comments to this effect. My intuition is still that we’ll regret this change (although I’ll change my mind if presented with better research).
+
+Tom Zander has been much more vocal than I have in his opposition towards this change.
+
+In fact I think more of the tech communy is on the “meh” or “not yet convinced” side than the “yeah this is awesome let’s definitely make this hard forking change to the protocol.”
+I read through the link you provided.  It sounds like Greg's criticism of the p2p network restructuring was in reference to a _different_ proposal that was included in a old version of the graphene paper, and not directly related to graphene.  Graphene, as implemented in BU, does not restructure the p2p network in any way.  
+
+Greg's other criticism about whether graphene will actually result in improvements over something like Xthin is valid. Right now we don't know.  But there's nothing wrong with some nodes using graphene and other nodes using Xthin.  It's a great way to get empirical performance data.  Greg actually acknowledges this in his post.
+For many of the weaker coins, sufficient hash power can be _rented_ from NiceHash to run the attack.  
+> Then refute the discussions you claim are lies with facts.
+
+Sure.  
+
+For example, he just lied at Satoshi's Vision when he said that miners orphan blocks with 0-conf double-spends "because incentives."  
+
+I asked him a question to clarify what he meant (maybe he meant that he'd _like_ them to do that in the future and was working on a change to the protocol).  He answered by saying "I don't give a shit" and that the miners simply orphan such blocks "because incentives."
+
+Another possibility is that Craig Wright is not a liar but instead an actor who doesn't actually understand Bitcoin (which still sort of makes him a liar).  
+
+
+I am a volunteer.  I fund myself through my non bitcoin work.  
+The biggest block to date is 0.26 GB.
+That got my vote for best joke of the conference.  I burst out laughing uncontrollably when he said that.
+I explained the difference in definition between a segwit coin and a bitcoin in my presentation at The Future of Bitcoin Conference in Arnhem this weekend:
+
+https://www.youtube.com/watch?v=U8gWv5lqG9A&feature=youtu.be&t=1508
+
+Here's a pertinent slide:
+
+http://i.imgur.com/x375TLv.jpg
+> that slide is from Craig wright
+
+I'm pretty sure it's from Peter R.
+
+It sounds like you're arguing that the problem is self correcting.  That the network wouldn't allow blocks to become any bigger than were economical to produce (i.e., that fees charged would be commensurate with the cost of production for block space).
+
+Another thing to note is that 10 GB blocks every 10 minutes is 133 Mbps of transaction data.  High-end machines with fast internet connections could deal with all the world's transactions _today_.  
+No worries.  I think it's implicit that we're talking about MAX_BLOCK_SIZE.
+The problem is that with those tokens you're not betting on a fork to bigger blocks, you're betting on a permanent blockchain split. If we get bigger blocks and Core gives in to avoid splitting from consensus _the BCU tokens expire worthless_.
+By opting out of Xthin, they only hurt themselves. And besides, if a "malicious miner" wants to make his block propagate slowly, then he can just wait a while before broadcasting it.  This works regardless of the block size limit ;)
+Judging by this graph, about 800 MB:
+
+http://imgur.com/QoTEOO2
+> As I understand it the node effectively loses sync with the network as soon as an "excessive block" shows up? 
+
+A Core node loses sync (or rather gets stuck) as soon as an excessive block shows up, in the case where a significant majority of the network builds upon the "excessive" block (see Fig. 3).   
+
+The purpose of Bitcoin Unlimited's _acceptance depth_ feature is not _not_ lose sync the way a Core node would (see Fig. 6).
+> Sure, I'm not arguing against that.
+
+OK so you're with me up to there.
+
+> But it's very likely (certain?) that that cost would be less than the gain made by knocking some hashing power offline, while they ignored your block.
+
+I don't think so.  Let's analyze a concrete example.  Assume there is _no_ block size limit and a malicious miner mines a 128 MB block.  Assume this block takes so long to propagate that it's orphaned.  The cost to the miner is the 25 BTC reward that he forfeited.  What exactly is the cost to the rest of the network?  How does the action of the malicious miner "knock some hash power offline"?
+> [Core's] 'goal' is to keep bitcoin decentralized, safe, and secure, and a consequence of that, is no hard forks and a low blocksize limit. 
+
+This has never made sense to me.  The way in which BS/Core is attempting to prevent bigger blocks is by restricting communication (e.g., censorship), by not offering choice (e.g., the block size could be adjustable in the GUI), and by making special deals with miners and other influential players.  In other words, techniques aimed at centralizing power within BS/Core and alienating groups with different ideas.  So, it seems to me they are PRO centralization, just as long as they are the ones in the center.  
+
+A group that was pro decentralization would try to improve communication (fight censorship), give people more choice (e.g., Bitcoin Unlimited), and in general work to make governance by the market as efficient as possible.  
+
+Lastly, the "fear of hard forks" is just their fear of losing additional control over Bitcoin governance.  Many people run BS/Core software just because they've never bothered to upgrade.  A hard fork forces those people to act and download new software....which may be Unlimited, Classic or something else.  But moving away from an implementation monoculture is a good thing for Bitcoin.  It represents further decentralization!
+
+
+I did lol, but seriously, /u/ydtm I definitely enjoyed your longer posts too.  I hope you didn't "shorten" your style just to appease a few of the complainers.  I suspect a lot of us quite appreciated your "full length" works.  I suggest you do whatever you think is best for the given topic.  
+Good post, /u/jstolfi.  
+
+I personally adhere to your definitions: a soft-forking change adds to the rule set while a hard-forking change removes from the rule set [edit: perhaps we should call these "pure" hard and soft forks?]. I tried to formalize this [here](https://bitco.in/forum/threads/the-relaxed-synchronicity-requirements-of-soft-and-hard-forking-changes-for-non-mining-nodes.903/).
+
+I noticed yesterday you said that a POW change would be neither a hard nor a soft forking change, according to these definitions.  This got me thinking that it probably could be carried out as a hard fork *followed by* a soft fork: we'd start by hard forking to accept the new POW (while still accepting the old POW), and then later soft forking to reject the old POW.  
+
+My intuition tells me that *any* change can be carried out as a sequence of these "pure" hard and soft forks (is this obvious?).  The benefit of doing so is of course the relaxed synchronicity requirements: for a pure soft-forking change, nodes can upgrade asynchronously *after* the miners *start* enforcing a new rule. For a pure hard-forking change, nodes can upgrade asynchronously *before* the miners *stop* enforcing an old rule. 
+
+> So, which definition of "hard fork" is the official one?
+
+Clearly, whichever suits Blockstream/Core at any moment.  And this is one reason it is important to agree on definitions (so that we're all speaking the same language).  
+> 73% were 0.5 protocol round trips with no prediction
+
+To borrow your second favourite word, you're "conflating" the compact block's high-bandwidth mode to the low-bandwidth mode that competes with Xthin.  Anyone can blast out unsolicited thin blocks to their peers.  As far as I can tell, compact blocks is a stripped down version of Xthin that makes no novel contribution to cryptocurrency.  Please feel free to correct me if I'm wrong [here](https://bitco.in/forum/threads/buip010-passed-xtreme-thinblocks.774/page-7#post-19342). 
+
+In low-bandwidth mode, do you expect compact blocks to require more or less 2.5X round trips than Xthin?
+
+> Claiming that BU made a difference with only a few dozen nodes on the network...seems not sane
+
+You're conflating the words of the OP with [my own](https://www.reddit.com/r/btc/comments/4i7osm/alex_petrov_of_bitfury_tweeted_a_graph_showing_a/d2vw5pr), dear Gmax.
+Right, so reducing propagation times is a positive thing for orphan rates regardless of whether it happens in Core or Unlimited.  Improvements in Core have more impact on the network as a whole because there are more Core nodes than Unlimited nodes.  
+Since miners use the relay network, why would reducing propagation times in Core drop the orphan rate but reducing propagation times in Unlimited NOT drop the orphan rate? 
+
+(BTW, I'm just arguing about your logic--I have no idea what actually caused the reduction in orphan rates nor whether the reduction was statistically significant.)
+> Weak-blocks give a proof-of-work secured way to publish information, and then use iBLT to have a network compressed way to pre-distribute block information. 
+
+And Xthin blocks + subchains accomplishes the same thing *and* increases the security of zero-confirm transactions (transactions get "verified" in a subchain's Δ-block very quickly).  
+
+The difference, however, is that Xthin is [already implemented and working](https://np.reddit.com/r/Bitcoin/comments/46gtjm/thin_blocks_early_results_messages_are_on_average/), and a design for the subchain architecture has already been [proposed and analyzed](http://www.bitcoinunlimited.info/resources/subchains.pdf).  On the other hand, Blockstream/Core's IBLTs and "weak blocks" are just loose ideas at this point.  
+
+People are moving away from Core and bringing their innovation to the new clients: Classic, Unlimited and XT.
+
+There is "Nakamoto Consensus" (objectively represented by the longest chain) and "Core Dev Konsensus" (subjectively determined through an undefined process).  Here are some more thoughts on the matter:
+
+https://bitco.in/forum/threads/outline-for-a-%E2%80%9Cbitcoin-unlimited%E2%80%9D-white-paper.735/#post-8781
+This would be great.  It would also be inline with the BU philosophy.  
+
+If a recognized group were to release a 2 MB fork of Core, and (for example) if the Chinese miners agreed to run it, the existing BU nodes would automatically be supportive of this choice (i.e., node operators running BU wouldn't need to upgrade).  It would really be no different than if the Chinese miners were running BU with the limit set at 2 MB.  
+
+Because the idea behind BU is novel and hasn't fully penetrated the community consciousness, it might be easier for conservative miners to get behind a simple 2 MB fork.  Miners and node operators who have comprehended how BU is actually equivalent would migrate directly to BU.  
+
+I think BU is the long-term solution.
+Exactly.  
+BU sets the BIP101 version bits and is compatible with XT:
+
+https://www.reddit.com/r/btc/comments/3y3spd/psa_bitcoin_unlimited_votes_for_bip101_it_is/
+> I'm genuinely wanting to know why a fee market is bad but afraid I can't agree with this post.
+
+His point is that we *already* have a fee market; what small-block proponents want to do is increase prices.  Block space is a commodity and satisfies the laws of supply and demand:
+
+https://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/
+
+> raising **block size** must be done after we have new tech not before.
+
+BIP101 doesn't raise the block size; it raises the protocol-enforced *limit* for the block size.  In order to understand the block size limit debate, it is important that people understand the difference.
+
+Furthermore, it is not physically-possible for the network to generate blocks bigger than what the network tech is capable of generating.  So block size is already *physically limited* by the network itself.
+
+Another interesting fact is that--except for the title--the word "bitcoin" does not appear in the white paper.  
+
+(I think bitcoin is a great name, for the record.)
+I don't think my talk made my opinion on the matter completely clear: a block size limit is OK IMO so long as it is (far) to the right of Q*.  This way, it doesn't affect the free market dynamics, and serves only as an anti-spam measure (as it has done historically).  
+Here's a better link (that starts from the beginning of the talk rather than 1.5 minutes in):
+
+https://www.youtube.com/watch?v=iKDC2DpzNbw&t=0h24m58s
+# Ledger: Call for Papers | 2015 September 15 #
+
+### ledgerjournal.org ###
+
+**The journal *Ledger* invites authors to submit their original research for the inaugural issue of the very first peer-reviewed academic publication devoted solely to the field of cryptocurrencies and its related subtopics.** This nascent field of research is highly interdisciplinary, sitting at the intersection of computer science, cryptography, economics, engineering, finance, law, mathematics, and politics. Due to its novelty and wide-ranging nature, cryptocurrency studies have not sat comfortably in any traditional journal, and it is thus our aim to create the first purpose-built vehicle for the leading research in the field. We welcome papers of up to four thousand words detailing new ideas and perspectives on any relevant topic, including but not limited to the technical, social, economic, and philosophical developments and implications of Bitcoin, cryptocurrencies, public and decentralized ledgers, distributed consensus, and more. Interested authors should consult the [submissions and policies sections on the *Ledger* website](http://ledgerjournal.org/ojs/index.php/ledger/about/editorialPolicies#focusAndScope) for more details on our focus and scope, submission methods, transparent peer-review process, [author guidelines](http://ledgerjournal.org/ojs/public/journals/1/AuthorGuide.pdf), and open-access policy. The deadline for submissions for the inaugural issue is 31 December 2015, but we will consider submissions after that date for subsequent issues on an ongoing basis. We welcome inquiries by e-mail at ledger@pitt.edu.
+
+*Ledger* is the first peer-reviewed journal devoted to the inherently interdisciplinary subject of cryptocurrencies, and is proud to be supported by its [distinguished editorial board](http://ledgerjournal.org/ojs/index.php/ledger/about/editorialTeam). It is published quarterly by the [University Library System, University of Pittsburgh](http://www.library.pitt.edu/e-journals) as an open-access journal and does not charge author fees. *Ledger* timestamps all published articles in the Bitcoin blockchain, and encourages authors to digitally sign their manuscripts. For further information please visit [ledgerjournal.org](http://ledgerjournal.org).
+Do you mean you're suprised Thermos said this? Or that you think the transcript is fake?
+I think this is actually a good idea, Jorge.  It builds on the logic from [this post of yours,](https://www.reddit.com/r/bitcoinxt/comments/3iest2/watch_out_the_issue_is_not_core_vs_xt_it_is_small/) that I agreed with, which explained that the issue is simply "bigger blocks" versus "smaller blocks."  Like you said in that post, "it does not matter which version each miner is running -- Core, XT, or something else. (In fact, that information cannot be determined by analyzing the miner's behavior)."  It just matters that a super majority of the hash power accepts larger blocks. 
+
+I also like this proposal because it is so simple: any miner (or user) can very easily modify whatever code they are presently using to be compatible with BIP99.5 (e.g., just by setting MAXBLOCKSIZE to 8,000,000).
+
+Furthermore, after we successfully increase the max block size like this *once*, I believe there will be less resistance to do so again should it become necessary.   
+
+EDIT: I keep telling you, Jorge, you're slowly becoming a bitcoiner!
+I think we're trying to say the same thing.
+That comment applies to the "high growth" curve.  If we indeed follow such a trajectory, we would bump into the blocksize limit near 2020.  Since we can't exceed the limit without another hardfork, it is reasonable to infer that price (fees) would increase to balance the reduced supply (blockspace).  
+A generic NFC tag acts more like a "secure EEPROM."  You could read-out a private key from such a tag, but the tag could *not* parse and sign a bitcoin transaction.
+
+Sigsafe is different because the private keys never leave the device.  It actually produces the digital signatures internally.  
+Metcalfe's Law states that V is *proportional* to N^2.  It says that if you double the number of users (adoption level), the value of the network increases by a factor of four.  The fact that the slopes on a log chart match up over 4 decades of price growth is what is remarkable.   
+
+Since the terms V and N^2 have different units, it is not possible to plot them on a common "labeled scale".   Note that changing the "scale" on a log chart only shifts the curve up or down.  It doesn't change it's slope.  
+I do believe we are witnessing the economic realization of Metcalfe's Law, but I agree that we must eventually diverge from V~N^2 growth to something milder.  That could still be a few years away, however.    
+
+If you assume bitcoin adoption is at 0.1% of its long-term saturation level, this model would predict a price in today's dollars of ~$500,000,000 / BTC at full adoption.  This seems a few orders of magnitude too high for even the most ardent bull!
+I wrote to T-Mobile a few weeks ago, explaining how as a Canadian traveling back and forth to the US, I would top-up my T-mobile SIM card even for short day trips if I could do it in 10 seconds with a single bitcoin payment. 
+
+I described how the hassle of logging into my account (after resetting my password that I forgot) and paying by Visa (which always seems to take 10 min) could be avoided with bitcoin. If I have a T-Mobile SIM card in my mobile device and my bitcoin payment is good, then they don't need to authenticate me since credit-card fraud is no longer a risk.  
+
+I never heard back, but perhaps I helped pave the way for you!
+It is a mathematical fact that *all* the wealth in the world is eventually transferred from the older generation to the younger generation.  
+
+Inheritance is *not* the only way this wealth transfer takes place.  If the younger generation's perception of value shifts--away from legacy financial assets and towards promising things like bitcoin--wealth is actually *sucked out* of paper money, over-leveraged bond funds, and dinosaur banks as if by magic.
+The bottleneck was originally specified to be ~100 transactions per second, which was _translated_ to 22 MB when people asked "what does that mean in terms of max sustainable block size?"
+
+I know because I was the one who first publicly described the bottleneck during my talk at Scaling Bitcoin Stanford:
+
+https://www.youtube.com/watch?v=5SJm2ep3X_M
+I don't recall a single laptop used in our experiment.  We did have a few desktops on residential internet connections though.  
+
+But these people don't care about the truth. They just want to propagate a meme. 
+Uh..that doesn't solve the problem at all.  
+Yes, I completely agree.  The idea that most people will directly use LN doesn't make sense if fees are high.  Like you said, they will have custodial accounts with a LN Bank.  This solves a bunch of other problems too like the need to be online to get paid, the need to scan the blockchain for channel fraud, and the need to have sufficient incoming channel capacity as in my [concert ticket example](https://twitter.com/alexbosworth/status/1105847698513510400).
+
+
+It’s based on BIP157/158 instead of BIP37. Read this post to learn what that means: https://www.reddit.com/r/btc/comments/av3gma/a_deeper_dive_into_simplified_payment/
+On BTC transactions propagate much slower than on BCH, and so a longer wait is required for the same level of security.
+"Guys, guys, guys...listen.  You're over-reacting.  Yes it is true that CSW is a fraud, but he's just a _civil_ fraud.  And that's almost the same things as not being a fraud at all." 
+I would disagree with their decision to blacklist. But I couldn’t prevent it (outside of selling my coins). The reality is that bitcoin breaks if a colluding group of attacker miners controls more hash power than all honest miners combined.
+> I would suggest backing up a step. The better question is what's the actual risk profile. If hypothetically the typical double spender has to make 10 honest transactions to get one fraudulent one through, and still has a high risk of being caught compared to credit card fraud, this is not a meaningful risk factor vis a vis shoplifting.
+
+Yes, this is exactly the type of information we want to collate.  Right now, some people say instant transactions are completely insecure, while others say nonsense like it would cost $50k to succeed in a 0-conf double-spend attack.  Let's try to get the facts straight first.
+
+> In this regard i'm with grumpy. First let's actually define a meaningful problem. 
+
+Yes, this is what I want to dedicate Day 1 to: defining the problem and really trying to understand it. 
+
+> What if there isn't one? Maybe the conference should focus on that.
+
+There are at least 3 vulnerabilities: fast-respend, reverse-respend, and miner-colluson double spends.  
+
+I think we can fix the first two so that such attacks are quickly detectable. 
+
+> In fact, I'd go a step further. There should be a kiosk where people try to double spend for merch. What if nobody can do it without getting caught? That would be the best part of the entire conference.
+
+Very cool idea!  
+What do you see as the benefits (and drawbacks) of this proposed consensus-layer change?
+I don't understand your comment.  Miners have control over the blocks they mine and the blocks they accept.   But even a majority of miners cannot prevent nodes from sending out double-spend proofs, communicating blocks via Graphene, or improving transaction relay.  Nor should miners _want_ to prevent this.  
+How is that better than nodes _always_ trying to confirm the first-seen transaction like they do now, but nodes also sending out notifications that an attack is underway if two conflicted TXs are seen within your short window?
+The workshop is to discuss this topic. We’re really close, but there’s still debate on how exactly the double spends should be relayed. For example, Tom Zander argues that it is better to relay only a _proof_ of the double spend. We’re close to a solution that could be adopted widely, but before we’re all the way there we need to work out several details.
+I've experienced this problem too.  It's definitely annoying. Wallets that don't allow spending unconfirmed change should at least ensure that their users' wallets contain several UTXOs to mitigate this problem.  
+Yes, of course it would be a change.  
+Yes, if the selfish miner finds the next block (a solution for height _N_), then he has a head start over the honest miners since the honest miners are still looking for a solution at height _N_ when this event occurs.  If alpha=1/3, and the SM finds the next block at _t_ = 0, then the expected time for the honest miners to find a competing block for height _N_ is _t_ = 15 min.  
+
+The selfish mining strategy works on paper (for certain values of alpha and gamma) because of this head start.  I am sorry if this fact upsets some people, but it is true.  
+
+https://imgur.com/gallery/P5dvx
+Nah it’s not a change at all /s.  The miners just orphan the block ... because incentives.  CSW said he doesn’t care how they do it; they just do it man! Maybe he found a new patented way for the miners to come to consensus on which TX came first before you know ... actually coming to consensus on which TX came first.
+Yes, ~40 hours per week.  We're also looking for someone who wants to hold this position _long term_.  The work will be pretty independent, so we need someone who can work alone, manage their time well, and motivate themselves.  Most team interaction takes place on BU Slack.
+I agree with Satoshi: the system never really hits a scale ceiling.
+
+Here are some calculations that show that with professional equipment even 1 TB blocks are possible today (1000x Visa scale).  Imagine what will be possible with tomorrow's technology.
+
+http://blog.vermorel.com/journal/2017/12/17/terabyte-blocks-for-bitcoin-cash.html
+I'm sorry but you're wrong.  Miners cannot update their UTXO sets without witnessing the signatures _for regular bitcoins_.  With current validationless mining, miners can only mine _empty_ blocks (b/c they can't update their UTXO sets); with segwit validationless mining, miners can confirm economically-important transactions.  That makes a huge difference.  I think you're still not seeing what the argument is for why segwit coins have an objectively weaker security model than bitcoins.
+Watch the entire video.  It is correct.  You are missing the subtly of the weakness behind segwit: miners can update their ledgers of who owns which coins _without_ witnessing the signatures that authorized those transfers for segwit coins, but not for bitcoins. 
+
+And it's not just I who think this.  This is a well-known weakness.  See the links below for Peter Todd's (BS/Core) and Tomas van der Wansem's (Bitcrust) interpretations:
+
+https://bitcrust.org/blog-incentive-shift-segwit.html
+
+https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-December/012103.html
+
+The hash chain that links the transactions together that define a bitcoin (see Fig. 1 in the Satoshi white paper) includes the signatures for bitcoins but does not include the signatures for segwit coins.  That is, the signatures can be omitted, lost, or perhaps never existed in the first place, without destroying the chain of custody for the coin. See this video at the 8min:30sec mark for more details:
+
+https://www.youtube.com/watch?v=hO176mdSTG0
+I think it might be useful with centralized hubs for certain nano- and micro-type payments.  As a general scaling solution to replace bigger blocks, I don't think it works at all.  I agree with most of these points:
+
+https://twitter.com/davidgerard/status/940311526606561280
+No, not really. You just send the block layer-by-layer rather than all at once.
+BCH has a higher expected return than BTC IMO, but that doesn't logically imply that shifting most of one's portfolio to that single asset would be wise.  Have you read up on the Kelly Criterion? 
+
+https://en.wikipedia.org/wiki/Kelly_criterion
+I have about 2 BCH for every BTC I own.  Dumped most my BTG.  I hold no other cryptos. 
+There is no reason why Satoshi's design (SPV nodes and on-chain scaling) can't scale to a global payment system used daily by all of the world's human inhabitants.  
+
+We _already_ have the technology to achieve this (but the [software needs significant work](https://www.youtube.com/watch?v=5SJm2ep3X_M)).  In 30 years when the demand arrives, we'll look back and wonder what all the worry was about.  
+Sure you can scale blocks exponentially.  At least up until the point where all the world's population can make a few transactions per day.  
+If the hash power majority enforces (and continues to enforce) the segwit rules, then indeed the segwit rules will be enforced.  That's not the point.  The point is that there is less incentive for the hash power majority to enforce the segwit rules in the first place (in particular, to download the witness data).  The reason there is less incentive is because miners do not need the witness data in order to claim fees.  
+
+This doesn't mean that segwit is _necessarily insecure_ but it absolutely does mean that segwit has a weaker security model than regular bitcoins.  Will segwit's reduced security "matter"?  Only time will tell. 
+
+It is a nuanced concept that cannot be explained in a paragraph.  I spent a week preparing this talk:
+
+https://www.youtube.com/watch?v=hO176mdSTG0
+
+If you want to understand the argument, spent 19 minutes watching from t = 4:50 to t = 23:40.
+The 55X compression is measured with respect to traditional block propagation.  55X fewer bytes were used to communicate this block than if the same block were communicated using traditional block propagation.
+
+In general, compression takes advantage of patterns and redundancy in the data that are known to exists _a priori_.  ASCII plain text can be compressed efficiently because it contains several patterns and redundancies.  For example, the 8th bit in each byte is unnecessary and so 8/7X compression is trivial.  Furthermore, the codes 0x41 to 0x7a (i.e., the letters "A" to "z") are more probably than other codes, etc., etc.  
+
+The _a priori_ assumption behind [Xthin](https://medium.com/@peter_r/towards-massive-on-chain-scaling-presenting-our-block-propagation-results-with-xthin-da54e55dc0e4) is that mempools between nodes A and B will tend to be fairly coherent (i.e., that |A ∩ B| ≈ |A| ≈ |B|).  Upon receiving an INV message from node A announcing a new block, node B images its mempool onto a Bloom filter that is sends with its getdata() request.  From this Bloom filter, node A can figure out which transactions node B is aware of already, and which transactions it needs to send in full.  Node A then needs to send only enough information for node B to know the _order_ of the transactions in the block for the transactions it already knows about.  
+
+You can also see from the linked PDF that another large block was sent with only 1.2X compression.  The reason for this is that the Xthin mempool coherency assumption did not hold (mempools were largerly incoherent at that time), and so the technique was not effective.
+/u/bryceweiner is correct.  The incentives are provably different.  Whether that is enough to really matter is up for debate.  I gave a talk in Arnhem demonstrating this:
+
+https://www.youtube.com/watch?v=hO176mdSTG0
+By the way, those other rules aren't like the block size limit in the sense that those other rules don't limit the growth/scale of the system.
+I'm referring to a specific type of friction: the friction associated with implementing the (technical) change _you_ want in _your_ client.  The _technical friction_ if you will.
+
+I agree that the friction associated with a group of people actually coming to a decision _is_ an important friction for the reasons you mentioned.  I call this _political friction_ to make it distinct from the _technical friction_ my post addressed.  BU is designed to use this political friction to more efficiently come to decisions regarding the evolution of the network.
+> The miners are externalizing costs...onto the average user who has to store the block chain
+
+No user _has to_ store the blockchain and the _average user_ does not store it.
+
+The recent study out of Cambridge estimated [2.8M to 5.9M active Bitcoin users](https://news.bitcoin.com/cambridge-university-global-cryptocurrency-benchmarking-study/).  Bitnodes measures [6865 nodes worldwide](https://bitnodes.21.co), for an active-user-to-node ratio between 408:1 and 860:1.
+
+In other words, users that store the blockchain (0.1 - 0.2%) are _anything but_ average. 
+
+All they would need to do is give their users the _option_ to allow their users' nodes to accept larger blocks.  This is the big mystery: they claim that they don't want to dictate consensus parameters and yet the refuse to make it even possible for their users to accept large blocks _even if their users want to_.  
+If you plotted the number of unspent outputs in the average user's wallet over time, do you think it would grow without bound, or approach an equilibrium? 
+> lnd can already support ~1-2k payments per second on a single channel thanks to the commitment update state machine which allows sides to batch+pipeline updates to the state in an asynchronous de-synchronized manner. 
+
+Yes, I realize that.  I meant thousands of transactions per second submitted randomly from a billion users--something similar to Visa.  Your comment that _"the real challenge is in efficiently handling the dissemination of the dynamic information in the channel graph"_ is what I was referring to.  
+
+> I wouldn't say that [the scalability of this alpha version released today is worse than Bitcoin], LN nodes don't need to validate every single transaction that's happened from the genesis of the chain to now in order to join the network (ignoring lite clients for a sec here). 
+
+In theory _maybe_; we'll see.  In practice--at least at the current state of development--I believe that the existing Bitcoin network with only a change to MAXBLOCKSIZE could scale _today_ to over a hundred transactions per second, tens of thousands of nodes, and hundreds of millions of lite-wallet users.  I don't believe LN in its _present_ state of development could do that (without perhaps a centralized hub-and-spoke model).  I think a better understanding of how routing will work in practice will be required to achieve this kind of scale.  You basically said as much yourself.
+
+Hopefully we can get both LN and an increase in the block size limit and test out both.  
+You haven't explained how "large miners can leverage large blocks to orphan smaller miners' blocks."  If large miners purposely produce blocks that propagate slowly, it only hurts their profit margins (except for the selfish mining attack, but that's more complicated and not what the OP was referring to).  Furthermore, if a miner really does want to make his block propagate slowly, he can just wait a few seconds before transmitting it.
+
+One of the effects Peter Todd describes in that link you cited is the small theoretical advantage large miners or large mining pools have when network orphaning rates are high (and there are errors in this work too, but it's sorta right).  At typical orphaning rates of a few percent, this effect is tiny compared to cost-per-hash advantages due to the miner's geographic location or even the effect of luck (variance).  
+If you run Bitcoin Unlimited with default settings, then your node will accept up to 16 MB blocks TODAY.  No activation required.  Of course, should a 16 MB block be mined today, it would certainly be orphaned, and your node would quickly follow the small-block chain again.
+Two things:
+
+1.  Right now--because we're bumping into the block size limit--the ["elasticity of supply"](https://en.wikipedia.org/wiki/Price_elasticity_of_supply) is zero.  The supply does not respond to a change in the price for block space, and so fees become highly volatile with changes in demand.  Without a block size limit (or a limit above the free-market equilibrium), the miners can respond to an increase in demand by supplying more block space, significantly reducing fee volatility.  In other words, the problem of stuck transactions would be less acute in the first place because fees would be more predictable.  
+
+2.  Child-pays-for-parent (CPFP) schemes can unstick transactions without any loss of security for zero-conf transactions.  CPFP allows both the sender OR receiver to effectively bump the fees to expedite the confirmation of a transaction.   
+The size of the Xthin block depends on how many of the block's transactions the receiving node already has in its mempool (i.e., an Xthin block is _customized_ for every node based on its bloom filter, so it's often a different file node by node).
+
+We thought it _might_ be possible that nodes on the Mainland China side of the GFC would have worse mempool synching and thus require larger Xthin blocks on average.  This did not appear to be the case (at least to a measurable extent).
+
+
+> Got any details on how one would actually do this with xthin blocks with a reliable reassembly rate?
+
+The same way as in Core's compact blocks.  The two techniques seem to me to be quite similar except for the Bloom filters.  
+
+> Compact block relay also has the advantage of not needing to use Boom filters(which pools often disable due to being a DoS vector).
+
+I'm pretty sure you're referring to a different Bloom filter in the context of DoS attacks.  The Bloom filter used in Xthin is unique to Bitcoin Unlimited and is created after a node receives an INV for a block that it doesn't yet have.  
+
+
+> ...thin blocks isn't really all that great for propagation improvements due to the **amount of required round trips**...Core should be getting something quite a bit better...
+
+Did you read and understand the information in the link you provided?  Compact blocks will require 2.5 round trips *significantly more* often than Xthin.  This is because the receiving node doesn't send a Bloom filter to indicate to the transmitting node which transactions it is missing.  The transmitting node just sends a list of transaction by hash and hopes for the best.  IMO, the method used by Unlimited is more elegant and robust.    
+
+
+You've got my attention.  Now I'm waiting for the explanation for what exactly I'm looking.  
+> [efficient block propagation is] not so important for non-miners...
+
+Not according to a [recent paper](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) from researchers at Cornell, Berkeley and elsewhere.  They found that the bottleneck was block propagation to *nodes*.  They recommend a max block size of 4MB so that at least 90% of the nodes can receive a max-sized block in the 10 minute block interval, given the current performance of the p2p network. (Readers: note that Peter Tschipper's "Xthin" blocks for Bitcoin Unlimited was designed to address this exact problem.)
+
+But what do these people know, right?  In fact, their friends from Princeton had the audacity to [challenge your claim that you invented Bitcoin](https://www.reddit.com/r/btc/comments/45121i/bitcoin_is_hashcash_extended_with_inflation/) (minus the inflation-control part, naturally).  
+
+cc: /u/solex1
+
+
+Looks great, /u/hellobitcoinworld!  I see you show the total BU node numbers both at the top of the page and in the pie chart and graphs.  
+
+Thanks for taking the initiative on this!
+BU sets the BIP101 version bits and is compatible with XT:
+
+https://www.reddit.com/r/btc/comments/3y3spd/psa_bitcoin_unlimited_votes_for_bip101_it_is/
+The former.  RBF allows you to mark a transaction as "double spendable" and nodes and miners running Core will work to facilitate the double spend. 
+Good point.  If they controlled a greater portion of the hash power they could take increased advantage of the backlog due to the block size limit.
+> mmm what do your big blocks taste like? 
+
+It pairs well with filet mignon from my spherical-est spherical cow.  
+
+
+Some good points, Jorge, but a couple of nuances to consider:
+
+1. What you're describing is a case where essentially the entire network is SPV mining.  If you consider that only x% of the network would engage in this behaviour, then theoretical orphan rates become a much stronger function of the block size, *Q*.  If I ran a pool, I don't think I would SPV mine (I'd support something like 'weak blocks' instead).  
+
+2.  Even if you assume that 100% of the network is SPV mining, as long as orphan rates are non-zero, then the orphan rate will still be a monotonically-increasing function of the block size, *Q*.  To see this, consider the following: a miner receives the hash of block B(N) and immediately starts mining an empty block on top of it while downloading and verifying that block's contents.  Now imagine that in the meantime the miner *fully downloads and verifies* a smaller block.  If that happened, the miner would orphan the larger block and mine on top of the smaller block because he would then be 100% sure that the smaller block is valid (and would also be able to include fee-paying transactions).  
+
+3.  Indeed orphan rates have been relatively stable over time, but remember orphan rates are a function of two variables: the average size of the blocks *and* the network propagation impedance.  Improvements in P2P messaging, faster block processing, etc., as well as things like the Relay Network, all serve to decrease the propagation impedance and lower the orphan rate.  At the same time, the average block size tends to increase.  For some reason that I can't explain, the orphan rate normally sits around 1%.  
+
+4. Your point that poorly connected miners are not at a significant disadvantage depends on what you mean by "significant."  For example, six seconds is 1% of the target block time (600 sec), and three seconds is half of that.  Really crudely, a miner with a 6 sec latency would lose twice as much money to orphaning as a miner with a 3 sec latency.   
+Adrian-X is my friend and he is certainly not a troll.  Adrian helped me with the mechanical design for sigsafe:
+
+https://vimeo.com/105458967
+
+Sigsafe made the first bitcoin transaction signed offline by a passive NFC tag (no battery), transmitted over an air gap, and then broadcast to the bitcoin network in real time.
+> Literally all of this mod's posts were buried.
+
+Before /u/110101002 was made a mod, I always thought he/she was a troll from /r/buttcoin.  After I explained that this mod called my GIF submission a "shitpost" in public, you admitted that ["this particular mod is kinda 'feisty' then"](https://www.reddit.com/r/bitcoinxt/comments/3nhq9t/deprecating_bitcoin_core_visualizing_the/cvolyd7).  Are you really surprised that his/her posts are highly downvoted? 
+
+/r/bitcoin is now largely moderated by people who would fit my definition of internet trolls.  
+IBLTs and weak blocks are schemes to implement coding gain (the "gamma" variable in my paper; they are not truly O(1) when you factor everything in [I think Rusty mentioned an IBLT 3% of the block size target at SB]).  A coding gain of 100X, for example, would allow a 10 MB block to be communicated with only 100 kB of data.  This is possible because the other nodes and miners already know a lot about the contents of a typical block before they are announced (since mempools are fairly homogenous).  
+
+Coding gain reduces the network propagation impedance and allows larger blocks to be produced for a lower price per byte.  Figures 7 and 8 in [this paper](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf) illustrate the effect.  
+
+I set up a thread to discuss topics related to the fee market in [here](https://bitco.in/forum/threads/block-space-as-a-commodity-a-transaction-fee-market-exists-without-a-block-size-limit.58/page-2#post-1338).
+
+BTW, the tone here is much more pleasant that over ["there"](https://www.reddit.com/r/Bitcoin/comments/3mddr4/a_transaction_fee_market_exists_without_a_block/).
+We've been thrilled with the community's reception to [*Ledger*](http://ledgerjournal.org).  In less than a week, we've had over one hundred and sixty individuals register as authors and readers, and we've already received five submissions. 
+
+The purpose of this post is twofold:
+
+1. To make the community aware of *Ledger*'s Author Guidelines. 
+
+2. To solicit input from the community regarding these guidelines.
+
+*Ledger* has a difficult job.  On the one hand, it is important that its published content be of a high scholarly quality for both the journal's sake and for the legitimacy of cryptocurrency as a new field of research.  On the other hand, we want to encourage submissions from a broad spectrum of disciplines and from knowledgeable individuals both in academia and industry, each of whom may have significantly different views on how an article should be written. 
+
+The linked paper "How to Write and Format an Article for *Ledger*" is our first attempt at communicating the journal's expectations for articles.  It is formatted based on the stylistic requirements of the journal, and thus also serves as a useful example to which prospective authors can refer. 
+
+To encourage people to read these guidelines, I am also offering $10 bounties for errors found. To qualify for a bounty, **you must NOT respond to this comment but rather to the comment by LEDGERTHROWAWAY1 below**.  This will hopefully keep this thread readable.  
+
+CROSS-POSTED TO /r/bitcoin: https://www.reddit.com/r/Bitcoin/comments/3ly0qn/how_to_write_and_format_an_article_for/
+The most significant costs to attempt to mine a block can be broken down into two components:
+
+1.  The cost to attempt to find a valid proof-of-work
+
+2.  The cost to include *Q* bytes of transactions, if you do find a valid proof-of-work
+
+The cost to *attempt* to find the proof-of-work for a given block height is equal the miners amortized cost per hash, multiplied by his hash rate, and multiplied by the time he expects to hash for before either he finds a block or someone else does (~10 min on average).  
+
+The cost to include *Q* bytes of transactions in a block depend on, at least:
+
+ 2.A.  The cost due to the increased chances of orphaning a larger block compared to a small block (thereby forfeiting the block reward).
+
+ 2.B.  The net-present-value of the cost of indefinitely storying any extra UTXOs that were generating by the transactions included in a block.  
+
+This paper speaks to Point 1 and Point 2.A.:
+
+https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf
+Only one of the proposals would get activated. However, prior to the activation date, I'm suggesting that indifferent miners could express their support of both.  Just an idea...
+This is my understanding as well.  For miners that are indifferent to BIP101 vs BIP100, this might be a reasonable thing to do as it would expedite the consensus process. 
+It would be nice to have a new place to work on ideas again.  Unfortunately, it sounds like that place won't be bitcointalk.org because threads that are broad in scope (such as "Gold Collapsing. Bitcoin UP") are apparently no longer permitted.  
+
+https://bitcointalk.org/index.php?topic=1157185.msg12199651#msg12199651
+
+Thanks for the suggestion.  I'm slowly (read: it may never be compete) working on another chart with this type of information, as well as cost projections for running a full node in the future.  
+
+I elected to keep this graphic focussed on visualizing Gavin's code change, and four possible "growth" scenarios: high, moderate, limited, and failure.  
+Come on Chris, get with the program :)
+
+$5 /u/changetip.
+I think this proposal is perfect:  one million square bits forming a single round coin represents the fusion of our analog and digital worlds.  The unicode character 0x0180 which produces the symbol ƀ may keep the people who wanted to switch to Ƀ happy, without actually changing from ฿.  
+
+"Bits" is a simple, easy-to-say word that is already a colloquial term for money.  And the parallel between money and bits (bytes) is even somewhat accurate.  When viewed from far enough away and from a physics perspective, money is often earned by creating information or removing entropy, and both information and entropy can be measured in bits.
+
+Thanks. You inspired me to clarify my position on twitter:
+
+https://twitter.com/PeterRizun/status/1120111334715084800
+Awesome work, guys!
+
+One question: do you have any apples-to-apples comparisons for propagation times "in the wild" for Graphene vs Xthin or CB?  I've seen lots of results for compression levels achieved, but fewer results for empirical propagation times that take into account the encoding/decoding computations.  Is Graphene faster than Xthin in a fair race?
+> How is profit lost though? If I choose to include “bribe” to and mine a block - other miners will mine on top of it even if they had been mining “honest” tx in the meantime. I am rewarded by nothing by sticking to mining “honest” transactions.
+
+In the Avalanche case, profit is lost because your block (that included the double-spend) is most-likely orphaned.
+Set up a website like the one proposed here:
+
+https://np.reddit.com/r/bitcoincashSV/comments/a4qxj3/business_idea_to_make_money_off_idiots_who_think/
+
+This would be a great way to collect data on 0-conf double-spends.
+It is possible to change the rules with hash.  That's how soft forks work. The hash power majority can add a new rule with hash.
+
+Similarly, the hash power majority can prevent any rule from being removed with hash -- i.e., prevent a hard fork.
+
+What is difficult to do with hash power alone is to remove a rule.  
+One possibility is that they were able to submit transactions into the network _as a whole_ at 1500 tx/sec.  For example, I can easily dump 50 tx/sec into Node 1, dump a _different_ 50 tx/sec into Node 2, etc., until the total transactions being dumped into the network total 1500 tx/sec.  
+
+During our [Gigablock testing](https://www.youtube.com/watch?v=5SJm2ep3X_M), we were able to dump over 2000 tx/sec into our testnet.  But of course, that number is largely meaningless because the rate at which any given node was able to accept transactions was between 100 and 200 tx/sec.  Since blocks are mined by nodes, the max sustained throughput into the blockchain was likewise limited to 100 tx/sec.
+
+And as we saw, during the BSV stress test, the [maximum sustained throughput was less than 10 MB per ten minutes](https://imgur.com/fZJeIG6) and 50 tx/sec.  
+
+For the other readers, I should make it clear that the rate at which you can dump transactions into the network is only a measure of how good your spamming tool is. Today with only a few hours of work, I could dump 100,000 tx/sec into the network by launching 2000 nodes and then pushing 50 unique transactions per second into each one.  
+
+
+Thanks for noting this. I agree. What do you think of /u/thezerg1’s method?
+
+https://medium.com/@g.andrew.stone/forkless-inclusion-of-functions-loops-and-new-opcodes-in-bitcoin-script-6bd1155a9f5a
+Yes, I agree.  It should be pretty easy to do too.  Maybe they're planning it for the future.  The button could just display a QR code with an encoded payment request at the same time as it shows the login and sign-up buttons.  People who didn't want to sign-up could still pay with any wallet. 
+Actually, it is you who didn’t understand what Peter T was describing. 
+
+BCH devs are the experts on Blockchain scaling. BU devs attained bursts over 10,000 TPS, while a Core node does only 7 🤣. It must be hard for a Core dev to learn much from those iddy-biddy 1 MB blocks.
+
+EDIT: Greg, I kind of actually miss arguing with you. You understood the technical aspects of bitcoin and sometimes I'd learn from you.  Our Chief Imbecile, Dr. Dr. Dr. Craig Satoshi Wright, just doesn't do it for me.
+I appreciate that if transactions are _not_ sorted topologically, that that could affect existing validation engines.  I'm with you there.  
+
+But I still don't see how we can check topological ordering "for free" so-to-speak, with a fully-parallel validation engine.  I imagine passing chunks of the block to different workers, who then validate each transaction in their chunk against the UTXO set.  
+
+Since things are happening in parallel, the order these workers are trying the transactions against the UTXO set is not necessarily in the order the transactions came in the block.  If an input is "missing," the worker just waits a while and tries that transaction again later.  If all the transactions _eventually_ make it through validation, then we now that a topological order _must_ exist for the block. But we haven't yet proved that the actual order the block is in is topological, have we?
+
+/p.s. heading to bed now, so I won't be able to respond...
+I agree we need better data. Merchants need to properly evaluate the risk of accepting instant transactions and they need to know the facts to do so.
+
+We already know that reverse-respends succeed about 10% of the time right now and the attacker is very unlikely to be caught in real time.  
+
+I don’t have data on fast-responds yet, but I think with a good attack setup, the success probability could exceed 50% (again without much risk of being caught).
+
+What I want to do is make it so that fast-respend and reverse-responds are easily detectable. I don’t see why anyone would be against that.
+In BU they can change the hard limit without even restarting their node. It is user adjustable and very easy. However, miners like to change this limit in lock step — there’s a bit of a coordination challenge we haven’t resolved.
+Because the soft cap controls the size of blocks miners produce. They accept blocks up to the hard cap. So if there was no limit, the miners would try to accept the poison block.
+I agree with you that block validation for both lexicographic and natural orderings will scale the same way: roughly as O(_n_).  I also believe that natural ordering will have an advantage in terms of the coefficients in front of that _n_.  
+
+The reason I think this change has become controversial is because the [original justification for it was that it would speed up block validation time](https://blog.vermorel.com/pdf/canonical-tx-ordering-2018-06-12.pdf).  But now it seems everyone (even the authors who proposed the change) agree that the benefit is small at best (and IMO likely negative). 
+
+> The superiority or lack there for ordering is going to come from the efficiency of block transmission, which also involves processing overhead.
+
+I'm not sure that this change will have a significant effect on block transmission either.  Right now, miners are free to sort _most_ of the block as they see fit.  Most transactions in a block can be sorted in a canonical order, and the miners can transmit a bit of extra information to resolve the orderings for those transactions that cannot be.  I did some calculations [here](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-1219#post-78775) that convinced me that this extra order information is well below 1 MB for a 1 GB block  
+> It hurts parallel validation in quite a bad way.
+
+My thoughts too.  But deadalnix and shammah argued that it improved parallel validation.  I don't have proof either way though.
+The catch is that a shorter block time results in a longer chain of block headers for SPV wallets to download, and an increase in the network orphan rate (which incentives further pooling of hash power).  A coin with a shorter block time will also be more susceptible to chain convergence failure if there were significant internet outages (e.g. a loss of trans-Atlantic fibres).
+
+I don’t know where the “sweet spot” is but I suspect 10 min is quite conservative.
+I gave him the benefit of the doubt for a long time (even though I couldn't parse a single technical thing he ever wrote).  We actually met in person once in Vancouver at a nChain office.  It was this meeting that made it clear to me that he was making stuff up.  
+
+First, he told me how great my work was and suggested that we write a paper on his selfish mining findings together (as co-authors).  I said something like "I'm pretty sure you're wrong and that Eyal & Sirer are perfectly correct.  But, I'd still like to try to understand your argument for why selfish mining is a fallacy."
+
+He walked me over to a whiteboard, and then proceeded to scribble a few blocks connected as a chain.  He looked at me and said something oddly technical: "You're obviously familiar with the properties of Erlang and negative binomial distributions."
+
+That's the point I _knew_ he was a bullshitter.  He _intentionally_ asked the question in a way designed to make me feel dumb so that I might be too embarrassed to answer 'no.'  I responded "Not really." 
+
+He smirked and half laughed. 
+
+I then said "but I am very familiar with the math required to understand selfish mining, let's work together on the board."  I proceeded to try get to a point where we agreed on even a _single technical thing_ about bitcoin mining, but it was impossible.  I said "OK, let's imagine a selfish miner solves a block and keeps it hidden.  Do you agree that the probability that he solves the _next_ block is equal to his fraction of the hash rate, alpha?"  
+
+He retorted: "Well that's sort of true but its really just an approximation. You're not looking at the problem from the proper perspective of IIDs."  
+
+I replied back "What's an IID?"
+
+He laughed to himself again, this time louder, and told me that he had assumed my math skills were better than what I was presenting to him.  He said IIDs are "processes that are independent and identically distributed."  
+
+I replied back: "Oh, you mean like how mining is memoryless, right?  Yeah, I understand processes like that.  So OK forget about the hidden block, do you agree that the probability that the selfish miner finds the _next_ block is equal to alpha?"  
+
+And again he would say something like "Peter, you obviously don't understand IIDs and negative binomials, but I have a paper coming out soon that will help you to understand what I'm saying."  And I'm thinking to myself that he hasn't actually said _anything at all_.
+
+The conversation went nowhere for a while like this with him dropping technobabble terms like it was going out of style.  At the end, we had not agreed on a single technical fact about bitcoin mining.  I wondered why he drew those blocks on the whiteboard, since he never actually referenced them in the conversation, but I decided not to ask.
+
+*****
+
+I can't figure out if he's a crank that believes he makes sense, or if he's an actor and this is all part of some bigger con that I don't understand.
+I think geekmonk might be playing dumb, but if he's not, he misunderstands what "memoryless" entails in the same way Craig Wright does.  In this thread, he argues with vigor that if a block hasn't been founds for 5 minutes, its expected arrival time is only 5 minutes later:
+
+https://www.reddit.com/r/btc/comments/8c6eux/everyone_is_allowed_to_work_on_bitcoin_cash/dxcw3m6/
+
+It is not possible to understand selfish mining if you don't understand the basics of Bitcoin mining.
+Blocks from the SM will -- with very high probability -- have less weak-PoW than blocks from the HM.  But in my proposal [here](https://www.bitcoinunlimited.info/resources/subchains.pdf) (that I think TomZ is thinking about), I don't _actually_ suggest that the HMs orphan blocks suspected to be from the SM (that _would_ be a soft-fork).  
+
+I don't really think we should modify the protocol like this either, because I believe just making SM more observable would go along way to discouraging it.  And if it ever did become a problem, we'd have an objective signal (i.e., the weak-PoW) from which to make orphaning decisions.  
+
+This same logic also applies to discouraging RBF-based 0-conf fraud.
+I think Selfish Mining is a real vulnerability in the same way I think a 51% Attack is a real vulnerability.  
+
+The logic for why a miner who has the ability to selfish mine may choose not to, mirrors what Satoshi said about a 51% miner:
+
+> "He ought to find it more profitable to play by the rules, such rules that favour him with more new coins than everyone else combined, than to undermine the system and the validity of his own wealth."
+If you skim this thread you'll see how it unfolded.   Basically, he had a fundamental error in his paper (he implictly assumed mining had memory) and then we had a long debate on slack.  We were able to reduce the misunderstanding to the simple question described in "The Bet."  CSW argued that the answer was t=5 while I argued t=15.
+
+https://bitco.in/forum/threads/wright-or-wrong-lets-read-craig-wrights-selfish-miner-fallacy-paper-together-and-find-out.2426/
+> There is nothing dishonest in this behaviour [replacing the first-seen version of a TX with a double-spent version]
+
+I disagree.  The purpose of mining is to prevent double-spending.  Miners that accept bribes to facilitate 0-conf fraud are not doing their jobs.  The system should respond as a whole to punish such miners, if possible.
+
+Something being _possible_ in Bitcoin does not make it honest.  Just like a miner can facilitate 0-conf fraud with some probability of success and for some cost, he can also facilitate 1-conf (or _N_-conf) fraud with some lower probability of success and for some greater cost.  Does this mean that intentionally re-orging the blockchain to facilitate double-spend attacks (e.g., against exchanges) is also not dishonest?   
+
+I think the answer is "of course facilitating double-spend fraud is dishonest."
+
+
+
+
+We are looking for more of a generalist who can work on whatever needs doing.  You would be the only web developer, but we certainly have no problem contracting with other companies to get certain tasks done efficiently.  We just need someone who can drive things forward and get shit done. 
+
+Using the GTI site as an example, the content and overall design would be done collaboratively, but then you would need to implement the site as far back as polling our testnet nodes over bitcoind's JSON-RPC interface, and figuring out how to modify one of the open-source block explorers to work with our testnet.  
+
+Here's what I'd say....
+
+Benefits of shorter block times:
+
+- Improved user experience, b/c there would be a shorter wait to receive the "first confirmation" (the double-spend resistance of a transaction with 1 confirmation is significantly better than the double-spend resistance of an unconfirmed transaction).
+
+Drawbacks of shorter block times:
+
+- Longer chain of headers for SPV wallets to download.
+
+- Marginally increased orphan risk at a given throughput rate
+
+- Some people think "10 min blocks" are a defining feature of Bitcoin
+
+- It would be a very difficult change to coordinate.
+
+From the data I've seen, going to 2 min blocks would not meaningfully impact orphan rates.  The bigger drawbacks I see are the longer chain of headers for SPV wallets and the fact that it would be a difficult change to coordinate (nodes + SPV wallets must update).  
+
+My hunch is that there is insufficient support for faster blocks to actually pull off such a change, especially since subchains/weakblocks might give some of the benefits without any of the drawbacks.  
+
+https://twitter.com/PeterRizun/status/941798726317760512
+No, I was never paid the 1 BTC I was owed by CSW for winning this bet.  His argument was that I somehow tricked him into accepting the bet unfairly.  
+I think in practice, orphaning is sufficient.  But people worry because orphaning risk doesn't _guarantee_ that a large spam block doesn't make it in.  Personally, I'd probably just remove the limit -- even in the off chance a miner does take a turd in the blockchain, it wouldn't really be that bad anyways.
+I support this message.
+I'm sorry but you're provably wrong:
+
+https://www.youtube.com/watch?v=hO176mdSTG0
+
+https://bitcrust.org/blog-incentive-shift-segwit.html
+
+https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-December/012103.html
+
+It is a subtle detail that you're missing, which is easy to overlook.  A segwit coin has an objectively weaker security model than a bitcoin.
+
+
+That's a good point.
+I understand the _theoretical_ attack.  I'm asking if it has ever occurred (I think the answer is "no").
+
+It is also possible to double-spend against someone running a full-validating node (which _has_ actually happened).
+OK, I just published it, and now I can download the PDF file under "Published Proposals."  This is very cool!
+
+It feels very foreign interacting with a site like this without logging in.  Instead I prove my credentials with my digital signature.  No passwords to forget :)
+Here is the file of the raw data I used to make the chart for my Coinbase and BitPay talks (54 MB):
+
+https://www.dropbox.com/s/odzap80d9fb9cqa/blocksizedata.txt?dl=0
+
+Hat-tip to /u/thezerg1 for exporting this for me.
+Most of the big-block-signalling pools are running with EB1 and would also reject a 1.1MB block if it were mined today.
+Would you then disagree with the statement that LN was advertised as a way to massively scale Bitcoin while keeping the cost to operate a full node low?
+> You make the excellent case that BU does not permit massive scaling.
+
+You forget the rest of the sentence "while still allowing users to run full nodes on low-cost hardware."  An important insight from /u/awemany's post is that _with or without LN_, it would take a decent computer to run a full node if Bitcoin scales up to a billion users.  
+
+Personally, I always expected nodes to become more costly to operate as the network grew.  One of the main goals for LN was to allow the network to scale _and_ keep the costs of nodes low.  It's looking like this is not true any longer.
+
+
+
+> Compact Blocks don't do that. They improve bandwidth performance not latency performance.
+
+Interesting.  Xthin improves both.  Our testing showed a 24X reduction in the number of bytes transmitted, a 5.6X improvement in latency across the normal P2P network, and a 9.8X improvement in latency across the Great Firewall of China.
+
+https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-5145c9648426#.e102q3agi
+> Are you unaware that people have technical concerns about bigger blocks?
+
+And Bitcoin Unlimited allows these people to express their concerns.  Bitcoin Unlimited isn't about "big blocks"; it's about letting the people running the network decide.  If the majority set the block size limits to 1MB and their acceptance depths to 999999 then we'll have what we have now with Core (small blocks).
+
+Hmm...so you're not talking about simply making your block propagate slower.  You're talking about making it propagate quickly to (let's say) 60% of the network hash power and very slowly to the other 40%?  Can you explain with numbers how this would give me an advantage? [I bet you can't without it turning into a variant of selfish mining]
+> Turning off the hashpower and than dynamically increasing it later to make up for the brief moment when they weren't mining.
+
+Yes, that's what I said was one of the two ways to avoid mining empty blocks.  It means you're under utilizing your infrastructure.  Clearly BitFury thinks doing so is worthwhile for the optics or for political reasons.
+> There is no reason to ever not fill a block besides an outdated method of mining
+
+What should a miner do after he's verified the most recent block but hasn't constructed a new candidate block from the transactions in his mempool?  Should he:
+
+- Mine on an empty block?  
+
+- Continue mining on the old block? 
+
+- Stop mining completely until his new (non-empty) candidate block is ready?
+
+
+Love how the 'K' is a diagram of a blockchain fork! Great idea!
+> We may have opinions if it is "good" or "bad", but in the end, we are unable to force nodes to accept our view since this happens outside of the blockchain. In other words, someone can always create a client that does this and there's no way for you to stop them.
+
+By similar logic, someone could create a client that would attempt to orphan 1-confirm transactions if an attacker paid a fee sufficient to make it worth a miner's effort to attempt the double spend.  As /u/maaku7 pointed out, even after hundreds of blocks had been found, there was still a fee that Bitfinex could have paid to entice the miners to re-org the blockchain and revert the hack (if the miners had been running the appropriate profit-maximizing software)!  
+
+The reality though is that most miners and node operators do not want to engage in such destructive practices, even if it is profitable from a short-term greedy perspective.  Running RBF is antisocial.  The fact that Core promotes it--even though there's little if any demand from miners or users--tells you a lot.
+Agreed.  I was sort of lumping that into my definition of "sound money."  Perhaps "better money" or "ideal money" would be more accurate. 
+Core's "Compact Blocks" is two different products, so we need to be careful to compare apples to apples.  These two products are "low-bandwidth" (LB) mode, which is aimed towards bandwidth-conscious nodes, and "high-bandwidth" (HB) mode, which is aimed towards latency-conscious miners.
+
+Like Xthin, Compact Blocks **LB** used the Bitcoin's inv/getdata method.  However, because the receiving node does not provide a Bloom filter of its mempool with the getdata request, Compact Blocks LB requires more round trips on average than Xthin (with Compact Blocks, the sending node doesn't know which transactions are missing from the receiving node's mempool until *after* it sends the thin block).  
+
+Compact Blocks **HB** blasts out thin blocks without confirming whether or not the receiving not actually wants them. This results in faster propagation times than using the inv/getdata method at the expense of bandwidth.  Bitcoin Unlimited's version of this is called Xpedited, which /u/thezerg1 is spearheading.  
+
+I suspect the competing product to Xthin (Compact Blocks LB) will show worse performance than Xthin, in a study such as the one we are doing.  
+
+
+Well then you'll be disappointed because nodes will converge upon a single chain [1].  [Here's a picture to help explain](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-560#post-20259).  
+
+
+[1] For all finite values of the acceptance depth.  
+> Uh. So what you're saying is so long as you handicap the protocol to remove part of it you can claim worse performance.
+
+No I'm saying that we should compare apples-to-apples.  Xthin is designed for *bandwidth*-conscious nodes connected over the standard P2P network.  Core's competing offering is the "low bandwidth" mode of compact blocks.  
+
+For *latency*-conscious nodes (such as miners), Bitcoin Unlimited (spearheaded by /u/theZerg1) is developing the Xpedited Relay protocol (XRelay), which would seems to compete with the high-bandwidth mode of Core's compact blocks.  
+
+Your BIP 152 specifically says that *"the [compact block] protocol is intended to be used in two ways, depending on the peers and bandwidth available."*  In other words, you have combined two products under a single label, where as we (Bitcoin Unlimited) have given each product a different name.  
+
+In summary:
+
+Xthin competes with compact blocks, low-bandwidth mode.
+
+Xrelay competes with compact blocks, high-bandwidth mode.  
+
+If we wanted to be less clear in our marketing, we could label our technology the "X protocol" and say that it is "intended to be used in two ways, depending on the peers and bandwidth available."
+I guess it depends what we're trying to prove. 
+
+What I'm trying to communicate is that it's OK for non-mining nodes to just go ahead and stop enforcing consensus rules that they no longer see value in (such as the 1MB block size limit).  They don't need permission and they don't need to coordinate with any other nodes.    For some reason, there is still a widespread belief that "we all need to upgrade at the same time," but this is not true.  
+
+This mis-belief adds friction to rolling out hard-forking changes.  For example, right now there are over 1000 Classic nodes that will REJECT blocks > 1MB unless a certain activation sequence occurs (even though their operators probably want to accept them). If for some reason, miners coordinate to increase their block size limits some other way (e.g., perhaps Core will try to do it differently), then those nodes will have to upgrade (possibly to Core) or risk forking themselves off the network. However, if they had run Unlimited instead, then it wouldn't matter!  Running Unlimited is a vote for bigger blocks *regardless of how miners choose to coordinate the rollout of the hard-forking change*. 
+
+A sea change in the direction of bigger blocks and decentralized development.  
+
+Running Classic, Unlimited or XT(E) are all aligned with this direction.  In fact, Gavin thinks [Unlimited makes the most sense for node operators and exchanges](https://bitcoinclassic.slack.com/archives/debate/p1454852849011705), and I agree.  
+
+Just don't run Core ;)
+No that is Ledger the hardware wallet company.  
+
+Ledger Journal does not have a position on this matter, although its editorial team is composed of both people who lean towards smaller blocks (e.g., Jon Matonis), people who lean towards solutions such as Bitcoin Unlimited (e.g., myself), and people who are neutral on the issue.  
+Great post, /u/mcelrath!  In addition to a thoughtful discussion on the nature of Bitcoin, the post is also a useful review of exciting research currently underway.  I'm very much looking forward to learning more about braids.
+
+> *“This result is too beautiful to be false; it is more important to have beauty in one’s equations than to have them fit experiment.” – Paul Dirac*
+
+Haha nice quote!
+
+Speaking of physics, braids and subchains make me think "calculus of variation." I imagine the blockchain follows some principle of least action, and the transaction-cohorts in your braids, or the Δ-blocks in my subchains, are the mechanism that allows the system to "sniff out" the local phase space, searching for the path of least action. 
+
+
+> The witness data (the discounted part) does not cause the UTXO set to grow
+
+But the signatures for the non-segwit UTXOs don't need to be stored in the UTXO database either.  I'm not sure I understand how segwit provides an advantage here.
+
+> The other has to do with validation cost (I think), in that the witness data is less CPU intensive than the transaction data
+
+I'm not sure I understand how segwit provides an advantage here either.  E.g., why would a normal P2PkH-type transaction require less validation time if done with segwit than without?  Either way, there's one signature per output to verify, right?  (Sure there's the jumbo "1 MB TX" that requires so many SHA256 operations that time spent hashing dominates time spent checking signatures, but this is rare edge case and AFAICT orthogonal to segwit.)  
+
+> While I think that SegWit is a needed improvement for dealing with malleability
+
+This makes sense to me--although I would say it is one *possible* way to deal with malleability.  There are other ways too.  
+Adam is knowledgeable enough (I think) to understand that BU will follow consensus as defined by the longest proof-of-work chain composed of valid transactions.  So his claim that it will "insta fork" is just silly.  If you push the small-blockers further, they will admit that "indeed BU will follow the longest proof-of-work chain," but they'll add the disclaimer "that chain won't be Bitcoin--it will be an altcoin instead."  
+
+Basically, this allows them to make a disingenuous FUD statement (BU will fork from Bitcoin) which is only true if you simultaneously believe that Bitcoin = Core.  What matters to most people is tracking *consensus*.  By any normal definition of "Bitcoin," it is only Core that would be at risk of "insta forking" if it dogmatically adhered to 1MB against overwhelming support for larger block sizes.
+I've never seen this quote before.  Very interesting!
+> From what I can tell, Subchains are a scheme to enable miners to do a sort of mini-confirmation (lower security but faster) of transactions in the time between regular ("strong") blocks on the chain.
+
+Yes, I would say that is a pretty good ELI5 that you just gave.  I might add that by doing this "mini-conf," the network is also able to reduce orphaning risk, so that it can process more transactions per second (assuming the block size limit were raised in conjunction).  
+
+Here is a visual explanation of how they work that you might like, in case you haven't seen this yet:
+
+https://bitco.in/forum/threads/subchains-and-other-applications-of-weak-blocks.584/#post-7246
+> I don't see the whole conspiracy theory blockstream angle.
+
+There is no conspiracy.  
+
+1.  Blockstream is a for-profit private company in the business of developing off-chain payment solutions.  
+
+2. Blockstream and its employees use their influence over Core to ensure that blocks remain small.
+
+3. Blockstream's off-chain solutions would see increased demand if blocks remain small.
+
+There is no conspiracy; just a conflict of interest.  
+
+
+
+I just download the data "live" from blockchain.info into Mathematica and make the plots.  Here is the code I use to get it:
+
+     mcap= {AbsoluteTime[{#[[1]],{"Day", "Month", "Year", "Hour", "Minute", "Second"}}], #[[2]]}&/@Import["https://blockchain.info/charts/market-cap?showDataPoints=false&timespan=all&show_header=true&daysAverageString=1&scale=1&format=csv&address=","ServerAuthentication" -> True];
+
+     txsqrd= {AbsoluteTime[{#[[1]],{"Day", "Month", "Year", "Hour", "Minute", "Second"}}], #[[2]]^2}&/@Import["https://blockchain.info/charts/n-transactions-excluding-popular?showDataPoints=false&timespan=all&show_header=true&daysAverageString=1&scale=0&format=csv&address=","ServerAuthentication" -> True];
+> I've observed during times of heavy exchange volume there are follow on heavy transaction rates, it seems like people are arbitraging and playing the market during the volatility spikes which causes some direct price relationship for a time
+
+Indeed.  On a related note, what's interesting is that transaction curve spikes *lag* the market cap spikes by several days.  The reason is that people make more transactions both when the price is rocketing and also when the price is crashing. 
+
+What is the main purpose of a research paper, a blog post, or a reddit submission like this?  It is to *infect* the mind of the reader with an *idea*.  In this case, the idea is that multiple protocol implementations are inevitable.  
+
+It is more important to communicate the *intuition* than the details.  If the reader understands the intuition, he has reusable brain stuff that he can apply in other places.  Your complaint seems to be that since the details may be wrong (it's a prediction about the future after all) that the illustration communicates nothing useful---but you're ignoring the *intuition* that the figure communicates.  
+
+It is empirically evident that this animated pie chart is very effective at communicating the intuition for the simple reason that it is barred from /r/bitcoin even though it is rather harmless.  Blockstream considers it a *dangerous idea* and one that must be suppressed.  
+They *have* told me what happened.  I already know.  And yes my abstract has always been public.  
+
+Congratulations!  It is great to see your ongoing commitment to making bigger blocks a reality. 
+Yes, we need both perspectives!
+
+A lot of people thought that the first halving was sort of "obvious"--as though it was axiomatic that it would happen.  Clearly, it would be "good for Bitcoin," but it was not obvious to me that it would occur.  The fact that it *did* happen gave me confidence that Bitcoin could enforce the Schelling consensus around monetary inflation, as this was *in the best interest* of the holders.  
+
+Now, we have sort of the reverse problem.  Rather than enforcing the Schelling consensus (1 MB), can we fork around it to achieve what is best for Bitcoin?  I believe that proof that Bitcoin can evolve through a bottom-up organic process will be the next bit of empirical evidence needed to further convince the world of its potential.
+I concur; it was definitely funny.  
+Right, it would shift demand to things like Lightning Network *and* to things like alt-coins and other payment systems.  So I think we agree. 
+It is fact that limiting block space on the main chain increases the cost per transaction at a given level of demand.  This thus shifts demand to off-chain solutions like LN.  Find me an economist who wouldn't agree with that.  
+
+Here is a more accurate way to state it your Myth #1: 
+
+*Myth*: Limiting the transactional capacity of Bitcoin does NOT result in increased demand for off-chain solutions like Lightning Network.  
+
+*Truth*: Limiting the transactional capacity of Bitcoin acts as a tax on main chain access and results in a subsidy to off-chain solutions such as those under development by Blockstream.  
+Perhaps it's possible that the "half of the debate" you think is being buried is actually only 20% of the community...
+
+It's funny because I had the impression that there was violent vote brigading *against* my comments and my thread.  For example, after I submitted that animated GIF, the thread quickly received 10 up-votes (100% up-voted), pushing it to the middle of the front page within 10 minutes.  The post then came under heavy down-vote attack, dropping it to +6 and 65% up-voted over the next 20 minutes.  However, the momentum was too strong and the down-voters couldn't keep the idea supressed...that is until the mods decided to censor the post under the guise of vote brigading.  
+
+**Just for the record, /u/eragmus : do you support the moderator's decision to delete my post and ban me from /r/bitcoin?**
+> what have you contributed code wise?
+
+I have not personally written any code that is used by an implementation of the Bitcoin protocol, nor do I plan to in the near future. 
+
+I believe there are many ways to contribute to Bitcoin and I agree that contributing code is one them.  I try to make contributions that best use my skill set and that I think are needed.   
+Yes! Please do this!!  I like your idea (later in this thread) of just rolling the block reward profits back into more rented hash power.  The donated money would be considered sunk cost.  
+
+What's cool is that there will be a huge amplification effect for *buying* BIP101 blocks.  Because we get a lot of money back in the form of block rewards, it will cost, for example, 0.9 BTC to buy a BIP101 block [plus right now we also get ~0.15 BTC back from /u/NxtChg's service per block].  Moreover, the cost should in theory drop as the market for rented hash power gets more efficient.  
+
+I hope you consider moving forward with this project!  I am pledging 1 BTC assuming (a) we can confirm with /u/jtoomin that the hash power is getting pointed properly to a BIP101 pool, (b) the web-interface makes it obvious how much hash power is currently being rented, how your contribution helps, and other details to make people confident that the service is doing what it's supposed to be doing, and (c) we're reasonable confident that NiceHash isn't some sort of scam (Does anyone know the owner of NiceHash? What are the chances of an exit scam?)
+Thanks for the info!
+
+So it sounds like btcd nodes probably make up a few percent of the total, rather than less than 1%.  Do you know if any significant mining operations use btcd?
+
+I am very impressed with btcd's forking numbers.  Although the data is sparse, it sounds like btcd's forking rate is the same order of magnitude as Core's self-forking rate.  This would appear to make the "bug-for-bug" compatibility fear more of an academic concern rather than a practical concern.  
+
+I completely agree with your sentiment that multiple implementations would reduce the impact of fork events that do occur.  
+
+Lastly, does btcd have a position on the block size limit debate?
+Agreed that libconsensus will make this easier.  
+
+
+> Thus, there must be something here that explains why Satoshi would say he doesn't care if block size was unlimited. He must also be intelligent enough to have a reason that would stand the test of time.
+
+1. He knew the block size growth would be naturally constrained by the limitations of the network's hardware and software, and by an emerging fee market.
+
+2. He knew that average users would end up using SPV clients and that more costly specialized node hardware would be run only by miners, research labs, some businesses and power users (who could afford higher costs).   
+There are numerous omissions and errors in that transcript, and that quote is no exception.  This is what I said:
+
+*"Well I think they would follow the playbook of other command and control regimes.  They would probably censor people who spoke out against the quota to make it seem like everybody thinks the quota is a good idea…[pause to show evidence of censorship on slides]...this is not a completely hypothetical example"*
+Until very recently, the production quota was to the right of Q*.  So the production quota was not affecting the free market equilibrium.  In other words, the natural limit was exactly where is was over all these years (less than 1 MB)!!
+
+It is only recently that the anti-spam measure has started to act as a political measure instead, moving to the left of Q* and distorting the free market (causing a deadweight loss as illustrated during my talk).
+My opinion is that this sub should *not* give out expert flair (e.g., like the "books").  Ideas should stand on their own merit.  Others can express their approval of good ideas by up-voting or by positively acknowledging the idea.
+
+  
+And I wrote the paper from the sidelines while wearing my beer hat.
+My paper showed, with minimal assumptions, that a healthy transaction fee market is expected if miners behave rationally, due to the orphan cost.  I think it would be more accurate to say that the paper could be revised to clarify these assumptions and the possible limitations of this result. (For posterity, I did attempt to communicate these simplifying assumptions, but with the benefit of hindsight I agree that the presentation could be slightly improved).  I would like to aknowledge your email correspondence with me on these matters.  
+
+To clarify, the most relevant assumptions and limitations of the paper were:
+
+(1) The model assumed that a given miner does not find two blocks in a row.  This assumption was necessary to make the math tractable.  But like you said, it then doesn't properly address the "miners-don't-orphan-their-own-block" objection.  That being said, the point of the paper--to show that a healthy fee market exists--is very likely unaffected by this limitation.  For example,  /u/dpinna proposed an approximation do deal with this already (and has been in correspondence with me on refining his ideas):
+
+https://www.reddit.com/r/Bitcoin/comments/3fuz2s/peter_todd_against_gavin_on_the_bitcoindev/cts8dn1?context=3
+
+I see this is a new area for research—the math gets tricky quickly.  Nevertheless, I am confident that we will be able to rigorously show that the important result of the paper--that of a healthy fee market--remains true in even more general conditions than the ones considered by my paper.  
+
+(2) Indeed the "health" of the fee market is predicated on the fact that block solutions contain information that must be communicated over physical channels, and that these physical channels are limited by the Shannon-Hartley theorem.  That is certainly the case *now* and would still be the case if all miners used the Corallo Relay Network.  In fact, it would also be the case using every implementation of IBLTs that I can imagine, because the set reconciliation process will take an amount of time proportional to the amount of new information in a block solution.  
+
+Greg, you suggested that it would be possible to have infinite coding gain for block solutions announcement (the “gamma” term in my paper). I.e., you suggested that block solutions can truly be communicated in an amount of time that does not depend, even asymptotically, on the amount of transactions included in the block.  You said this was possible if what went into a block was already agreed upon far ahead of time (so that zero information needed to be communicated when the block was solved).  
+
+In regards to your proposed block-solution relaying scheme, a new research question is whether anyone can rigorously show: 
+
+(a) Under what assumptions/requirements such a communication scheme is physically possible.
+
+(b) That such a configuration is not equivalent to a single entity^1 controlling >50% of the hash power.
+
+(c) That the network moving into such a configuration is plausible.
+
+Nevertheless, I've agreed with Greg to clarify these points of contention when I make the other corrections to my paper.  
+
+ ^1 For example, if--in order to achieve such a configuration with infinite coding gain--miners can no longer choose how to structure their blocks according to their own volition, then I would classify those miners as slaves rather than as peers, and the network as already centralized.
+
+EDIT: I'd also like to add that what papers like this do is rigorously study a simplified-version of the actual problem.  The goal is not to come up with a superdooper amazingly-complex model that predicts everything; instead the goal is to come up with a very simple model that captures and explains the phenomenon, subject to simplifying assumptions, so that we can build intuition and understanding of the complete problem.  
+
+Haha no.  I was just imagine a spokesperson for the new CONSENS-A-TRON^^TM saying that.  
+It's true.  Several of my posts related to XT, the fork, or the moderation have been deleted.  
+I was surprised to see this removed.  Does anyone know what rule of r/bitcoin it broke?  It had 172 up-votes in 8 hours.
+I agree.  I believe we're saying the same thing.  What block size will be accepted by the network is a calculation each mining node must make before it begins mining on top of a large block.  This is part of the feedback mechanism that enforces an *effective* block size limit even in the absence of a protocol-defined limit.
+I agree that miners will tend to act rationally to maximize their profits.  And a healthy fee market is, in fact, the expected outcome of rational miner behaviour, if block size is unconstrained by the protocol (and notwithstanding the assumptions stated explicitly in Section 10 of the linked paper).
+I think the analogy to the Fed's FOMC is fairly accurate.  Part of the ideology behind central banking is that a group of educated men can make better decisions for what is best for the economy (by choosing the interest rate that balances "inflation expectations" with "employment") than allowing the free market to solve the same problem.  
+
+This is similar to the block size debate.  Part of the ideology behind limiting the block size is that a group of talented coders can make better decisions for what is best for Bitcoin, by choosing a limit that produces what they see as a better balance between "decentralization" and "blockchain access," than what would happen if the limit were slowly removed according to Gavin's BIP101 proposal.     
+
+Isn't this what the debate really comes down to now?   The technical debate is over; It's ideology at this point.  Do we want a Bitcoin that has a dual mandate of balancing decentralization with blockchain access?  Or do we want a permissionless Bitcoin where blockspace is governed by the fee market?   
+> Goddamn...
+> By definition, a transaction without any confirmation should be treated as meaningless.
+
+Perhaps your _definition_ is the source of your cognitive dissonance.  
+
+By _reality_, a well-formed transaction without any confirmation will be mined into a block with a probability _P_, which can be estimated empirically by payment providers based on network heuristics.    
+
+Relying on your made-up definition to change how things _should_ be treated is, to use your own words, the "stupidest possible [thing] you could possibly devise."
+That's a good point.  If the network is more useful, I expect it to be used more often.  I actually think that transactions per day (excluding popular addresses) is thus a better proxy for the "N" in Metcalfe's Law than if we actually knew the true user base.  
+
+A user that uses bitcoin a lot probably adds more value than a user that uses it only a little.
+The  total trapped liquidity divided by the max size of payments is less in the circular-graph using payment channels + HTLCs, than in the complete-graph using on payment channels.
+Low LN fees don't solve the problem because LN transactions cannot move coins from the useless strings to the useful ones.  This requires on-chain transactions.
+It applies to really small routed payments.  Channel size doesn't matter.  
+
+https://github.com/lightningnetwork/lnd/issues/48
+I recently gave a talk on SPV in Hong Kong (unfortunately, there isn't a professional recording to share). In preparing for my talk, I dug into SPV's fascinating history.  I thought I'd use your post here to provide a summary.  
+
+The basics: The fundamental idea behind simplified payment verification (SPV) is explained in Section 8 of the [bitcoin white paper](https://www.bitcoin.com/bitcoin.pdf): if Alice pays Bob with a bitcoin transaction, Bob requires very little _additional_ information from the network to verify that the transaction was included in the blockchain.  Bob needs only two things:  (1) he needs to know the longest chain of block headers (which requires downloading 80 bytes every ten minutes), and (2) he needs to know the path through the Merkle tree that links the transaction he received to the root hash embedded in the block header (about 320 bytes of information for a block with 1000 transactions).  See [this video](https://youtu.be/MvM055u4bm4?t=1098) (starting at t = 18:18) for more information.  
+
+Satoshi's SPV idea is simple and brilliant.  But the details get messy when implemented in the real world.  The first messy detail is how Bob actually _knows_ that Alice sent him a bitcoin transaction in the first place.  Alice _could_ directly deliver the transaction to Bob, for example via NFC or by sending it to Bob's IP address.  But today this isn't what usually happens.  What happens instead is that Alice broadcasts the transaction to a few random nodes on the bitcoin network, these nodes in turn "gossip" the transaction to other nodes, et cetera, until all nodes on the network are aware of the new transaction. Alice trusts that Bob will eventually hear about the transaction though this gossip process.  
+
+This brings up the first obstacle to SPV.  The only way Bob can be sure to learn of the payment is to listen to _every_ transaction broadcast on the bitcoin network.  This obviously requires a lot of data (full-node level bandwidth!), which defeats the purpose of SPV in the first place. 
+
+One way to solve this bandwidth obstacle is for Bob's wallet to register his address with a full node and ask it to forward him any transactions that pay him.  Later, when his transaction is confirmed in a block, the same node can also forward Bob the Merkle branch proof he requires to verify for himself that the payment he received was confirmed in the blockchain. 
+
+Easy right?  Bob can trustlessly verify that he was indeed paid with only a few SMS-text-messages worth of data.  So what's the problem?  
+
+The problem is that Bob is leaking privacy information.  The node that provides Bob information about his transaction knows that he (or rather the entity at his IP address) cares about these transactions.  Information about which transactions Bob is interested in is valuable to certain companies/agencies and is potentially harmful to Bob if leaked.  
+
+The Bitcoin developers (e.g., Mike Hearn) came up with a clever solution to improve privacy: [BIP37 Bloom filters](https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki).  The idea behind BIP37 is that rather than registering Bob's addresses with a full node, Bob registers a Bloom filter with the full node instead.  The Bloom filter is crafted by Bob's wallet so that all of the transactions Bob cares about get picked up by the filter, but some transactions that Bob _doesn't_ care about also get picked up by the filter, thereby confusing the node as to which transactions are really Bob's.  BIP37 allows Bob to "tune" the filter to be very private (i.e, to send Bob his transactions and LOTS of other random transactions) or highly selective (i.e., to send Bob his transactions and just a few other random transactions).  We see here that there appears to be a bandwidth-versus-privacy trade-off with SPV.
+
+I still think BIP37 is great, but history has shown that it doesn't provide as much privacy as originally intended.  The privacy problem with BIP37 is subtle and is due to the fact the "addresses" are so prominent in the user experience today.  Every time Bob uses bitcoin to get paid he typically specifies a new address to the payer. Hopefully, this address is only paid once, but maybe Alice decides to pay Bob a second time using the same address.  And so Bob wants to constantly monitor _every address his wallet has every created_ for new incoming transactions.  This means the Bloom filters he registers with full nodes are constantly growing and changing.  Due to the way BIP37 is used in practice, it is possible for a node to determine specifically which addresses are Bob's from a series of these Bloom filters. We can fix this problem somewhat, but until we fully abstract "addresses" away from the user experience and make them truly "single use," I think this will always be a bit of an issue.  Tom Zander (u/ThomasZander) probably has more to say on this topic. 
+
+BRD is an example of a SPV wallet that uses BIP37.  
+
+[BIP157/158](https://github.com/bitcoin/bips/blob/master/bip-0158.mediawiki) took a new approach to SPV, as part of the LN efforts, and which our own Chris Pacia (u/Chris_Pacia) has contributed to and built upon.  BIP157/158 turns BIP37 on its head: rather than the SPV wallet registering a filter with a node, the node provides a filter to the SPV wallet of all the transactions it is aware of, e.g., in a given block.  If the SPV wallet sees that the filter contains transactions that Bob cares about, then the SPV wallet can download the complete block _from a different node_.  The wallet then builds the Merkle proof itself (from the downloaded block) to verify that the transaction was indeed included in the blockchain.  With this technique, there is no privacy information leaked at all.  But we see the bandwidth-versus-privacy trade-off once again: we've improved Bob's privacy but now his wallet is downloading complete blocks every once and a while.  This obviously isn't efficient if we imagine a future with 10 GB blocks! 
+
+Neutrino is an example of a wallet that uses BIP157/158. 
+
+Lastly, I'll say something about Electrum servers, although I really haven't studied them enough to speak as an authority on this topic.  
+
+Firstly, I don't think it is correct to say "'true' SPV doesn't need a server but Electrum wallets do."  All SPV wallets need a server, it's just that with a wallet like BRD a run-of-the-mill Satoshi client can act as the "server."  But, remember, this is only the case _because_ BIP37 was added to the Satoshi client!  We could imagine a future where BU adds Electrum-server functionality but ABC doesn't.  Now is u/jonald_fyookball's Electron Cash a "real" SPV wallet or not?  The answer doesn't really matter because it's a bad question to ask in the first place.  In the future, we're going to see the services offered by full nodes diverge, with perhaps some providing BIP37, some providing full Electrum features, and some doing totally new things.  So this idea that Electron Cash relies on a "server" while BRD doesn't is a bad way to look at things in my opinion (they both need a server).  What is important instead is the trade-offs made by the particular SPV-wallet solution (e.g., in terms of bandwidth-vs-privacy, and other trade-offs).    
+
+A second comment I'll add is that adding the features of an Electrum server to a mainstream Satoshi client would probably be controversial.  Understand that there is a not-insignificant faction of people who'd love to revert even BIP37!  I'd bet that Core would never in a million years add Electrum functionality, I'd be surprised if ABC would implement it, while I'd be surprised if BU _wouldn't_ implement it, at least as an option.  AFAIK, Electrum is a much greater privacy leak because SPV wallets directly ask for the Merkle branch proof they are interested in, and so it is much easier for an Electrum server to figure out which addresses belong to which users.
+
+I hope this post was informative to some readers. 
+I don't see that as a problem.  Satoshi's design can already scale by several orders of magnitude to become better money for the world, which is what I'm here for.  If we succeed in building a new monetary system based on bitcoin, I would consider that a bewildering success. 
+If the rules change, then the proofs change too, right?  Wouldn't we then need to change the details of the proof system each time we change the rules (a hard or soft fork)?  Would not a new node coming online need to trust that the details of proof system they are using to verify the proofs is the correct one?  Is this not then like a proof-of-github analogy to the proof-of-work (SPV) security you'd get by trusting the UTXO commitment? I don't see where the extra security comes from.
+
+This is a cool idea with cool math behind it, but unless I'm mistaken it seems to be a lot more valuable in a future where the protocol is truly "locked down" than in a future where the rules are being changed every 6 months.
+CTOR was controversial.  For example, nearly all BU members voted against it.  Anyone arguing that CTOR wasn't contentious either doesn't have all the facts or is trying to rewrite history.  
+I'm not arguing for or against "finalization."  I'm just answering a technical question about what _would_ happen in various cases.  I don't like this patch but I don't like the threat of deep re-orgs either.  
+He’s alive and well of Twitter. And a BCH supporter (and SV opponent) as far as I can tell.
+An attacker with majority hash power can ensure that _only_ empty blocks are added to the chain. They can prevent _all_ transactions from confirming for as long as they maintain the attack.
+The point is that you wouldn’t actually run the script. You wouldn’t even transmit the script. You’d have a macro that represents the script and an efficient (non script) implementation of that macro. 
+
+For popular “macros” it is obviously simpler to just have a single op code. Perhaps the point I’m trying to make is more rhetorical than practical, but the point is that it doesn’t _really_ matter that our op codes are “optimal.” Workarounds will be built as needed to optimize the most popular functionality. The argument that op codes can make things so efficient that they upset the balance of incentives is weak, because there always exists permissionless ways to optimize anyways.
+So you think Bitcoin's scripting language should be made less powerful?  That is, less rather than more should be possible.  
+
+Up until about a year ago, my belief was that bitcoin's scripting language was unnecessarily complex.  That we just need bitcoin to be simple p2p ecash and for that we only need P2PkH and multisig.  So I think I can understand where you're coming from. 
+Really? I still don’t see the point of CTOR (that said, I don’t think it will kill BCH either). Can you explain in your own words the reason for forking to CTOR?
+I think you’re misunderstanding: what makes Graphene more efficient is not having to transmit the ordering information. CTOR is a way to do that with a hard fork. But there are also ways to do it today without any sort of fork, hard, soft or chewy.
+I just watched the full talk.  A few people whose opinions I value told me that he has some deeper meaning.  But I didn't find it.  As far as I can tell, he's completely serious with that slide. 
+I disagree on both points.  The benefits to block propagation comes from not having to transmit the ordering information, which is achievable already today without LTOR.  I might buy that removing _any_ ordering requirement would simplify the code, but I don't buy that LTOR is significantly less complex than TTOR.  
+If you point our how it takes a long time to unilaterally close a channel, the timelock is 1 day.  If you point out how nodes crashing for a day could lead to funds being stolen, then the timelock is 1 week. 
+
+
+Except if your wallet wasn’t online to receive the payment, or your Watchtower failed, or you didn’t have enough incoming capacity in your channel, or the payment failed to route.
+
+Wow, LN _definitely_ is the payment network of the future!
+Wow, so cool!  You guys really put this together nicely for the launch!
+Agree with everything you said, but is it not still fair to say that the regression coefficient (0.6s per MB) describes the propagation/validation bottleneck as of today?  (We know we can improve but right now it’s slow.)
+Inspired by this post from /u/awemany:
+
+https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-1222#post-79064
+Agreed.  
+Yes, graphene should help a lot.  
+
+There's also _lots_ of inefficiencies in the network layer code, that could make significant improvements.  
+Nice investigative work!  
+
+Yes, it would be great to understand if the 12s @ 90% is explainable based on your model. On this topic, another thing that no one seems to understand is why the distribution for propagation time is close to log-normal.  For example, when we did the Xthin tests a few years ago, we were surprised at how long the tails were on the distributions. When we did the gigablock testing again we saw lognormal style distributions.  I believe the transaction propagation times show a similar affect.  
+The security assumption for SPV is that the majority of the hash power is honest and that the SPV wallet is connected to _at least_ one honest node.  So long as one node tells the truth, it doesn't matter if 99 nodes lie to the SPV wallet.
+The gambler’s ruin equation in Satoshi’s white paper is exact (noting the observations you just made). But the equation he later derives from the gambler’s ruin equation is inexact (but good enough IMO).
+
+The paper that apparently gives an exact equation (although I haven’t verified myself) is written by Cyril Grunspan (warning: very ugly math ahead):
+
+https://arxiv.org/abs/1702.02867
+The math that describes double-spend success probabilities as a function of an attacker’s hash power. Satoshi has a reasonable, although not exact, model in Section 11 of the white paper. Meni Rosenfeld also has a good paper on the topic.
+I’d argue if we can improve 0-conf security and demonstrate that fact, it would be even better.
+A 30% miner will succeed in double-spending a transaction with one “10-min” confirmation with a much higher probability than if it had four “2.5-min” confirmations. That’s just how the math works.
+
+That said, I prefer subchains over decreasing the block time.
+Yes, that is mostly right.  But it's not just the opponent miner who could orphan Coingeek -- the opponent's strategy gets _all_ of the remaining hash power working against Coingeek.  That's why Coingeek's strategy is so weak.  
+
+If Coingeek controlled 51%, then yes no one could game them.
+
+But if they teamed up with other miners to form a majority to enforce the strategy, it could cause an even bigger problem (e.g., a chain split)!  The reason is that they wouldn't have a reliable way to communicate which blocks were bad since they wouldn't share the exact same mempool.  
+The most interesting result IMO is that _even if an altruistic miner is willing to lose profit in an attempt to discourage some bad behavior_, any other miner with more hash power can game him.  The other miner simply engages in the behavior the altruistic miner wants to discourage, and he _will_ earn a greater share of the BCH revenue.  
+
+I suspect that only a mining majority can discourage certain bad behaviors in a non-gameable way.  
+As long as mining is memoryless (i.e., miners don't slowly "make progress" towards the solution), the equations in Eyal & Sirer hold.  
+
+
+Yes it adjusts more quickly in BCH so the SM becomes profitable sooner than in BTC. 
+
+Interestingly, /u/contrarian__ did a simulation that showed that it takes 40% to be profitable in BCH rather than 34% in BTC. He said it’s due to the difficulty never settling down from the higher orphan rates that SM creates.  That’s pretty interesting and I’d like to learn more.
+I would consider that a change to your node's protocol.  
+
+And if a strong majority of miners made the same changes, then yeah I'd call it a change to "the protocol."  The minority minors would no longer want to build blocks larger than 100 kB, as they'd be at a higher risk of being orphaned.  
+
+I guess what I'm saying is that "the protocol" is emergent and based on the individual protocols deployed by each node on the network.
+My talk presented an idea to do this:
+
+https://youtu.be/7zydrz6Ri6U?t=2h21m11s
+
+CSW however claims that miners who facilitate 0-conf fraud (e.g. via RBF) will have their blocks orphaned already and without any changes to the protocol required.
+Early-bird tickets will likely go on sale tomorrow for $300.  You can check the site to see details on the conference venue and recommended hotels today:
+
+https://satoshisvisionconference.com/travel-hotels.html
+The easiest way to achieve the canonical order is to sort TXs by hash.  But this means that a transaction where A pays B may occur _after_ a transaction where B pays the same coin to C.  Currently, this is not allowed (transactions must be listed in a causal order in a block).  There is a proposal to remove this requirement, which would be a consensus change.  
+His point is that even at this scale, the cost to run the node is still small compared to the cost (equipment + electricity) needed to find proof-of-works to extend the blockchain.  So it does would not really further centralize mining.  
+I really like subchains but I didn't participate in the meeting and so it didn't come up.  If widely used by miners, they would provide benefits similar to faster blocks.  
+
+It's really hard to say what is "best."  
+
+Subchains is ideologically the easiest, as it is neither a hard nor soft fork.  But it would be a lot of work to get it done, and then even more work to get miners to start using it. 
+
+Faster block times is the easiest and quickest way to get some "bang for our buck," but it has the disadvantage that some people think 10-min blocks are part of what defines bitcoin. 
+
+Bobtail has lots of great properties (more security per confirmation, selfishing mining immunity, less block-time variance), but it makes the block headers considerably bigger, that might make it more work for super-lightweight SPV wallets to download.  
+
+What I want to do is just get the discussion going.  How can we make Bitcoin Cash the best version of Bitcoin that it can be?   
+
+
+> Yes, it is, and it makes no sense. If I am a merchant, exchange or anyone receiving Bitcoins on Segwit addresses, I would simply reject and discard blocks not following Segwit ruleset. 
+
+Did you watch the video?  You will _not_ have proof that the segwit ruleset was violated, and instead you will have a bunch of "social proof" that everything is hunkydory.  
+
+Removing the signatures from the chain that defines a bitcoin has the subtle but insidious side effect that your (segwit) coins could be stolen without leaving proof that a fraud occurred.  
+
+In our on-going experiments for this phase, we're aiming for a UTXO set size approximately equal to the size of Bitcoin's UTXO set.  The point we were trying to make by the sentence you quoted was that if Bitcoin's user base were significantly larger, then the UTXO set would be significantly larger too. (The size of the UTXO set is most strongly correlated with the number of users.) We intend to "stress test" the UTXO set in the next phase of the experiment.   
+
+The transactions were all "real-world" type transactions and there is no OP_RETURN padding.  If the proposal is accepted for presentation in Stanford, we'll present all of the relevant details.
+
+Time will tell if nChain follows through and contributes 1:1.  But I think they will.  Although Craig Wright still owes me 1 BTC for this:
+
+https://twitter.com/badslinky/status/890838798648594433
+Awesome!  Just remember to only include the cases where the initial conditions were met: that is, only those cases where the SM solves the next block (at height N) at t = 0.  
+
+Another cool way to think about this is what /u/cypherblock said [here](https://bitco.in/forum/threads/wright-or-wrong-lets-read-craig-wrights-selfish-miner-fallacy-paper-together-and-find-out.2426/page-2#post-41762):
+
+> "Here is an interesting experiment you can do on your own. Get the time of like the last 144 blocks or so (you can copy paste a days worth from blockchain.info), then find the elapsed time between each block.
+
+> Now for the experiment, imagine a selfish miner secretly finding a block at t=9min (from previous block) for those intervals where that is possible (>9min duration). When on average was the next block actually found in the data? Was it 1min after the selfish miner or 10 minutes after the selfish miner?
+
+> Using Google sheets this is fairly easy to do (but I'm glad to help for anyone not familiar with spreadsheet formulas)"
+Did you watch the video? What specific part of my argument do you think is wrong?
+
+BTW--I haven't shown that segwit coins are necessarily insecure, just that they have a weaker security model than bitcoins.
+Jameson Lopp is speaking.
+:)
+By "EC" you mean that fact that node operators running BU can adjust their node's block size limit more easily than by re-compiling the source code?
+I'm confused now.  You said we should upgrade to larger blocks "using specific and universal rules to determine block validity" and I replied that that is exactly what the miners intend to do.  Yeah, I don't _know for sure_ how the upgrade to larger blocks will unfold, so yeah I'd agree I'm handwaving when I say it will be anti-climatic because miners have an incentive to all agree on the same limit.  But no one else knows either so we're all hand-wavving.  
+
+I'm still not sure what you're arguing about.  It sounds like we mostly agree. 
+
+> That would double the speed of the minority chains difficulty adjustment, making it more likely to eventually be able to sell coins if they toughed it out?
+
+No, because half of the blocks get orphaned.  So the time to difficulty adjustment is unchanged with or without the Level 3 protocol enforcement.
+
+He did sign it.  He said he will post the signed message here.  I'm sure he'll be around shortly.
+To first-order approximation, the size of the UTXO set scales with the number of identities using Bitcoin.  Increasing the user-base, regardless of how that is done (LN vs on-chain vs both), increase the size of the UTXO set.  Here's a diagram to help explain:
+
+http://i.imgur.com/pLzmtj6.gif
+
+The effect that SegWit would have is second-order (the first-order effect is the size of the user base).  One could argue that it would tend to increase the UTXO, because SegWit allows for more permutations of outputs; or one could argue that SegWit would decrease it due the discount given to signature data.  But that's really just hand-waving at this point.
+I would have designed Bitcoin with exactly the same inflation schedule that Satoshi chose.  It seems to be working very well so far.  
+I'm not disagreeing the LN doesn't offer potential improvements.  I'm pointing out that it doesn't help scale Bitcoin to more users with respect to the size of the UTXO set.  
+
+Seems we both agree.
+> Please state your proof or reasons why it would make it worse?
+
+I don't know if it will make it a bit worse or a bit better.  Either way the number of unspent outputs will still be proportional to the number of users.  
+
+2 billion users x 10 outputs per user x 50 bytes per output = 1 terabyte of UTXO data.  This really hurts the idea that LN would permit massive scaling while still allowing users to run full nodes on low-cost hardware.
+> Christ listen to yourself! This coming from the person who encouraged some idiot to use a downvote on r/Bitcoin. We all saw the screenshot. You are highly unethical.
+
+What are you talking about?  And what's wrong with using downvotes on /r/Bitcoin.  Isn't that what the button is for?
+
+
+OK that's what I thought.  
+
+The problem with this argument (even _if_ it were true) is that miners can _already_ make their blocks propagate more slowly just be waiting a few moments before announcing them.  So if this were a profitable thing to do, miners could already do it, irrespective of the block size limit. 
+What you're saying is still not clear to me.  Are you saying that large miners can gain an advantage over small miners by purposely making their blocks propagate more slowly?
+Oh I see what you mean.  No it would look more like the curve for BU adoption at nodecounter (increased sharply in September and October but slowed down now).
+
+But to be completely accurate, remember that there are _two_ independent variables here (Q, t).  We're plotting the distribution versus block size (Q) and animating how that distribution changes with time (t).  If you look really closely you'll see that there are small discontinuities at 2 MB, 4 MB and 8 MB too.  So there is no way to plot all of this information on a 2-D plot (you need an animation or a 3-D/contour plot).
+I'm not sure I understand your question.  It's a plot of the real data, as reported by bitnodes.21.co.  
+I don't know who the donation came from.  And I am one of the three people with signing authority on the 2-of-3 wallet.   
+> You see, the size of a block that a miner produces does indeed have a direct impact on the risk of that block being orphaned.
+
+Indeed.  And we can show that this has been true empirically too (i.e., it's more than just a reasonable theory).  This graph shows that orphaned blocks tend to be bigger than non-orphaned blocks: http://imgur.com/ctZOdO7
+I _think_ I'd like to see the number of blocks the gate stays open for be made user configurable, with a default value of 1 (just the first excessive block itself gets passed through).  Miners could change the value to something larger if they wanted to.  
+
+But really, I don't think it matters much either way.  Like /u/Capt_Roger_Murdock says, the AD logic should not be triggered much (if at all) in normal operation. 
+Even if this were true (and it is true only under very specific and IMO academic circumstances, namely the selfish mining attack), what does this have to do with Bitcoin Unlimited?  If a miner _wants_ to make his block propagate slower, he can just wait a while before he announces it.  There is nothing anyone can do to prevent this. In the vast majority of practical circumstances, this just makes it more likely that his block will be orphaned and his block reward lost.  
+> when a well connecting hash majority makes blocks that propagate slower (e.g. by being bigger) they just happen to make more mone
+
+Just to be clear: are you claiming that a large miner benefits by purposely making his block propagate slower?
+It's important to me that we do our best to make the site visually appealing.  If the BUIP is passed, I'm hoping our proposed budget is sufficient to pay for all the outside help we'll need.  
+
+If there are Bitcoiners reading who are also able to design beautiful websites, please let us know!
+It would be hurting the miner--not helping him--as the recipe to avoid mining empty blocks means the miner must either increase his orphan rate (by continuing to mine on the old block) or briefly turn off his hash power (while waiting for the new candidate block to be ready).
+> I don't think there's a Bitcoin failure model if the block size is kept at 1 MBish
+
+That's certainly possible, and what those advocating for "Bitcoin as a settlement layer" seem to believe.  I disagree however. I believe if Bitcoin doesn't scale on chain, its network effect will soon be lost to a different coin that does (ideally to a spin-off but possibly to Ethereum or, only half-joking, to something like E-coin from Mr. Robot coming out of left field).
+
+My intent with this graph was to deliver what Olivier asked for in a simple and compelling graphic. One could certainly add more scenarios, but I chose to focus on the two I thought were most likely.
+> "Bitcoin users might get increasingly tyrannical about limiting the size of the chain so it's easy for lots of users and small devices."
+
+Indeed. Your opposition to on-chain scaling is tyrannical.  
+
+Satoshi was wise.  
+https://blockchain.info/charts/difficulty?timespan=all&scale=1
+BU allows nodes to set their own block size limit along with the conditions under which they'll accept a block greater than this limit in order to "track consensus."  
+
+BU simply aims to provide a tool for the community of node operators to come up with appropriate limits from the "bottom up" rather than from the "top down."
+
+BU isn't about bigger blocks (although that's what I believe the market wants), it's about removing friction in expressing market preferences regarding the block size limit. Widespread adoption of BU could result in "1MB4EVA" if that's what the node operators wanted. 
+Good observations.  
+
+The trouble is that the sample size for the orphaned block population is small such that if you attempt to regress versus size, things get even noisier.  But I should play around with the raw data for longer and see what else I can find...
+
+That said, I think I've shown more than a correlation between the two variables.  I think I've shown that--over a given time period--the mean size of the blocks from the "orphaned" population is bigger than the mean size of blocks from the "main chain" population.  One could perform a t-test to confirm, but I'm pretty sure the difference between the two means would be statistically significant.    
+UTXO commitments are coming, which will greatly speed up the time required to obtain the current UTXO set. The historical blockchain data can then be downloaded in the background or left pruned.
+
+> Even 7 hours is a rather long time-- consider, for example, your service being down for 7 hours while you reindex after running into some database corruption.
+
+This is a perfect use case for UTXO commitments.  Why bother reindexing the entire blockchain from genesis if you've already done it before (and saved some checkpoints so you never have to do it again)?
+
+
+Shorter block times *increase* orphan rates, all other things held constant.  Roughly speaking, the average orphan rate is given by
+
+  orphan rate = 1 - e^-(t/T) 
+
+which, for orphan rates less than ten percent or so can be approximated as
+
+  orphan rate ~= t/T
+
+where T is the mean block time and t is the average block propagation time to the network's hash power.
+
+If the average propagation time for a block is 6 seconds, then (approximately speaking) Bitcoin would have a ~1% orphan rate, Litecoin would have a ~2.5% orphan rate and Dogecoin would have a ~10% orphan rate.  
+Why do you feel obligated to run a Classic node?  
+
+Did you know that Unlimited is compatible with Classic and that miners running Unlimited mine blocks that count towards Classic's 2MB HF activation?
+> It seems to me the currently problematic bottleneck with regard to scaling Bitcoin is the propagation between mining nodes.
+
+Do you believe that big blocks take longer on average to propagate to the network's hash power, and are thus more likely to be orphaned?
+
+Interesting.  I think I see what you're saying now: by segregating the different parts of the transactional data you can more easily treat those parts differently--if doing so is advantageous.  Agreed.
+>  for **their** definition of valid.
+
+That's the important preface to the statement that's been missing for oh-so long.  Glad to see it finally make an appearance.  
+
+
+Agreed!
+> Bitcoin depends on all nodes following the same validation rules
+
+I don't understand why you keep saying this when there are 80+ Bitcoin Unlimited nodes following different validation rules (i.e., a larger accepted block size) yet Bitcoin is still working.  
+
+Do all the nodes have to follow the same validation rules or not?
+
+
+^^ /u/ForkiusMaximus is also a significant contributor to Bitcoin Unlimited :)
+"Consensus rules like block size can't be decided on a per-node basis. The system only works if everyone "decides on" the same thing" -- Luke Jr
+
+"Bitcoin consensus implements a mathematical function that defines the operation of the system and above all else all systems must agree (or else the state can diverge and permit double-spends)" -- Gregory Maxwell on moving the block size limit out of the consensus layer
+
+"There is a clear, known, unambiguous, and easily measured rule in the system that a block is not permitted to have a size over a threshold." -- Gregory Maxwell on moving the block size limit out of the consensus layer
+
+"Peter R says illogical things though about how to decentralise it. Like well everyone can run random competing consensus algorithms and see which win. (Err, no, consensus algorithms dont work like that)." -- Adam Back on Bitcoin Unlimited
+
+I could do this all day.  But I won't :D
+
+Anyways there are now 40+ nodes running Bitcoin Unlimited that will accept blocks larger than 1 MB **today**.  
+> Bigger blocks cause miner centralization
+
+False.  Bigger blocks cause *decentralization* as bigger blocks correlate with more users, more awareness and more support for Bitcoin.  
+
+> Bigger blocks make it more expensive to run a full node.
+
+True, *ceteris paribus*, but technological progress *reduces* the cost to run a node.  
+
+> Bitcoin is growing exponentially, and a simple increase to 2mb is unlikely to buy a whole lot of time
+
+The idea is to keep the limit constantly above the free-market equilibrium block size: Q* < Q_max.
+
+> Raising the block size is a hardfork, which breaks compatibility with all existing nodes
+
+True.
+
+> which means anyone who doesn't upgrade can get abused
+
+FUD.  Non-upgrading nodes will no longer see valid blocks as difficulty will be too high.  But the node operator will realize something went wrong anyways, so this really isn't a concern.   
+
+> if you assume that the propagation time is low, then you are assuming convergence safety - but what's the point if you just assume the conclusion is safe anyway?
+
+These are two different issues.  The assumption that propagation times are short for Δ-blocks is only so that we can use the first term in the power-series expansion for orphaning risk at some points in our calculations.  In other words, it is just to simplify the math. 
+
+The question of convergence is illustrated graphically in Fig. 5 (p. 7).  At some degree of subchaining, the latency will be too high and it won't work.  But this is entirely different from whether the "fast-block assumption" used to simplify the math is valid.  
+Thank you for conceding that indeed the two curves are plotted on the *same* set of axes.
+That's just the *limit* for the block size, not the block size itself.  The block size will be dynamic under BIP101.  
+Then the free-market equilibrium block size would be less than the limit and no change would be required.
+> even if the "Blockstream crew" and other leading Core developers were experts in block size limits and their social, economic and technological ramifications, that would still not justify centralizing control of this protocol parameter in their hands, and that is effectively what happens when we depend on hard forks to incrementally increase the protocol limit. 
+
+Completely agree!  Bitcoin needs to evolve from the "bottom up" through an organic, decentralized process.  
+
+
+> publicly saying that blockstream blocked your paper
+
+Firstly, we were not permitted to submit full papers. Only BIPs and 1-2 page abstracts.
+
+Secondly, I have not said that Blockstream blocked my paper. Only that Blockstream personnel were concerned about the results I intended to present and that I was asked to allow Blockstream personnel to review my slides prior to presenting.
+
+I also have new information that Blockstream personnel attempted to have parts of my Montreal talk censored from the YouTube proceedings.
+
+>Link?
+
+/u/adam3us: I linked my abstract to an earlier comment but it was deleted by the moderators here.  This comment might also get deleted since I'm pointed out the censorship.  
+/u/oreganoofcorti has done a lot of work exploring how miner centralization can be quantified.  IIRC, one of the measures he uses is the "number of pool to reach 51%" over time, as you suggested.    
+
+Somewhat related links:
+
+http://3.bp.blogspot.com/-OqQwjpyH5vY/VkscIFq5d4I/AAAAAAAAEkQ/b4Dy7Cw7cEg/s1600/generalIndiciesPlot2015-11-17.png
+
+http://organofcorti.blogspot.ca/2015/11/november-17th-2015-block-maker.html
+> no data show correlation between average block size and mining centralisation. (peak mining centralisation happened Jun 2013 on 0.20MB average blocks)
+
+That's a great point! Do you know if there is a chart that exists that illustrates the (lack of) correlation?
+
+
+Thanks for the tip and compliment!
+
+If my paper has made an impact, then many people deserve praise for contributing to its underlying ideas.  I merely formalized using mathematics and nice diagrams what several people from the Gold Collapsing Bitcoin UP thread and Redditors such as /u/awemany had been suggesting for some time now.  Thank you again for the kind words and recognition! 
+This will be my first and last Reddit comment on this issue.  I appreciate all of the support promoting my work and ideas!  
+
+The HK conference rules did not permit the submission of full papers--only BIPs and 1-2 page abstracts were accepted.  Furthermore, my proposal has always been public and highly visible [[link](https://www.reddit.com/r/bitcoinxt/comments/3s5507/the_size_of_blocks_policy_tool_or_emergent/)].
+
+The first segment of my talk was based on my fee market paper [[link](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf)].  The second part of my talk was based on new unpublished empirical research suggesting that block size is an emergent phenomenon and questioned whether it could be used as a policy tool.
+
+The last part of my talk would introduce the meta-cognition idea behind the Bitcoin Unlimited scaling proposal, presenting TestNet results showing how it can track consensus during block-size related fork events (e.g., BIP101 activation on test net).  
+
+To clear up some speculation regarding the BU scaling proposal:
+
+1. Bitcoin Unlimited is NOT about simply "removing" the block size limit
+2. There exists working code for this implementation
+3. There exists TestNet data showing how it can "smart fork" to track consensus
+4. Bitcoin Unlimited is compatible with BIP101/BitcoinXT (as well as several other scaling proposals)
+5. Bitcoin Unlimited is simply about giving choice to the user in a smart way so that consensus regarding scaling emerges naturally.    
+
+I find it very odd that my proposal is being criticized for not containing sufficient information regarding exactly what results I intended to present, when it was conference organizers who specifically limited the size of submissions to 2 pages.  
+
+Lastly, regarding the initial acceptance and later rejection of my paper, I have documented the facts that I know [here](https://bitco.in/forum/threads/clearing-up-the-confusion-my-hong-kong-presentation-proposal-was-not-accepted.209/).  
+
+  
+The point is that there is no "variable" equal to 21,000,000.  The total coin supply is an emergent phenomenon: it is equal (approximately) to the sum of all the individual block rewards that have been accepted into the longest chain.  Right now we have consensus that the block reward is 25 BTC.  We also have strong consensus to reduce that to 12.5 BTC sometime next summer.  
+
+What we don't have is a guarantee regarding what the inflation rate will be fifty years from now.  We have a *guide* left to us by Satoshi, but we also have a tool left to us by the same individual for how we come to consensus about rules and incentives: the longest proof-of-work chain!  Perhaps fifty years from now our grand-children will recognize a strong benefit for a small amount of perpetual inflation and will decide to cease any further halvings.  
+Bitcoin is ultimately a creature of the market, governed by the code people freely choose to run. Consensus is then an emergent property, objectively represented by the longest proof-of-work chain.
+
+Both the block interval time or the block reward (inflation rate) could change if the market viewed that as being in Bitcoin's best interest.  I think *both* of these things will change eventually:
+
+-  I think the block interval time will change a decade or two from now to something much smaller (~1 minute), as we build better communication infrastructure between nodes and miners to reduce orphaning (remember, 10 min was sort of a conservative guess to balance speed of confirmation with orphaning risk).  
+
+- I think the block reward will decrease to 12.5 BTC in the summer of 2016.
+Bitcoin Unlimited (BU) is largely just an idea at this point in time.  But, yes, it would be compatible with XT/BIP101 in that miners who run BU would mine blocks with the BIP101 version number (BU would help to activate BIP101).  
+
+One difference is that BU miners would mine upon blocks >1 MB from Day 1.  From the perspective of the BU nodes, there is no "activation event" that they need to wait for.  
+Exponential growth makes a straight line on a log curve like this. 
+
+Since mid 2013, the growth curve is fairly straight (exponential growth at a constant growth rate).  If we account for the "hump" due to Satoshi Dice:
+
+- 2012-04-24 SatoshiDice launches
+
+- 2013-05-14 SatoshiDice web site closes to US players
+
+we get a reasonably straight (exponential) fit back to mid 2012.
+
+The growth during the growth spurt of 2011 was also exponential (but even faster than what we're seeing now).  
+>Bitcoin has historically operated with a block size limit greater than the free-market equilibrium block size.
+>>Actually that is an unvalidated and quite possibly incorrect assumption for much of that time.
+
+Can you try to explain why you think the free-market equilibrium block size may have been greater than 1 MB for much of Bitcoin's history?  Your comment just now is the first I've heard against the theory that (up until perhaps recently) the block size limit has historically been greater than the free-market equilibrium block size.  
+
+> are you suggesting that we purposely change the successful economic parameters of Bitcoin to remove transactions from the Blockchain in order to subsidize off-chain payment solutions?
+>> Incorrect. You did not appear to consider my suggestion eg 2-4-8MB parameter change over 4 years, while we wait to see what Lightning can achieve for improved scalability.
+
+From my perspective, I don't really care whether the block size limit next year is 4 MB or 40 MB--so long as it is once again far to the right of the equilibrium block size Q* .  This is where I think we disagree: you seem to want to permit the block size limit to drift to the left of Q* so that it serves the political purpose of taking transactions off of the main chain (increased fee pressure) in order to subsidize off-chain solutions like Lightning Networks and side chains.  
+
+I can only parse your statement "wait to see what Lightning can achieve for improved scalability" if I interpret is as a request to subsidize Lightning for a few years.  Why do we have to "wait and see" anything?  Instead, we should increase (or remove) the hard limit and allow Lightning and "Bitcoin Classic" to compete on an even playing field.
+
+> So that readers can appreciate the extent of any conflicts of interest, is it also true that you are co-founder and CEO of Blockstream, a company in the business of developing and operating off-chain payment solutions?
+>> At times your level of discourse indicates that you have problems interacting in a neutral and constructive fashion 
+
+There is nothing *wrong* with having a conflict of interest, Adam.  Just be honest with that fact and allow people to come to their own conclusions.  The facts are that:
+
+1. Blockstream is in the business of developing and operating off-chain payment solutions.
+
+2. A restrictive block size limit increases demand for off-chain payment solutions.
+
+3. Blockstream employees and contractors are vocal about ensuring the block size limit stays/becomes restrictive.  
+
+How is me pointing this out "emotional and rude"?
+
+Let me end by saying that I think lots of the things Blockstream is doing are really cool and I hope that some are successful.  My *only* problem is with Blockstream (in particular Core Devs who are involved with Blockstream) arguing against main-chain scaling due to the clear conflict of interest.  
+Blockstream is in the business of off-chain payment solutions; LN and sidechains are examples of such. 
+
+The announcement for Liquid *proves* that they will earn fees off (at least some of) these off-chain solutions.  The same announcement also proves that they will retain control of (at least some of) these solutions.  It is crystal clear that Blockstream is in the business of off-chain payment solutions and it is also a simple fact of economics that controlling the block size limit would be helpful in diverting transactions towards those solutions.  How is this a myth?  
+
+I do acknowledge that there could be sidechains and LNs that are independent of Blockstream.  
+This animation is a unique visualization of the historical relationship between the average block size and the price of a bitcoin.  Not only do the two quantities tend to grow larger together, the higher-frequency oscillations are often in phase too.  
+
+The animation was created in Mathematica from empirical (real) data downloaded from blockchain.info.  I wrote a simple program to create a “true-to-scale” static image for an arbitrary month, looped through all the months of Bitcoin’s history, and then exported the resulting array of images as an animated GIF.  
+
+The cited 92% correlation is the Pearson’s correlation coefficient between the logarithm of the two time series.  It is important to take the logarithm so that the correlation coefficient describes how the percent change in one quantity is related to the percent change in the other.  
+
+P.S. The green rectangles are supposed to represent dollar bills :)
+Yes, that is me.  
+/u/changetip $5.00
+
+Congrats!  Have a drink on me!!
+> Next time, I'd suggest explicitly letting people here know that you do not want that brigading to occur. Make it clear that you want discussion, instead of a mob. Honestly, make a good faith attempt and genuinely try to figure out the truth without any bias, and no in the world will have justification to ban or censor anything... Or if they do, I won't remain a supporter, at least.
+
+Fair enough.  I will continue to share my submissions to *encourage participation* but I will preface them with an appeal that voters try to remain objective.  
+
+However, I believe you will be disappointed with the results.  From my vantage point, the small-block/single-implementation proponents have exhausted all scientific arguments and are relying on rhetoric and [doublespeak](https://bitco.in/forum/threads/gold-collapsing-bitcoin-up.16/page-47#post-1712).   
+
+My interpretation is also that vote brigading occurs in the opposite direction that you think it does.  I believe there are coordinated down-vote brigades that specifically target my submission and posts (and target other people's posts too).  (If you look at my post history, I made a total of five submissions prior to the censorship that received 176, 567, 440, 416, 322 and 175 upvotes; my submissions *after* the censoring began at /r/bitcoin have never exceeded 60 upvotes). 
+
+He actually called it a "shitpost" over 6 hours ago.  I remember because I was surprised that a mod would say something like that about an animated pie chart showing how development could become more decentralized.  
+
+By the way, he has now edited his post to remove the profanity:
+
+https://www.reddit.com/r/Bitcoin/comments/3nhq5a/deprecating_bitcoin_core_visualizing_the/cvo8a5f
+I agree there was vote brigading *against* my comments and *against* my submission.  See [here](https://www.reddit.com/r/bitcoinxt/comments/3nhq9t/deprecating_bitcoin_core_visualizing_the/cvok7l8).
+Doesn't the 'np' prefix stand for "non-participating"?  I shared the link to the post to *encourage participation* from a broader spectrum of the community.  Nowhere did I solicit people to up-vote or down-vote any content.  Anyways, it sounds like the post could be deleted even if I *had* prefixed it with 'np'.
+
+More participation (like more transactions) seems like a positive thing to me.  
+>> and supporting multiple forkwise-compatible implementations
+
+> What do you mean here? 
+
+I mean multiple implementations of the *same* protocol so that they *don't* fork.  The reason I added the words "forkwise compatible" was because my earlier efforts at calling them "multiple implementations of the Bitcoin protocol" resulted in people saying that what I was describing was alt-coins.  The words "forkwise compatible" were supposed to stress the idea that the implementations *don't fork* with respect to one another.  Perhaps there's a better way to describe this...
+
+
+I know you're being sarcastic, but--since some PoS proponents use this as an argument in favour of checkpoints--a checkpoint is strictly a point *after* the beginning of the program's execution.   
+Thanks for pointing out btcsuite!  I have three questions:
+
+1. When I was building these charts, it looked like only about 0.3% of the nodes were actually running this implementation of the Bitcoin protocol.  Does that number sound accurate to you?
+
+2. We are often reminded of the need for "bug-for-bug" compatibility.  In your opinion, is this feasible with an implementation like BTC suite (that was not derived as a fork from Core like XT was)?  
+
+3. Has there every been an instance when the BTC nodes forked from the Core nodes due to a compatibility issue?  
+Nice work!  Assuming the miners behave as described in my [fee market paper](https://dl.dropboxusercontent.com/u/43331625/feemarket.pdf), the slope of your curve would be related to the average propagation impedance.  Would you be interested in sharing the raw data (e.g., a CSV file that lists block height, fees, and size)?
+It's funny: a redditor on the other forum suggested that the journal was a [government plot to shape public opinion.](https://www.reddit.com/r/Bitcoin/comments/3moaq5/first_peerreviewed_academic_bitcoin_journal/cvguigc)
+
+In fact, we do hope the journal helps to shape public opinion ([but it's not](https://bitco.in/forum/threads/ledger-a-journal-about-cryptocurrency-and-blockchain-research.55/#post-919) a government plot). Borrowing from the original mission statement from the journal *Nature* (1869), one of *Ledger*'s objectives is to “place before the general public the grand results” of cryptocurrency work and discovery, and “urge the claims of [this research] to a more general recognition in education and in daily life.”  
+
+Regarding maintaining objectivity in published manuscripts, we believe that *Ledger*'s [transparent peer-review process](http://ledgerjournal.org/ojs/index.php/ledger/about/editorialPolicies#peerReviewProcess) will help.  For example, if an author submitted a research paper that could be interpreted as favourable (or unfavourable) to increasing the block size limit, and if that paper was rejected for some reason that the author felt was due to politics rather than science, he could elect to self publish the manuscript along with the peer-review transcript, thereby opening up the process to public scrutiny.
+> The idea that it would lead to the things he talks about at the end (in an abrasive tone, I agree) are preposterous.
+
+At the end, I made a reference to how production quotas in the past have been enforced (censorship at first, and attacks if necessary), and then gave evidence of this happening in Bitcoin.  So I sort of showed that it's not preposterous at all and is in fact exactly what's been happening.
+
+My tone was quite calm and the slides themselves did most the talking at the end.  If you and the poster above you find this "abrasive," perhaps it is because it hurts you to hear the truth.  
+
+
+Yes, definitely.  An efficient and transparent mechanism for peer review on Bitcoin and cryptocurrency research will be very useful, in my opinion.  
+I am curious why you consider academic economics to be garbage.  Do you believe that supply and demand is a useful concept, for example?  How could this type of research be improved in your opinion, especially as it applies to Bitcoin research?
+No. The entire Day 1 morning session was removed. I never personally watched it, but people at the conference asked me why my talk had been removed. I don't know why they took it down when all the other sessions are up.
+> Peter's omission is that joining pools together reduces their impedance immediately to zero among them, giving them immediate benefit.
+
+I actually take that into account.  Even if you assume that the intra-pool propagation impedance is zero, it still doesn't affect the health of the fee market *unless only one pool exists* (in which case there is no one to lose an block race to).  
+
+Here's the slide: http://imgur.com/wMeKf0Q
+
+I agree.  Personally, I don't think this sub should award "expert flair" to anyone.  Ideas should stand on their own merit. Others can express their approval of good ideas by up-voting or by positively acknowledging the idea.
+
+This submission makes some good points too:  https://www.reddit.com/r/bitcoinxt/comments/3kd1rp/mike_hearn_should_give_up_his_expert_flair_on/
+I think the OP is suggesting the "expert books" no longer symbolize that one is an expert; they symbolize something negative instead and so the OP is suggesting that Mike remove this symbol from his profile.  I agree.     
+You're losing the ability to use your money locked in that payment channel for something else at the same time.  
+That makes sense.  To help make sense of that number, I just did a quick check and that seems less likely than the chance the network hash power could find a SHA256 collision with a probability of 0.01%:
+
+   400x10^15 hash/sec * *t* = 0.0001*2^256
+
+Solving for *t* yields
+
+   *t* -> 2.9 x 10^55 sec
+     -> 9.4 x 10^47 years
+The proof of economic consensus is in the pudding, as it were. 
+
+Just to be clear, the original design of Bitcoin as specified by the White Paper (see image: https://imgur.com/Xn4xFuv) made no mention of a block size limit.  Nodes were to compile valid transactions into blocks and, when they found a valid proof-of-work, to publish their block solutions.  Other nodes expressed their acceptance of the block by extending it (mining on top of it).
+
+BIP101 (XT) is just a mechanism to allow miners to express their acceptance of larger blocks.  If they do so, thereby making the longest chain one that includes blocks larger than 1 MB, then that chain becomes Bitcoin.  
+Great point!  
+
+I actually keep visiting CoinDesk expecting to see a story, but so far…nothing.
+Haha I didn't know there was a difference between innumerate and enumerate!  $10 sent:
+
+https://blockchain.info/tx/ca4829ae792af4d1111fdb2167cf7b8c30d1b6115ea036a30803069c0c3da6cc
+
+(I think saintoshi beat you with the typo on page 2).  
+
+Good catch!  $10 sent:
+
+https://blockchain.info/tx/3a51f11abeb480dd65f83a712e4804f4aaf1673e690da72857d93f6eea8e7e5a
+Thanks for the suggestion.  I had the same thought as well.  Perhaps I will re-structure the abstract in a future revision.  
+Thanks for the thoughtful reply.  
+
+The analysis only considers the upper-bound for blockchain growth / effective blocksize, given the stated assumptions.  Like you point out, miners are free to choose any value for S, and won't necessarily pick S'.  The point is that if they pick any other value, then the blockchain will grow *slower* than the upper limit.  
+
+Jorge, seems like your slowly coming around to the good side ;)
+Please don't attribute words to me that I didn't say.  Where did I state in my post that "we don't need a blocksize limit"?
+
+For the record, I support Gavin's plan to double the limit every two years, after a jump to 8 MB.  
+Why would Argentina make it difficult to *export* (bringing hard currency into the country which they desperately need)?
+
+I would purchase a few cases of good quality Argentine wine, thereby supporting bitcoin while helping the currency crisis in Argentina.  But it looks like it would also be very difficult to import this to Canada (even if you could get it out of Argentina).
+
+If trade were truly free at the person-to-person level, we could really make great things happen.  Free trade but only for the big companies and only for certain things, I suppose. 
+DadFoundMyAccount: could you clear up a few things?
+
+1.  Are you "SkateSoft" who posted the same video on bitcointalk:  https://bitcointalk.org/index.php?topic=407406.0
+
+2.  If so, why haven't the tipped coins moved from the donation address of https://blockchain.info/address/1JUL1GKM8kjpiiYNoZjrmxkVS5bHmMWjZ5 to the paper wallets?
+  
+EDIT: I wanted to point out that you could remove a lot of doubt over this entire saga if:
+
+A.  The QR code shown in the video matched the donation address on youtube and at bitcointalk.
+
+B.  You signed a message with the private key to this address and posted it in the comments to this thread.  This would prove that you are indeed the person who created the video.  
+
+C.  We could all see by checking blockchain.info that you did move the tips you received to those paper wallets (but so far the funds haven't moved).   
+
+
+The textbooks of the future will describe Erik Voorhees as an eloquent and great proponent of the bitcoin movement.  I feel we are truly making history here.  
+
+Well done Erik!
+It is not true that I'm not committed to the success of BCH over BTC. Why would you think that? All I do is work on BCH and promote it. I am significantly overweight BCH financially, as well.  
+
+The entire Bitcoin community getting its act together and recognizing that bigger blocks are the way forward would be a very good thing for BCH.  Isn't that what we all want? BCH will get stronger as more and more people realize its scaling path is superior. 
+
+What people need to accept is that in order for BCH to win, we need more and more people realizing that LN isn't a viable path forward while bigger blocks are.  But that realization means that the people within BTC may work to increase BTC's block size too.  To pretend that bigger blocks could become widely accepted as the better solution while at the same time that somehow BTC would be barred from recognizing this too is foolish.
+
+I would _prefer_ for BCH to win out, and am working to make that happen. But the reality is that BCH may not succeed.  People need to accept that that possibility. 
+
+The best future is one where most people use bitcoin: a p2p ecash system. That means the people currently promoting BTC/LN. There is no reason to exclude them. We want them too. And hopefully BCH wins out over BTC.
+
+More here:
+
+https://twitter.com/PeterRizun/status/1120111334715084800
+> I think rather it will reveal that the emperor was wearing no clothes and has spent the previous multiple years fucking around, getting left behind by Bitcoin Cash. 
+
+Yes, agreed.  And this would be a positive thing for Bitcoin, and especially so for BCH holders.  Once discussion about the flaws of LN and the need to increase the BTC block size limit are being discussed seriously, BCH will gain a lot of credibility in the eyes of today's small blockers. There will then be two dynamics at play: those voicing the need to increase BTC's block size limit, and those choosing to exit BTC for BCH as the path of least resistance.  
+
+In such a future, BCH will appreciate more in % terms than BTC. Whether or not BCH flippens BTC will depend on which dynamic is stronger: voice or exit.  Realize that BCH has more upside than BTC regardless of the outcome.
+Yeah liquidity was not the best word choice. The tweet was in response to a slightly trollish tweet comparing dogecoin favorably to BCH. So I made an equally IMO slightly trollish response comparing BCH favourably to LN.
+
+But like you said, it’s not _that_ unreasonable of a comparison and does give a sense of scale difference.
+Ryan's linked video is worth a watch.  It presents most of the arguments against Lightning in an easy-to-understand way.
+Do you agree that for a fixed number of users/services/entities (whatever you want to call it), that the size of the UXTO will reach an equilibrium, rather than grow without bound (ignoring lost coins)?  To me this seems obviously true.  At a certain point, an equilibrium must be reached where outputs are being consumed as fast as they are being created.  I don't see how that can't be true.  
+
+Whether the equilibrium is 5 outputs per user or more or less, I can only speculate.  I see your point about the gas station, but then I can see a lot of users having only a single coin from which they peel off new payments.  But what I can't see is 100s or 1000s of outputs per user.
+> 128MB blocks or higher were never sustained in the Gigablock testnet.Is that not the truth?
+
+We generated and propagated blocks up to 1.3 GB in size in 2017.  We did not analyze or report sustained average block size because that is a metric that can be easily gamed (e.g., by packing transactions with large OP_RETURNS or by propagating large blocks at a slower frequency than ~10min).  Instead we tracked sustained transactions throughput measured in TX/sec.  We were able to sustain approximately 500 TX/sec, after Andrew's mempool parallelization efforts.  I suspect now in 2019 we could sustain well over 1,000 TX/sec if we were to retest. Hopefully we can run another experiment this summer.
+
+> Is it also not the truth that nChain participated in the Gigablock testnet? 
+
+Depends what you mean by "participated."  If you mean nChain staff were  _active_ participants and helped with coding, running experiments, analyzing data, or performing any other useful work, then no nChain did not participate.  If you mean that nChain contributed some money to help with the costs of the experiment, then yes they did.  
+
+> Is it also not the truth that in the Gigablock testnet tx were always seeded locally?
+
+No that is not the truth.  The Gigablock testnet had 19 nodes spread out over 3 continents.  Typically 12 nodes would serve as transaction generators, broadcasting transactions into the network.  The mining nodes (4 - 6 nodes) would collect these transactions into a block and look for a solution, and then propagate that solution to all 19 or so nodes on the network.
+
+
+I am _for_ LN. Who isn't?
+
+What I'm not for is handicapping the base layer to cause the high fees in the first place, in a misguided attempt to push people to LN (which incidentally stops working properly when fees are high).
+Yup. It's not just the channel that Bob opens with his channel partner than needs enough liquidity.  The channel partners' liquidity to _other_ channels could also be the bottleneck!
+From a practical perspective, I think that a transaction is "invalid" if including it in the next block makes that block likely to be orphaned.  If a miner includes an otherwise-valid transaction defined by Avalanche as double-spent, and if that makes the other bitcoin miners likely to orphan the first miner's block, then in a very real sense the Avalanche process _did_ make that otherwise-valid block invalid.  
+
+So I think saying that Avalanche can't make a valid block invalid is stretching the normally-accepted meanings of "valid" and "invalid."  A more extreme example would be to say that in bitcoin transactions are valid regardless of whether or not they are signed, and it "just so happens" that miners only build upon blocks that contain signed transactions.  But I don't think such a framework would be useful because then what do the words "valid" and "invalid" really mean?
+My feeling is the same.  I see 51%-attack protection as a better "first job" for Avalanche, as it only affects reorgs with some depth, as you said.  Using Avalanche to orphan otherwise-valid blocks at the chain tip (to improve 0-conf) is a lot more ambitious and represents a more significant departure from pure PoW.
+Because the Avalanche process can make an otherwise-valid block become invalid.  
+> I think increasing the bandwidth required for individual transactions seems worth reducing the space requirements of the shared state. What do you think?
+
+I think it's really hard to say.  If we have huge breakthroughs in storage in the coming decades, then probably not.  If we have huge breakthroughs in Internet bandwidth in the coming decades, then probably so!
+
+> Where can you buy Monero or Ethereum with Bitcoin Cash without having to convert it to Bitcoin first?
+
+Coinex has ETH/BCH and XMR/BCH trading pairs.
+
+
+Assuming we wanted to, how would we go about re-merging the chains?
+Personally, I'm frustrated with both sides.  We split from BTC for a very GOOD reason: we wanted to continue to grow on chain while the other side didn't.  This BCH/BSV split is stupid and destructive IMO.  Both sides basically have the same vision, and the rules for both chains are essentially the same.  We've just made adoption way more difficult and confusing.  
+
+What BU and I have been pushing for for a long time is miner ratification of protocol changes via BIP135. I think this would have blocked CTOR, allowed DSV, and most importantly kept the chain together.  But it's too late for that now.  
+I think we can safely reduce block times to 2 minutes, without having a significant negative impact on orphan-centralization risk.  
+
+I think the bigger trade-off is the 5x bigger chain of block headers that the SPV wallets will need to download.  
+
+My preference would be to stick with the status quo and implement subchains on top of the protocol with 20s or 30s fast-blocks.  
+It doesn't affect BU.
+Because the bad block with fake coins would pass validation.  It was the assert() check which crashed the nodes that prevented this.  If fake coins got confirmed, that would have increased the coin supply.
+Every node the attackers send the bad block to would crash. I’m assume an attacker is _trying_ to do as much damage as possible. Sure, if they just send the block out to a few peers, only those peers would crash.  But why would they create the bad block in the first place then?
+And I signed up for an account and tipped you just by moving the button!!  Very cool.  
+
+/u/ryancarnated: bug report: the "copy-to-clipboard" didn't work for me on iPhoneX. Further, I couldn't tip Tom at all from my iPhone. It kept telling my to sign-up or login, but when I'd hit either button, I'd see that I was already logged in.  Everything worked flawlessly on my Mac with Safari though.
+I'm using the term "user" in the context of someone who uses a node, for example "a user of Bitcoin Unlimited software."  This user could be a miner, exchange, payment processor, SPV server, researcher, developer, business, or hobbiest. 
+
+But, yeah, I agree that someone who just wants to "use" bitcoin does not need to run a node -- a SPV wallet is perfect.
+Bitcoin Unlimited is about giving node operators and miners the freedom to run their nodes as they see fit.  If a miner or node operator wants to change the max size of blocks his node accepts, we wanted to make it easy for them to do this.  And I think we've largely achieved that with BU.  A node operator can easily change his node's block size limit in a few seconds.  Further, we successfully demonstrated mining and propagating blocks over 1 GB in size with BU nodes on the Gigablock Testnet.  
+
+I believe that block space should be unconstrained by the protocol.  That if the block size limit is maintained far above demand, that an equilibrium block size will emerge where supply meets demand.  For more information on my theories, see [this paper](https://www.bitcoinunlimited.info/resources/feemarket.pdf), or this [talk](https://www.youtube.com/watch?v=ad0Pjj_ms2k).
+
+For the people saying "we should just remove the block size limit," who is "we"?
+
+If we is BU, how can we do this? If we make it impossible for miners to set a block size limit, they probably won't run our software. So instead we give them a tool to set their block size limit to whatever they want. And by default, we set the limit to whatever the majority of miners is currently enforcing. We even run experiments to measure at what block sizes our software starts to fall apart to provide empirical evidence of the max sustained load a network of BU nodes could support.
+
+What else can BU do?
+
+Once you see that the block size limit isn't really "real," you'll understand that the answer to the question "what else can we do?" is to continue to work to identify and fix technical bottlenecks to scaling.  By fixing these bottlenecks, the miners will gain the confidence needed to continue to raise the max size of block their nodes will accept.  
+
+cc: /u/imaginary_username
+It’s a fantastic idea IMO. I’ve been pushing for keeping the block size limit far above demand since 2015. This way, the block size can be set by supply and demand in the free market.  
+
+We’ve achieved this with BCH.
+To me it's not a problem if Fidelity paid no TX fees.  Including additional transactions in a block imposes a real cost on a miner, so Fidelity would need to provide _something_ of value to the miner in return. This something would have the same economic effect as directly paying transaction fees. 
+There's a subtlety hear: if 95% of the miners can accept the block, sure who cares about the 5%.  No problem.  If only 5% can accept the block, they'll reorg back to the 95% chain eventually anyways.  Again, no problem.
+
+The problem is if ~50% can accept the block.  Which side of the fork is the correct side?  
+
+Yes, this too will _likely_ be resolved but miners would rather not face this risk in the first place.  That's why miners agree the orphan blocks that are greater than a certain widely-known limit.  This limit is of course what we call the block size limit. 
+What CSW doesn't understand is that if a miner packs the block with HIS OWN transactions, those transactions can all be zero fee.  There is no consensus rule that says that transactions must pay fees.  So even if the block is orphaned, the attacker is not at risk of losing fees because the transactions didn't pay any.  
+I would probably do BIP101, except keep doubling every two years instead of stopping at 8 GB.  
+
+Here's a picture of what it would look like:
+
+https://i.warosu.org/data/biz/img/0008/18/1437235578848.gif
+>I don’t understand why you say the 2nd higher fee transaction is fraudulent ?
+
+Because we're talking specifically about fraudulent double-spends of instant transactions, and I was explaining how there are two different attack vectors. 
+
+Also, I'm referring to BCH, not BTC.  BTC is not interested in reliable instant blockchain transactions, and so they condone RBF.  Indeed, a RBF transaction on BTC may be perfectly legitimate.
+
+BCH does not condone RBF.  It is not optional in BCH; it was removed from the protocol during the fork last year in order to make instant transaction useable like they were originally.  As per the white paper, a miner is to accept only the first-seen version of a transaction into his mempool.  Deviant miners who replace first-seen transactions with later-seen transaction may be facilitating double-spend fraud.  Currently, 0% of the BCH hash rate is deviant.
+Evidence?  Well we both have two underscores in our user names. 
+> Suppose that no blocks have been found for 11 minutes. What's the expected time until the next block now?
+
+negativegamma?
+Because right now, a transaction confirmed in a block takes precedence over a conflicted-version of that transaction admitted only into a node's mempool. This is needed to ensure that the network converges upon a single chain.  According the current protocol rules, the strategy that games Coingeek is perfectly acceptable so the other nodes won't even notice.
+
+Coingeek is proposing a change to the bitcoin software to make transactions only in mempool take precedence over confirmed transactions in certain cases.  In other words, it is Coingeek that is changing, not the rest of the network, and that makes their strategy gameable.  
+Not at all.  They wouldn't be _real_ double-spends of instant transactions (in the sense that someone got defrauded).  They would just be designed to look like double-spends in the eyes of Coingeek.  This would then make Coingeek waste mining power not mining on top of a perfectly good block.  
+You can't get around it.  It is just physics.  I think Craig knew about this Ansible idea but didn't properly understand it, and so he ended up making another stupid claim on Twitter.
+
+But the Ansible idea is very interesting I think, and the article is well written.  Here are some of my initial thoughts:
+
+https://www.reddit.com/r/btc/comments/8a9589/ansible_practical_fasterthanlight_secure_0conf/dwxsn70/
+> It doesn't change the fundamental speed of reading bits off a magnetic disk.
+
+SSDs do not contain a magnetic disk. 
+
+
+CSW earlier said that miners disobeying "first seen" would be a change to the protocol.  If he considers first-seen to be a part of the protocol, then what he's proposing is certainly a protocol change if he's even half-way consistent.  
+I guess that depends on what your definition of "the protocol" is.  
+
+If the miners agreed to orphan blocks larger than 100 kB, would you consider that a change to the protocol?
+If the BCH miners decided to deliberately orphan all blocks larger than 100 kB, would you consider that a change to the protocol?  
+
+To me, it is clear that if miners add a new rule and start orphaning certain blocks that violate that rule, that represents a change to the protocol.  I'm not saying that changes are bad, but let's call a spade a spade.  
+In the SM lingo, "alpha" represents the fraction of hash power controlled by the selfish miner.  So if alpha=1/3, it means the honest miners control 2/3rds of the hash power.   The expected time for all miners combined is 10 min, but since the honest miners control only 2/3rds of it, this blows their expectation value out to 10 / (2/3) = 15 min.  
+
+On your second point, yes it is more likely for the HM to find the next block (at height N) than the SM.  But remember, the SM only starts the attack when he indeed does find the next block.  And in such cases, the HM is thus lagging behind (because the HM is still looking for a solution for height N whereas the SM is looking for a solution at height N+1). 
+I agree that "honest" is a better word than "selfish."  
+
+For example, the idea that miners are selfish makes people think that 0-conf transactions have weaker security than they do.  Their argument is that a selfish miner would accept a bribe (higher-fee) to replace the first-seen version with a double-spent version, and because they say miners are selfish it follows that 0-conf transactions have no security.   But empirically we know that it is _not_ trivial to double-spend a 0-conf transactions. 
+
+By the same logic that says 0-conf transaction have no security, one could argue that miners should attempt to orphan a 1-conf transaction if the bribe were greater than the coinbase reward, and orphan a n-conf transaction if the bribe were n-times greater than the coinbase reward.  You end up with a security model where transactions of a few million dollars are not secure until confirmed under _days_ of PoW, which is of course not the reality.  
+
+And it gets even worse when you assume that the hash-power majority will defraud their users and the other miners.  This is because the majority can _always_ collude to defraud the honest minority out of _all_ coinbase rewards and out of _all_ transaction fees, and they majority can retroactively take back _all_ payments they make.  If the majority is dishonest, the system breaks down completely.  
+
+So, yeah, the correct assumption is that the hash power majority is honest and does not actively try to defraud the other network participants.
+Thanks!
+There are two proposals: Bitpay's which is b58 but changes the magic byte, and CashAddress which is similar (but not identical) to bech32.
+
+In _no_ case would the address formats be the same as what is used for Bitcoin.  That would defeat the purpose.
+I don't think anyone is actively working on it, although I think most of us would be supportive if someone did.  Peter Wuille did some great work on this topic that I think should be followed-up on.
+He actually models the _N_ miner situation and then studies the 2-miner situation separately.  
+
+Your criticisms are similar to one of the reviewers of the paper, who felt it was rather "empty" game-theory that would apply equally-well to many scenarios.  
+
+Anyways, I thought it was still quite interesting because I see the underlying results holding even when the other forces are included.  Bitcoin mining will likely never be a monopoly, but it will always be "centralized" to the extent that individual miners still retain a degree of pricing power.
+It doesn't matter whether you solve the problem from t = -10 min or t = 0 min, the answer is t = 15 min either way.  Here's why...
+
+**From t = -10 min:**
+
+Given the statement in the problem description that the selfish miner finds the next block (height N) at t = 0, we know _a priori_ that the honest miner does not find a block between t = -10 and t = 0.  If you calculate the conditional probability distribution for this problem and then use that to find the expected arrival time, you'll get t = 15 min.  
+
+This result is very counterintuitive when examined from this perspective.  /u/awemany did a simulation in python to prove it [[histograms]](https://i.imgur.com/xeOlupE.png) [[code]](https://gist.github.com/awemany/57b95a24b09b648bda1db9509f5dcba9).
+
+
+**From t = 0 min:**
+
+Since Bitcoin mining is a memoryless process, the honest miners still haven't made any progress even though they've been hashing for 10 minutes (they're still working on the same block).  And so the honest miners expects the block at t = 15 minutes.
+Right. What Gmax doesn't see is that in the case of a block backed by PoW, you're not really trusting the miner to give you the right information -- you're trusting that the miner doesn't want to lose money and thus built his block correctly. GMax is confusing two different trust models.
+/u/tomtomtom7 is just acknowledging the fact that the segregated signatures are worth less to a miner than normal Bitcoin signatures (due to the fact that the former is not required to update one's UTXO set), and thus this shifts the incentives. 
+
+You are the one responding emotionally to simple factual statements, as though it's tearing at your perception of reality. But I find it hard to believe that you failed to understand the way segwit transactions were different due to the subordinate nature of the witness data.
+
+Furthermore, tomtomtom7 is not suggesting that this difference would mean that segwit coins were insecure--he said earlier that he doesn't think this difference matters _that much_.  But the bottom line is that this does change the incentives. Whether it's enough to really "matter" no one knows yet.
+Some people want AD, others do not. BU allows users to decide for themselves.  I believe making it difficult for people to do what they want to do is a losing recipe.
+
+What's nice about BU is that you don't _have_ to like it for it to succeed in its goal. It's compatible with every way to increase MAXBLOCKSIZE. Support for bigger blocks is support for BUs goals.
+I'm sorry but you're still making an error. You can verify the entire history of _your_ transaction without downloading blocks. You only need SPV technology to do this. 
+
+I think a lot of people misunderstand how exactly SPV works, and based on this misunderstanding, believe it to be less secure than it is.
+> The point is that with SPV you don't actually verify anything yourself.
+
+You verify _your_ transactions _and_ verify that they've been included in the most-work chain. What you don't verify are everyone else in the world's transactions.
+It's not obsolete.  BU still supports the excessive block gate (it can also be disabled). However, people were confused thinking that BU meant that miners would NOT coordinate on a block size limit and that blocks would get orphaned left, right and center.  For this reason, we've been de-emphasizing the role of excessive block gate and are focusing more on coordination schemes that miners can use to set the same block size limit.  
+Best comment in thread.
+Bitcoin is permissionless.  You can run a node if you have the will and the means.
+Yes, I agree with all of your points.  
+Which features from segwit in particular do you want?  
+Thanks for your response, JayPeee.  I agree that these types or efforts can go a long way.  I think what is difficult is getting the initial organizational structures in place, so that there's a critical mass of people who then sustain the efforts.  
+
+Bitcoin Unlimited is very lucky to have money to spend on putting these types of things in place, we just need actionable plans and people to spearhead them.  We set up the [Bitcoin Unlimited grants program](https://medium.com/@peter_r/call-for-proposals-making-satoshis-vision-a-reality-with-bitcoin-unlimited-4ff5da246dc7#.w8btl28yd) specifically so that members of the community could propose projects that would help BU and then get money make it happen.  If you want to take a more active roll, you could help spearhead a project to do exactly what you just proposed.  Bitcoin Unlimited will even fund it, if the community agrees it is money well spent.  
+> The most obvious overhead is the bandwidth wasted by broadcasting each transaction twice, and fixed by ~~Flexible Transactions~~ [correction: Xthin] or Compact blocks
+
+Compact Blocks is Core's answer to Xthin; Flexible Transactions is Classic's answer to segwit.
+
+
+
+
+> It doesn't show correlation that support's Peter R's argument that the price is proportional to the transaction volume square.
+
+Yesterday you showed the world that you don't understand log graphs, today you're showing them that you don't understand correlation either.  Nobody knows everything, but that fact that you can't admit when you're wrong and instead keep digging a deeper and deeper hole like this is bizarre.  
+
+It is not an "argument" that Bitcoin's market cap (V) has been correlated with the number of transactions per day (N); it is a fact.  Go ahead and calculate the correlation coefficient between log V and log N: last time I did so it was 96% or so! [It's important to log the two time series before you calculate the correlation coefficient in this case because we're concerned with how a _percent change_ in the transaction volume relates to the _percentage change_ in the market cap.]
+
+Will this correlation continue to hold?  No one knows for sure, but it's pretty obvious to me that more transactions means more users, and more users means higher prices.  
+There's a second setting called the "acceptance depth," which defines how long you'll try to enforce your smaller-block policy before giving up and going with consensus.  
+
+Let's assume almost every node has a block size limit of 1 MB and an acceptance depth of 6.  
+
+If a miner mines a 1.5 MB block, few nodes will relay it, few miners will mine upon it, and it will very likely get orphaned.  
+
+Now let's imagine that the majority of the network has a 2 MB limit but your node still has the earlier setting (1 MB limit with 6 block acceptance depth).  
+
+If a miner mines a 1.5 MB block, your node will initially ignore it.  However, your node will also notice that everyone else is building on a different chain.  When that chain becomes six blocks deeper than your preferred "small block" chain, your node will give up and converge upon the larger-block chain.
+
+BU can emulate Core by setting the block size limit to 1MB and the acceptance depth to infinity.  
+Did you see our [test results](https://medium.com/@peter_r/towards-massive-on-chain-scaling-block-propagation-results-with-xthin-792a752c14c2) for Xthin and the Great Firewall of China (it was censored from r/bitcoin)?  
+
+Most Xthin blocks crossed the GFC in less than a second, and the bitcoin.com mining pool uses Xpedited, which is even faster than Xthin.  
+
+I wasn't involved in the measurements associated with this particular result (although Emil will [present on this topic](https://medium.com/@peter_r/satoshis-vision-bitcoin-development-scaling-conference-dfb56e17c2d9) in San Francisco on Sunday), but [this is the methodology](https://medium.com/@peter_r/towards-massive-on-chain-scaling-presenting-our-block-propagation-results-with-xthin-da54e55dc0e4) we used for our Xthin block propagation measurements.  
+
+That said, I do agree the article is lacking in detail, but perhaps the bad grammar makes up for it ;)
+With Xthin complete, and with Core's version (compact blocks) coming shortly, I think weak blocks should be the next big "push" to help make bitcoin more usable as p2p electronic cash.  If implemented in the right way, weak blocks can significantly reduce orphan rates for large blocks AND provide quantifiable security for zero-confirm transactions.  I don't see why 3 second weak block times like /u/seweso suggested wouldn't (eventually) be feasible.  
+
+[Some diagrams](https://bitco.in/forum/threads/subchains-and-other-applications-of-weak-blocks.584/#post-7246)
+One day you had a hissy fit and _asked_ me to leave after I was having a pleasant conversation with a few of the non-crazies over there (which are most of the people).
+
+If you banned one or more IP addresses of mine in the past then (a) you never told me, (b) I never noticed.
+
+> The point is that propagation time are irrelevant to this whole scenario because propagation to other miners happens outside of the bitcoin network.
+
+Right.  The point I was making was that you can't claim that Core's improvements regarding block propagation help reduce the orphan rates and at the same time argue that Unlimited's improvements do not.  
+
+In the experiment we're currently performing, we're comparing both latency *and* the total number of bytes exchanged.  
+
+Although latency is more important for mining nodes, as pointed out by [this study](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf), block propagation to *nodes* (node latency) is the current bottleneck for on-chain scaling (i.e., with a significantly larger block size, a portion of nodes would be unable to download blocks within the 10 minute block-time target and thus continually fall further behind).  The data from this study suggested that at an average block size of 4.1 MB, 10% of the network nodes would be unable to keep up, while at an average block size of 37 MB, half of the network nodes would be left behind.  Xthin helps with this *latency* problem related to *nodes*.  
+
+In my opinion, you see things very black and white.  It's like you think either latency should be minimized or bandwidth should be minimized, and thus you can't understand why we would be comparing latency in a protocol targeted towards non-mining nodes.  The truth is that it's a balance between the two, with a bias towards latency for miners and towards bandwidth for non-mining nodes.  I don't think anyone knows exactly where the sweet spot for that balance is.  But I believe it is something for the free-market to determine.
+> It is not a different bloom filter; It is Bitcoin Core's CBloomFilter.
+
+Now you're conflating the instantiation of a class with the class itself.  Deceptively so, I might add dear Gmax.  You know full well what we're talking about.   
+
+BTW, you still haven't answered my question: do you expect more or less 2.5X-round-trips with Compact Blocks [low BW-mode] compared to Xthin?
+> The thing that makes avoiding the round trip impossible: Xthin's transfer must be client initiated to send the bloom filter.
+
+This is not true.  XRelay is 0.5 round trips.  Paging /u/theZerg1.  
+
+> The receiver can send a huge and expensive bloom filter and then it's very costly to check the block against it. This is effectively the same DOS attack that exists for the BIP37 case.
+
+Thank you for acknowledging that it is indeed a *different* Bloom filter.  I don't believe there is a serious DOS risk here, but /u/bitsenbytes is the expert on this matter.
+
+Remind me again: what precisely is novel about Compact Blocks?
+Indeed, a technique like blocks-only or Xthin would allow these marginal to more easily keep up with much larger blocks.  According to this logic then, the 4.1MB / 37MB max-block size estimates from the Cornell study are actually *conservative*. They don't take into account the actions that people could take to improve their node's ability to keep up. 
+> This isn't really all that important, a few seconds for regular nodes to download a block isn't a big deal...
+
+Then why did [this study](http://fc16.ifca.ai/bitcoin/papers/CDE+16.pdf) by Cornell investigators identify block propagation to nodes as the bottleneck?  Their results suggest that at an average block size of 4.1 MB, 10% of the network nodes would be unable to keep up (i.e., 1 in every 10 nodes would be unable to download blocks within the 10 minute block-time target and thus continually fall further behind), while at an average block size of 37 MB, half of the network nodes would be left behind.   
+
+Xthin is designed to fix this bottleneck to help permit continued on-chain scaling.   
+Transaction fees *can* pay for proof-of-work security in a free market like the one /u/jstolfi is describing.  Here's the reference:
+
+https://np.reddit.com/r/Bitcoin/comments/3yod27/greg_maxwell_was_wrong_transaction_fees_can_pay/
+
+cc /u/tl121
+Hmm...I'm not sure.  Maybe /u/jeandulouz had me mistaken for someone else?
+Yes, and this is what makes the mining dynamics so interesting: in reality miners are neither "rational short-term profit-maximizing agents" nor "cohesive monolithic cartel members."  They are somewhere in between.  The trouble is that we only know how to analyze the two extreme cases rigorously with math.  
+Right, it is block size related.  One of the costs of producing larger blocks is the added orphaning risk as blocks get larger.  I suspect this will be the dominant cost for the next few decades at least.
+
+But there are other costs too.  For example, a miner takes on a liability equal to the present value of the storage costs of that new data, discounted by his cost of capital. 
+It gives both miners and node operators a say.  Miners are free to produce blocks of any size that other miners will accept *so long as they are smaller than what the economic majority of nodes will accept too*. 
+>When you say freedom of choice to the node operator which type are you referring to?
+
+Both.  We suspect non-mining nodes that aren't worried about "big blocks" will choose a high limit for the blocks they accept.  We suspect mining nodes will come to consensus around a block size limit (e.g., 8 MB) perhaps even via the activation of BIP101.  
+
+> Second, are 100GB blocks possible on BU or not?
+
+No.  

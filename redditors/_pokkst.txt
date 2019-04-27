@@ -1,0 +1,358 @@
+Take it from someone who just switched from BTC to Bitcoin Cash and has been porting over my projects onto this platform:
+Bitcoin Cash believes in scaling gradually over time, while improving the technology for better propagation in preparation for bigger blocks way off in the future when needed.
+From my somewhat short time in this community, it seems that most actually like Layer 2 solutions. Their main issue with LN is that BTC put all their bets on LN solving everything. It didn’t, and won’t, due to how the system was designed itself. To fix various UX issues, you’d have to redesign and rewrite all of the LN. Bitcoin Cash believes in improving the base layer, making sure everything works, then playing around with second layers and sidechains. A sort of “do your homework first, then play video games” situation.
+As for “the whitepaper”, I’ve actually always felt the whitepaper was a good reference point to go off of. Bitcoin Cash stills follows this design, with improvements along the way to make this design function better. A lot of BTC people seem to say “Fuck the whitepaper.” cough John cough
+In conclusion, if you believe in Bitcoin being a settlement layer, stick with BTC. If you believe in Bitcoin being peer-to-peer electronic cash, switch to Bitcoin Cash.
+You can also read my write-up/reasoning for moving to Bitcoin Cash here: https://pokkst.xyz/bch
+Thank you Roger! Feels good to be here. :)
+Hey everyone!
+I'm the guy who was posting on /u/throwaway_btc_acct and made a statement on why I switched to BCH and away from BTC.
+I'm currently porting my apps to BCH now, and above I linked some screenshots to my "gallery wallet"!
+Gallery wallet is a "hidden" wallet that disguises itself as a gallery app on your phone. On the app's home screen it looks like a generic gallery app, but when you tap the title bar 5 times, you are brought to a PIN entry screen (on first ever startup you're asked to create a PIN). Entering the PIN correctly will begin loading a BCH wallet inside the app. :)
+The aim is to provide privacy through obscurity.
+Let me know what you think!
+Indeed! :)
+cough
+Had a great time chatting with you linzerd! Also hi all!
+Hello, am developer!
+If you guys notice any bugs, feel free to report them to me. I'm a solo developer on this and in general, with IRL work and school, so I don't have a top-notch team working on this. It's just me. :)
+It is open source, and non-custodial.
+Technical overview:
+For the BCH wallet portion, it uses bitcoincashj. For the SLP wallet portion, it uses the Bitcoin.com SLP SDK. There are technically two wallets running in tandem when the app is running (both using the same recovery seed), one for the base level BCH wallet, and one for SLP tokens.
+BCH wallet derivation path: m/44'/145'/0' (BIP44 standard)
+SLP wallet derivation path: m/44'/245'/0'
+The website is here: https://crescent.cash
+Not only is it de-platforming and harassment, with both suspending him previously and restricting follower reach, it's also a huge conflict of interest due to his investment in Lightning Labs (as stated by @Bitcoin in the tweet linked).
+
+People calling for the account to be "given to Bitcoin.org" should know that I'll give this guy his name back if they pass it on to us.
+
+I don't agree with BTC and a lot of people supporting BTC, but mad props to you for this. Respect.
+Yep! He tipped me $50 :)
+People are free to "hodl" coins and use a coin as a SoV. Long-term though, if a coin is not a good MoE then it will not be a good SoV.
+BCH is both, while BTC is not.
+I don't see my work as that important to the ecosystem, but thank you! :)
+Hey everyone!
+I'm super excited to announce this. I've just released a new non-custodial, open-source BCH wallet with FULL Cash Account (https://cashaccount.info) support! This means you can register Cash Accounts in-app, which means this is a fully dedicated Cash Account wallet. Send and receive BCH using a Cash Account alias. :)
+Website: https://pokkst.xyz/crescentcash
+Download: https://pokkst.xyz/crescentcash/download
+Src: https://gitlab.com/pokkst/crescentcash
+And, if you for some reason want to support me (Mr. Silverblood wanted me to make this :P) then feel free to send me money on BitBacker.io 
+https://bitbacker.io/user/pokkst/
+Feel to ask me any questions you may have and I'll try my best to answer them. :)
+More detailed write-up: 
+A few of us, such as myself, and /u/imaginary_username, have been wanting someone to update and maintain the bitcoinj-cash library as it has been abandoned by someone who is now working on a bitcoinsv-cash library. That version of the library was never updated to support CTOR, so sometimes transactions would get messed up in wallets and balances would be off.
+With the amazing help of @ProtocolCash, there is now a version supporting CTOR! 
+https://twitter.com/ProtocolCash/status/1118780951402663936
+https://twitter.com/ProtocolCash/status/1118794491874250752
+I had posted a tweet asking for help, as I couldn't figure it out myself, and then came ProtocolCash and saved the day! Thank you!
+Afterwards, I then made modifications to his fork myself. Such changes include: 
+
+
+Changing the derivation path from m/0' to m/44'/145'/0' (what Electron Cash uses)
+
+
+Making CashAddrs used by default
+
+
+Add support for sending to Cash Accounts via BitcoinJ's SendRequest.to() and SendReqest.emptyWallet() methods!
+
+
+Now any wallet made with this version of Bitcoinj-cash can send to Cash Accounts!
+Link to his repo: https://github.com/protocolcash/bitcoinj-cash
+Link to my repo: https://github.com/pokkst/bitcoincashj
+I knew you'd come around. :)
+Hahahah, I actually just found that out this morning. Had no idea beforehand that this is the first native mobile SLP wallet.
+Feels pretty nice. :)
+Please do! (to whoever may be reading)
+I'm just a solo dev so any help is appreciated. :)
+Hey everyone!
+I've just released v1.3.0 of Crescent Cash, which brings SLP token support to the wallet! You can now send and receive SLP tokens inside the app!
+I began planning on how to implement this ever since /u/MemoryDealers suggested it in the Bitcoin.com weekly news update here: https://youtu.be/-ag_Q_WvLJo?t=829
+So now it's finally here!
+Enjoy!
+Download: https://crescent.cash/download
+Src: https://gitlab.com/pokkst/crescentcash
+All of the BTC users are too brainwashed to raise block sizes, as a “[Raspberry] PI needs to run a node” (quote from a dude i had an argument with recently, if you want that full story, anyone feel free to DM me)
+yet they cheer on Segwit for being a “block size increase”
+lol
+Once you start questioning everything BTCers tell you, they flag you as a scammer and force you out, really.
+Everyone here is more chill. Welcome! :)
+And aww, thank you! :)
+Was waiting for someone to post this! :)
+Hello! Am dev.
+Hope you guys like it!
+Thank you! 
+And I'll check that out, thank you! :)
+Take it from someone who also just switched from BTC to BCH: it's tough.
+I have an app, named Crescent Pay that uses a $handle system for Bitcoin addresses. When I switched to BCH, my "friends" said the reason I left is because prominent BTC supporters didn't like my app (untrue, they liked it), and then claimed that Crescent Pay is supported by pedophiles, and then other "friends" of mine joined in and harassed me and blocked me. It's literally a cult.
+Everyone here is more chill, we have a "don't give a fuck, let BTC fail and prove itself to be a failure" kind of attitude from what I've seen. Sure we shitpost about BTC, but we're just letting that chain die.
+Unfortunately/fortunately yes, depending on how you like to look at things. :)
+I ported this app over from BTC (named Crescent Pay for BTC, and uses a centralized alias system). I had to rewrite a large portion of the app, polish, and test over and over again. I did it in about a week (maybe even less). Many sleepless nights and a lot of pizza and soda consumed. :P
+EDIT: Ooooh sneaky edit by you.
+To answer the questions: I just work fast. Often sitting for hours (though I get up and stretch and walk around so I don't die lol) programming. :)
+lazyfox.io* god dammit
+Here are four comments I found mentioning "0.03":
+https://www.reddit.com/r/btc/comments/b54ij2/bch_adoption_is_on_fire_in_tokyo/ejg9ui8/?context=3
+https://www.reddit.com/r/btc/comments/b54ij2/bch_adoption_is_on_fire_in_tokyo/ejfq9ih/?context=3
+https://www.reddit.com/r/btc/comments/b20gn4/this_blockchain_is_for_lightning_network_members/eir4ot7/?context=3
+https://www.reddit.com/r/btc/comments/b20gn4/this_blockchain_is_for_lightning_network_members/eiqsh2y/?context=3
+In total from my quick search I found six, but listed four because I didn't want to make the list too long.
+Dude doesn't even realize how dumb he sounds lmfao
+1.1.1.1 is terrible for privacy considering it's by Cloudflare.
+Damn so this is what it’s like to be popular
+People share my tweets for me :O
+Indeed! I stay up late and just listen to music and write code a lot.
+I'm basically sleep deprived to hell, but oh well! :P
+That average fee is not a good metric to go off of. Use median instead for both.
+For example, I just made a ~50 input/1 output transaction yesterday and I paid less than a cent still.
+BSV is a centralized piece of garbage run and used by statists.
+Yep! He added an extra $50 later on :D
+Awww, thank you! :)
+I hope I do too. :)
+My other wallet, BCHgallery has also been updated with full Cash Account support. Though it's optional. :)
+So far I have the first two wallets with full support. :)
+Yep, just saw your tweet. Currently doing that. :)
+Hello!
+I am the developer of the app featured in this news article!
+If anyone has any questions, feel free to ask. :)
+I used a base BTC wallet a long time ago, when re-learning Android development because it had been a while since I last made an Android app, but the code has been refactored and rewritten a few times, so mostly yes from scratch.
+I just added support, hopefully. Currently testing it out. 
+EDIT: It works! Just sent 0.01 BCH to the EFF via BitPay. :)
+Yep! All of my software is open source.
+Correct. Also good to use with Electron Cash.
+I honestly don't see myself as that important (I'm bad with compliments too) but thank you! :)
+Narrator: "They don't."
+For the record, I barely use Reddit, so this sub didn't me that. Simply looking at hashrate distribution proves my point.
+I didn’t see his reply as critique or hostile. I found it to be an honest question. :)
+I currently do not have time to understand CashShuffle’s code (like in the Electron Cash plugin/native integration) and port it to Java. A desktop port of Crescent Cash would be easy right now. I also have finals coming up soon at college, and IRL work so I’m going to be limited on time :(
+wen pop “champaign” lads?
+While yeah, they could/should implement it, the reason being is that (if I recall correctly from when doing some coin development as a learning experience) that transaction doesn't technically exist, so some explorers add it in, some don't.
+If you look at various other coins and their respective block explorers (depending on which explorer they forked) you'll notice you won't see theirs either.
+I'll get working on a dark theme.
+A search function would be kind of difficult as it would require querying Cash Acct lookup servers thousands of times (for each block) looking for accounts.
+I plan to implement a lot of settings soon. :) Which will also conceal the seed until you click show.
+It's just a normal SPV wallet, that connects to various nodes on the network and downloads block headers to verify the chain. It uses BitcoinCashJ
+Hello! Am dev.
+Feel free to ask me any questions you guys may have. :)
+I have some stuff planned. It's going to be a lot of work though. :)
+Thank you!
+And I want to, but I don't have the funds currently to register a business. Apple requires you to legally have a business in order to publish cryptocurrency wallets.
+Oh shit! Thank you!
+Hahahah thanks! :D
+...... This has nothing to do with BSV. The handles were inspired from Cash App's cashtags.
+sweet :) hopefully this gets merged! :)
+Haha, thank you, I think. :P
+:)
+Similar. I got the idea from Cash App's "cashtags", and $username was too long for the UI (was trying to be short and precise) so I chose "handle".
+I think you forgot to include the tipprbot, but don't worry about it. :)
+Thank you though!
+Using a custodial wallet is no different than using PayPal.
+For SLP I'm using the Bitcoin.com SLP SDK
+:P
+Thank you! :)
+Thank you! :)
+Thank you! :)
+Be very careful. I suggest not even eating food, as that costs money and that will eat into your savings.
+You're basically broke right now.
+.... Did you even read my comment?
+EDIT: Read here: https://btc.chaintools.io/tx/4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b
+GitHub issue about this transaction: https://github.com/bitcoin/bitcoin/issues/3303
+
+Works as designed: The genesis block coinbase transaction effectively doesn't exist, as it was never indexed in the original software. Making it spendable would be a hard-forking change, returning it with txindex=1 would suggest the coin supply was 50 BTC higher than it actually is since it hasn't been spent.
+
+Yes. Satoshis. Like I said, it isn't one specific address. Read literally the first sentence in my previous reply. 
+Ahahahahaha I bet they would. :P
+ahahah thank you though :P
+means a lot :)
+Thank you! :)
+I'm not the original poster, but using a custodial wallet is not using Bitcoin. It's no different than using PayPal.
+Not yet, but it will be very soon!
+No problem! A wallet I recommend for BTC is Electrum, and the BCH equivalent is Electron Cash.
+I do however recommend to not touch BTC. Unless you like paying $2 in fees for every transaction.
+I know :(
+A couple of us worked on forking bitcoinj.cash to work with CTOR, so I took the time to make cashaddr addresses default, sending to cash accounts (cashaccount.info) native in the bitcoincashj SendRequest functions, and changed the derivation path to m/44'/145'/0' :)
+The BCH wallet path is:
+m/44'/145'/0' (BIP44 standard)
+And the SLP wallet path (from the SLP SDK) is:
+m/44'/245'/0'
+The SLP SDK also uses 145 for the BCH path
+Thank you! :)
+Most do it for free, with the occasional tip/donation or bounty reward.
+Didn't realize you were sending BTC at first, so I was going to say extremely high.
+Now that I realize you're sending BTC, then that fee seems low to be honest.
+Use BCH next time.
+hello 
+former BTC maxi, now BCH maxi :)
+It’d be kinda like using Google’s DNS servers. Cloudflare collects data about users. One way they collect data is from their DDoS protection systems on thousands of websites.
+Right? It's basically worthless if it's less than a million.
+He is.
+
+
+Yes
+
+
+Once I can afford to register a business, then yes. No idea if/when that'll happen. I'm a broke college student.
+
+
+If possible with BitcoinCashJ, then yes.
+
+
+Thank you! :)
+Ooooh! Thank you! :)
+Thank you! I used bitcoincashj which is a Bitcoin Cash Java library. I used the cash-0.14 branch as it has CashAddr support. :)
+I checked out the link, interesting stuff!
+Way longer than a year
+Indeed, I was!
+Thank you :)
+Thank you so much! <3
+You know... not a bad idea to try.
+I thought it was like 0.16 BTC or some really weird number like that.
+Thank you :)
+Mining back in the early days didn't deposit mining rewards in the wallet to the same address. It's currently estimated that most of the first 20,000 blocks were mined by him. I remember seeing hashrate graphs and such where you could see when Satoshi was mining. People used that to figure out that the first 20,000 blocks (not all, but most) were mined by him.
+Thank you! :)
+Yay!
+Security? No. Privacy? Yes.
+This wallet isn't designed for the average people but ones that care about not displaying they hold cryptocurrency.
+The average person won't know about this wallet.
+Yeah I was testing Crescent Cash today and noticed that BitPay invoices didn't work. It was a cert issue.
+Though judging by the comments, it seems to be fixed.
+Damn, really glad they have top notch analysts with the ability to see that the price dropped like 7 dollars.
+Chaintip is a tipping service. He sent you $0.50 in Bitcoin Cash. You received a DM from /u/chaintip telling you to reply with a Bitcoin Cash address. If you supply a Bitcoin Cash address (not a BTC address), then you will get $0.50 worth of BCH to your BCH wallet.
+With the way the SLP SDK works is it keeps the Bitcoin wallet separate from the SLP one so you don't lose tokens or BCH.
+thank you so much! :)
+heheheh, thank you! :P
+wat
+lol
+I don't care about karma.
+Made an account and posted there! :)
+https://memo.cash/profile/1PeUQvqzmb1BbqK1WBSM8QRtD5mpT7YSMF
+Holy shit! Thank you so much! <3
+wait wat
+Yep!
+That's for the BTC version.
+The BCH version is here: https://pokkst.xyz/crescentcash
+Sweet, thanks again. :)
+I'll look into this and see what I can do.
+Unfortunately yes for right now.
+Thank you! :)
+Thanks for the tip!
+Unfortunately it's not released yet, but it should be very soon. I'll remind myself to let you know when it is. :)
+Two pools literally control ~85% of the BSV hashrate....
+Great idea! I'll look into adding that.
+Just started rollout of v1.3.1 which fixes point 1 and clarifies point 2 in-app with "Insufficient BCH balance" instead of "An error occurred".
+oooh, thank you!
+That’s a fair point, I forgot about that.
+Thank you! I followed you back. :)
+hehehe, thank you :)
+They actively argue for small blocks to "maintain decentralization".
+Oh sweet! My app was mentioned!
+shameless plug https://pokkst.xyz/crescentcash
+I made one of them. It was on /u/throwaway_btc_acct then I started posting on this account when I made it public.
+This is the third wallet to support sending, first to be fully supported. Check https://cashaccount.info
+(Note: I also develop BCHgallery)
+Thank you! :)
+For cryptocurrency apps, Apple told me that you must register a business, and provide legal documentation of it. I don't currently have the funds to do that.
+Yes. I've been looking at ways to remove this issue though. Currently looking into Cash Accounts.
+Thank you!
+Here's one actually that announces Electron Cash being released ;)
+https://twitter.com/BitcoinCashFans/status/891906727012175872
+Bitcoin Cash was made wayyyy before Segwit2x was announced as canceled. The chain split and on August 1, 2017 the BCH chain started.
+S2X was canceled a few months later.
+I will allow it able to be disabled in the next update. Thank you for the suggestion. :)
+Hi!
+I plan to release to Fdroid soon, I just need to find the time to make a PR to get it added to their repository.
+As for Yalp and Aurora Store issues, the Play Store holds an app bundle (.app file) and sends a generated .apk file preconfigured for the device the requesting device identifies as. I've used Yalp and Aurora before, and I know they share a similar backend at least, because a lot of popup prompts are the same and it behaves very similar. I wonder if Aurora Store is more up-to-date and has more features, seeing as it is basically a Material Design version of Yalp.
+Anyway, Fdroid is definitely near the top of my to-do list. I love FOSS software. Currently have a laptop with Kubuntu, two phones with LineageOS, and a server in my bedroom running Ubuntu. :)
+I just saw your edit:
+
+
+I'll look into the "Invalid address" error, that shouldn't be happening.
+
+
+You need to have BCH in your main wallet to send tokens. (Bitcoin.com SLP SDK requires it)
+
+
+That's out of my control as bitcoincashj calls it whenever it's done syncing, and sometimes it has to redownload some stuff and sync again.
+
+
+Yeah that's an issue with Android's automatic layout transitioning.
+
+
+Will do soon. :)
+
+
+Currencies will be easy to implement. I just need to write some code to grab prices from APIs and then convert the BCH balance to fiat balance.
+Not actively looking for contributors, but if you want to make a PR feel free. :)
+hahaha most likely
+<3
+Depends on the company, what kind of company data will be on the MacBook, etc.
+We don't know where you work, but it's possible that company policy will force you to use the 2017 Air for security reasons.
+2 years ago BTC people would argue about storage. When that was proven wrong, you people moved to "muh bandwidth" except bandwidth is currently not an issue, and technology always keeps progressing, so it won't be an issue for the foreseeable future. I've now seen people on Twitter arguing that the CPU is the bottleneck when downloading the chain. What's next?
+Not to mention, you argue that increasing the block size limit leads to centralization, but then cheer on Segwit... which you just said doubled the block size limit.
+Cognitive dissonance level 10000.
+Thank you!
+I might be a bit biased, because I'm the developer of this app, but if you're looking for a "noob-friendly" wallet then try Crescent Cash
+It utilizes a system called Cash Accounts which allows you to create an alias tied to a wallet address. It's all handled for you in the background. You can also send to/receive from normal Bitcoin Cash addresses as well.
+The app is only for Android right now.
+If you're on iOS, then I have no idea. For desktop, I recommend Electron Cash.
+Thank you, Roger! :)
+Indeed I did! :)
+Read more here: https://pokkst.xyz/crescentcash
+Thank you!
+Yeah right now I'm just taking it easy while working on various tweaks. :)
+I'll have to look into that! :)
+:) I'll see what I can do, but yeah it'd be nice to add.
+Not necessarily true, regarding the last part, as this is also a normal Bitcoin Cash wallet so for services/wallets that don't support Cash Accounts, you can generate new addresses for deposits and such.
+As for stealth addresses, not yet. :(
+Thank you! :)
+Ahhh I see. We'll work something out. :P
+An xpub is uploaded to a database which is then used to derive a fresh, unique address tied to your wallet when someone sends you coins using your handle. I'm currently looking into a potential system that will allow users to self-host their own instances.
+btw it's been released. :) you can download it from my site here: https://pokkst.xyz in the "BCHgallery" entry. :)
+info page: https://pokkst.xyz/info/bchgallery
+Hey, dev of Crescent Cash here.
+Check the new update. It now supports SLP :)
+Thank you for the tip!
+I'd love to make an iOS version, I just need to figure out funding to register a business to publish under, as Apple requires it for cryptocurrency wallets like mine.
+Yeah the SLP SDK requires like 4k/5k. I found that out when testing their SDK demo, and in my own wallet.
+I’m not the one who wrote that.
+waifu big gey
+Didn't know what you meant by that. Just realized I accidentally posted that twice (I forget which posts in this sub I comment in since it moves slow). Whoops. :P
+It's possible to have 2 SSDs in the Mid 2012 MacBook Pro if you take out the CD drive.
+Pretty easy really. You need special screwdrivers though, but you can simply look up "MacBook Pro screwdrivers" on Amazon. After that you just unscrew like 2 things, then lift the HDD out, and put the SSD in.
+Definitely get a mid 2012. It’ll suit your needs, and it even runs Mojave. You can find some on ebay for like $300.
+Just make sure to upgrade the HDD to an SSD, and maybe get a new battery.
+I use pretty much everything hardware wise, for most things.
+For email though I use ProtonMail, and email client for macOS is Thunderbird + ProtonMail Bridge. iOS is the ProtonMail app.
+The option is still there.
+I posted this another thread just yesterday, but:
+2009 Mac Pro - With upgraded parts. Running macOS Mojave
+Mid 2012 MacBook Pro - Also with upgraded parts. Running macOS Mojave.
+iPod touch (6th gen.)
+iPhone SE
+iPhone 6S
+iPhone XR
+Apple Watch
+Apple TV
+AirPods
+(I bought all of this starting in December 2018)
+It's not easy making your first million at the age of 3
+You can get iMessage on Android via AirMessage. It requires you to already have a Mac though, and I believe you can only send/receive via iCloud account emails
+To be honest, you do not even need anti-virus software on Windows machines either. I haven’t had one for about... 7 years maybe? I haven’t gotten a virus in like 8 years.
+No.
+Textbook definition of scope creep.
+I have a 2009 Mac Pro with upgraded parts on Mojave, a 2012 MacBook Pro with upgraded parts, iPhone SE, 6S, and just today a XR. I also have an Apple TV, and an Apple Watch.
+But I’m not “locked in” as I have Android phones, Linux laptops, Windows laptops, Linux desktops, Windows desktops, and Linux servers in my house.
+https://feecalculator.cash
+The one from me is genuine. I made /u/throwaway_btc_acct as, well, a throwaway. I would use /u/pokkst but I lost the password. I've been using Reddit since 2012, I just make new accounts often so I don't leave a trail of identifying information.
+Thank you! :)
+Correct. BitcoinCashJ/BitcoinJ is weird and uses derivation path m/0' for some reason.
+I'm aware of the crash issue, and it's fixed for v1.1.0
+And what I do (it's needed) is make a temporary wallet when restoring. In BitcoinJ there is a method to check if an address belongs to a wallet, so I check the address from the lookup server to see if it belongs to the wallet, if it does then it begins the actual restore process
+I believe so.
+Handcash is closed source IIRC
+But yeah Crescent stores an xpub so there's a unique address every time when sending to a handle
+Correct, Crescent Pay uses xpubs to get fresh addresses for wallets. 
+BCHgallery displays the xpub of your wallet, but not for any specific reason, just in case if you ever need it.
+I first have to figure out if BitcoinCashJ has support for OP_RETURNs when building transactions. It's gotta be there somewhere. If it does then that gives me hope for adding registration in-app in the future.
+The mass majority will not use Bitcoin then.
+Lightning Network is effected by the high fees of the base layer due to fee commitments, fees when settling on base layer, etc. No one will use Lightning Network then.
